@@ -9,9 +9,9 @@
       android:translateX="108"
       android:translateY="108">
 
-      <path
-          android:fillColor="#FDFDFD"
-          android:pathData="M0,0h1080v1080H0z" />
+<!--      <path-->
+<!--          android:fillColor="#FDFDFD"-->
+<!--          android:pathData="M0,0h1080v1080H0z" />-->
 
   <!--    </path-->
   <!--        android:fillColor="#F4CBA4"-->
