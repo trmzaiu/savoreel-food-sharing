@@ -11,13 +11,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.savoreel.ui.onboarding.LoginScreenTheme
 import com.example.savoreel.ui.theme.SavoreelTheme
+import com.example.savoreel.ui.theme.nunitoFontFamily
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             SavoreelTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -26,6 +30,18 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Hello $name! hahahhaha",
+        style = TextStyle(
+            fontFamily = nunitoFontFamily,
+            fontWeight = FontWeight.Bold,
+        ),
+        modifier = modifier
+    )
 }
 
 @Preview(showBackground = true)
