@@ -2,9 +2,19 @@ package com.example.savoreel.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.savoreel.R
+
+//val FontDomine = FontFamily(
+//    Font(R.font.domine_bold)
+//)
+//
+//val DomineFont = TextStyle(
+//    fontFamily = FontDomine
+//)
 
 // Set of Material typography styles to start with
 val Typography = Typography(
