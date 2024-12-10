@@ -3,6 +3,7 @@ package com.example.savoreel.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val primaryButtonColor = Color(0xFFB22222)
+val disableButtonColor = Color(0xFFC86464)
 val linkColor = Color(0xFF444444)
 val lineColor = Color(0xFFAAA5A5)
 val homeColor =  Color(0XB23B3D3D)

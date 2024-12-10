@@ -1,5 +1,6 @@
 package com.example.savoreel.ui.onboarding
 
+import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -26,15 +28,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.backgroundLightColor
+import com.example.savoreel.ui.theme.disableButtonColor
 import com.example.savoreel.ui.theme.domineFontFamily
 import com.example.savoreel.ui.theme.fontDarkColor
 import com.example.savoreel.ui.theme.lineColor
@@ -44,9 +52,20 @@ import com.example.savoreel.ui.theme.secondaryDarkColor
 import com.example.savoreel.ui.theme.secondaryLightColor
 
 @Composable
-fun LoginScreenTheme() {
-    var username by remember { mutableStateOf("") }
+fun SignInScreenTheme(navController: NavController) {
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+    var showErrorDialog by remember { mutableStateOf(false) }
+
+    val validEmail = "example@gmail.com"
+    val validPassword = "123456"
+
+    fun validateLogin(email: String, password: String): Boolean {
+        return email == validEmail && password == validPassword
+    }
+
+    val isFormValid = email.isNotEmpty() && password.isNotEmpty()
 
     Box(
         modifier = Modifier
@@ -72,7 +91,7 @@ fun LoginScreenTheme() {
                 text = "Savoreel",
                 fontSize = 48.sp,
                 lineHeight = 19.5.sp,
-                fontFamily = domineFontFamily,
+//                fontFamily = domineFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = primaryButtonColor,
                 textAlign = TextAlign.Center,
@@ -81,16 +100,16 @@ fun LoginScreenTheme() {
 
             Spacer(modifier = Modifier.height(100.dp))
 
-            // Username and Password Section
+            // Email and Password Section
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Username Input
+                // Email Input
                 BasicTextField(
-                    value = username,
-                    onValueChange = { username = it },
+                    value = email,
+                    onValueChange = { email = it },
                     modifier = Modifier
                         .height(50.dp)
                         .width(340.dp)
@@ -102,12 +121,12 @@ fun LoginScreenTheme() {
                             contentAlignment = Alignment.CenterStart,
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            if (username.isEmpty()) {
+                            if (email.isEmpty()) {
                                 Text(
                                     text = "Email",
                                     style = TextStyle(
                                         fontSize = 16.sp,
-                                        fontFamily = nunitoFontFamily,
+//                                        fontFamily = nunitoFontFamily,
                                         fontWeight = FontWeight.Normal,
                                         color = lineColor
                                     )
@@ -139,7 +158,7 @@ fun LoginScreenTheme() {
                                     text = "Password",
                                     style = TextStyle(
                                         fontSize = 16.sp,
-                                        fontFamily = nunitoFontFamily,
+//                                        fontFamily = nunitoFontFamily,
                                         fontWeight = FontWeight.Normal,
                                         color = lineColor
                                     )
@@ -161,13 +180,13 @@ fun LoginScreenTheme() {
                         text = "Forgot Password",
                         style = TextStyle(
                             fontSize = 14.sp,
-                            fontFamily = nunitoFontFamily,
+//                            fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.SemiBold,
                             color = secondaryDarkColor,
                         ),
                         modifier = Modifier
                             .clickable {
-                            println("Forgot Password Clicked")
+                            println("Move to ForgotPasswordTheme")
                         }
 
                     )
@@ -176,24 +195,29 @@ fun LoginScreenTheme() {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Login Button
+            // Sign In Button
             Button(
                 onClick = {
-                    // Handle login logic
-                    println("Username: $username, Password: $password")
+                    if (!validateLogin(email, password)) {
+                        errorMessage = "Make sure you entered your email and password correctly and try again."
+                        showErrorDialog = true
+                    } else {
+                        println("Email: $email, Password: $password")
+                    }
                 },
                 modifier = Modifier
                     .width(360.dp)
                     .height(50.dp),
+                enabled = isFormValid,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = primaryButtonColor,
+                    containerColor = if (isFormValid) primaryButtonColor else disableButtonColor
                 )
             ) {
                 Text(
                     text = "Sign in",
                     style = TextStyle(
-                        fontSize = 16.sp,
-                        fontFamily = nunitoFontFamily,
+                        fontSize = 18.sp,
+//                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Bold,
                         color = fontDarkColor
                     ))
@@ -207,7 +231,7 @@ fun LoginScreenTheme() {
                 Text(
                     text = "Or connect with",
                     fontSize = 16.sp,
-                    fontFamily = nunitoFontFamily,
+//                    fontFamily = nunitoFontFamily,
                     fontWeight = FontWeight.Medium,
                     lineHeight = 19.5.sp,
                 )
@@ -228,7 +252,7 @@ fun LoginScreenTheme() {
                         modifier = Modifier
                             .size(24.dp)
                             .clickable {
-                                println("Google Login Clicked")
+                                println("Sign in with google")
                             }
                     )
 
@@ -241,7 +265,7 @@ fun LoginScreenTheme() {
                         modifier = Modifier
                             .size(24.dp)
                             .clickable {
-                                println("Facebook Login Clicked")
+                                println("Sign in with facebook")
                             }
                     )
                 }
@@ -253,9 +277,9 @@ fun LoginScreenTheme() {
                 Text(
                     text = "Don't have an account? ",
                     style = TextStyle(
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         lineHeight = 20.sp,
-                        fontFamily = nunitoFontFamily,
+//                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,
                         color = secondaryDarkColor,
 
@@ -266,19 +290,40 @@ fun LoginScreenTheme() {
                 Text(
                     text = "Sign Up",
                     style = TextStyle(
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         lineHeight = 20.sp,
-                        fontFamily = nunitoFontFamily,
+//                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         color = primaryButtonColor,
                         textAlign = TextAlign.Center,
                     ),
                     modifier = Modifier
                         .clickable {
-                            println("Sign Up Clicked")
+                            navController.navigate("signup_screen")
                         }
                 )
+
+                if (showErrorDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showErrorDialog = false },
+                        title = { Text("Couldn't sign in") },
+                        text = { Text(errorMessage) },
+                        confirmButton = {
+                            Button(onClick = { showErrorDialog = false }) {
+                                Text("Ok")
+                            }
+                        }
+                    )
+                }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SignInPreview() {
+    SavoreelTheme {
+        SignInScreenTheme(navController = rememberNavController())
     }
 }
