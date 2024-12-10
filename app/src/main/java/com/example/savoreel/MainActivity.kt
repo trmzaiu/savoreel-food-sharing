@@ -32,18 +32,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name! hahahhaha",
-        style = TextStyle(
-            fontFamily = nunitoFontFamily,
-            fontWeight = FontWeight.Bold,
-        ),
-        modifier = modifier
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {

@@ -28,14 +28,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.savoreel.R
 import com.example.savoreel.ui.theme.backgroundLightColor
+import com.example.savoreel.ui.theme.domineFontFamily
 import com.example.savoreel.ui.theme.fontDarkColor
 import com.example.savoreel.ui.theme.lineColor
+import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.example.savoreel.ui.theme.primaryButtonColor
 import com.example.savoreel.ui.theme.secondaryDarkColor
 import com.example.savoreel.ui.theme.secondaryLightColor
@@ -69,7 +72,8 @@ fun LoginScreenTheme() {
                 text = "Savoreel",
                 fontSize = 48.sp,
                 lineHeight = 19.5.sp,
-//                style = DomineFont,
+                fontFamily = domineFontFamily,
+                fontWeight = FontWeight.Bold,
                 color = primaryButtonColor,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -103,7 +107,8 @@ fun LoginScreenTheme() {
                                     text = "Email",
                                     style = TextStyle(
                                         fontSize = 16.sp,
-//                                        fontFamily = fontNunitoMedium,
+                                        fontFamily = nunitoFontFamily,
+                                        fontWeight = FontWeight.Normal,
                                         color = lineColor
                                     )
                                 )
@@ -134,7 +139,8 @@ fun LoginScreenTheme() {
                                     text = "Password",
                                     style = TextStyle(
                                         fontSize = 16.sp,
-//                                        fontFamily = fontNunitoMedium,
+                                        fontFamily = nunitoFontFamily,
+                                        fontWeight = FontWeight.Normal,
                                         color = lineColor
                                     )
                                 )
@@ -147,7 +153,7 @@ fun LoginScreenTheme() {
                 // Forgot Password
                 Box(
                     modifier = Modifier
-                        .padding(end = 14.dp)
+                        .padding(end = 20.dp)
                         .fillMaxWidth(),
                     contentAlignment = Alignment.CenterEnd
                 ) {
@@ -155,7 +161,8 @@ fun LoginScreenTheme() {
                         text = "Forgot Password",
                         style = TextStyle(
                             fontSize = 14.sp,
-//                            fontFamily = fontNunitoSemibold,
+                            fontFamily = nunitoFontFamily,
+                            fontWeight = FontWeight.SemiBold,
                             color = secondaryDarkColor,
                         ),
                         modifier = Modifier
@@ -186,7 +193,8 @@ fun LoginScreenTheme() {
                     text = "Sign in",
                     style = TextStyle(
                         fontSize = 16.sp,
-//                        fontFamily = fontNunitoBold,
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.Bold,
                         color = fontDarkColor
                     ))
             }
@@ -199,7 +207,8 @@ fun LoginScreenTheme() {
                 Text(
                     text = "Or connect with",
                     fontSize = 16.sp,
-//                    fontFamily = fontNunitoMedium,
+                    fontFamily = nunitoFontFamily,
+                    fontWeight = FontWeight.Medium,
                     lineHeight = 19.5.sp,
                 )
 
@@ -246,7 +255,8 @@ fun LoginScreenTheme() {
                     style = TextStyle(
                         fontSize = 14.sp,
                         lineHeight = 20.sp,
-//                        fontFamily = fontNunitoRegular,
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.Normal,
                         color = secondaryDarkColor,
 
                         textAlign = TextAlign.Center,
@@ -258,10 +268,15 @@ fun LoginScreenTheme() {
                     style = TextStyle(
                         fontSize = 14.sp,
                         lineHeight = 20.sp,
-//                        fontFamily = fontNunitoExtrabold,
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.ExtraBold,
                         color = primaryButtonColor,
                         textAlign = TextAlign.Center,
-                    )
+                    ),
+                    modifier = Modifier
+                        .clickable {
+                            println("Sign Up Clicked")
+                        }
                 )
             }
         }
