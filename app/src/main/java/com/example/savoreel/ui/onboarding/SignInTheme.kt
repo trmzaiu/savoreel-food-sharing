@@ -1,6 +1,5 @@
 package com.example.savoreel.ui.onboarding
 
-import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,11 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,11 +22,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,16 +32,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.ui.component.CustomButton
+import com.example.savoreel.ui.component.CustomInputField
+import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.backgroundLightColor
-import com.example.savoreel.ui.theme.disableButtonColor
-import com.example.savoreel.ui.theme.domineFontFamily
-import com.example.savoreel.ui.theme.fontDarkColor
-import com.example.savoreel.ui.theme.lineColor
-import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.example.savoreel.ui.theme.primaryButtonColor
 import com.example.savoreel.ui.theme.secondaryDarkColor
-import com.example.savoreel.ui.theme.secondaryLightColor
 
 @Composable
 fun SignInScreenTheme(navController: NavController) {
@@ -59,13 +48,14 @@ fun SignInScreenTheme(navController: NavController) {
     var showErrorDialog by remember { mutableStateOf(false) }
 
     val validEmail = "example@gmail.com"
-    val validPassword = "123456"
+    val validPassword = "12345678"
+
+    val isFormValid = email.isNotEmpty() && password.isNotEmpty()
+
 
     fun validateLogin(email: String, password: String): Boolean {
         return email == validEmail && password == validPassword
     }
-
-    val isFormValid = email.isNotEmpty() && password.isNotEmpty()
 
     Box(
         modifier = Modifier
@@ -107,66 +97,19 @@ fun SignInScreenTheme(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 // Email Input
-                BasicTextField(
+                CustomInputField(
                     value = email,
                     onValueChange = { email = it },
-                    modifier = Modifier
-                        .height(50.dp)
-                        .width(340.dp)
-                        .background(color = secondaryLightColor, shape = RoundedCornerShape(size = 15.dp))
-                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                    singleLine = true,
-                    decorationBox = { innerTextField ->
-                        Box(
-                            contentAlignment = Alignment.CenterStart,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            if (email.isEmpty()) {
-                                Text(
-                                    text = "Email",
-                                    style = TextStyle(
-                                        fontSize = 16.sp,
-//                                        fontFamily = nunitoFontFamily,
-                                        fontWeight = FontWeight.Normal,
-                                        color = lineColor
-                                    )
-                                )
-                            }
-                            innerTextField()
-                        }
-                    }
+                    placeholder = "Email",
+                    isPasswordField = false
                 )
 
                 // Password Input
-                BasicTextField(
+                CustomInputField(
                     value = password,
                     onValueChange = { password = it },
-                    modifier = Modifier
-                        .height(50.dp)
-                        .width(340.dp)
-                        .background(color = secondaryLightColor, shape = RoundedCornerShape(size = 15.dp))
-                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    decorationBox = { innerTextField ->
-                        Box(
-                            contentAlignment = Alignment.CenterStart,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            if (password.isEmpty()) {
-                                Text(
-                                    text = "Password",
-                                    style = TextStyle(
-                                        fontSize = 16.sp,
-//                                        fontFamily = nunitoFontFamily,
-                                        fontWeight = FontWeight.Normal,
-                                        color = lineColor
-                                    )
-                                )
-                            }
-                            innerTextField()
-                        }
-                    }
+                    placeholder = "Password",
+                    isPasswordField = true
                 )
 
                 // Forgot Password
@@ -186,8 +129,8 @@ fun SignInScreenTheme(navController: NavController) {
                         ),
                         modifier = Modifier
                             .clickable {
-                            println("Move to ForgotPasswordTheme")
-                        }
+                                navController.navigate("forgotpassword_screen")
+                            }
 
                     )
                 }
@@ -196,7 +139,9 @@ fun SignInScreenTheme(navController: NavController) {
             Spacer(modifier = Modifier.height(40.dp))
 
             // Sign In Button
-            Button(
+            CustomButton(
+                text = "Sign in",
+                enabled = isFormValid,
                 onClick = {
                     if (!validateLogin(email, password)) {
                         errorMessage = "Make sure you entered your email and password correctly and try again."
@@ -204,24 +149,8 @@ fun SignInScreenTheme(navController: NavController) {
                     } else {
                         println("Email: $email, Password: $password")
                     }
-                },
-                modifier = Modifier
-                    .width(360.dp)
-                    .height(50.dp),
-                enabled = isFormValid,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isFormValid) primaryButtonColor else disableButtonColor
-                )
-            ) {
-                Text(
-                    text = "Sign in",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-//                        fontFamily = nunitoFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        color = fontDarkColor
-                    ))
-            }
+                }
+            )
 
             Spacer(modifier = Modifier.height(70.dp))
 
@@ -304,21 +233,18 @@ fun SignInScreenTheme(navController: NavController) {
                 )
 
                 if (showErrorDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showErrorDialog = false },
-                        title = { Text("Couldn't sign in") },
-                        text = { Text(errorMessage) },
-                        confirmButton = {
-                            Button(onClick = { showErrorDialog = false }) {
-                                Text("Ok")
-                            }
-                        }
+                    ErrorDialog(
+                        title = "Couldn't sign in",
+                        message = errorMessage,
+                        onDismiss = { showErrorDialog = false }
                     )
                 }
             }
         }
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable

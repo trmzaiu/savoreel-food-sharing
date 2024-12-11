@@ -8,6 +8,7 @@ import com.example.savoreel.ui.onboarding.SignUpScreenTheme
 
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.savoreel.ui.onboarding.ForgotPasswordTheme
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
@@ -21,6 +22,10 @@ fun AppNavigation(navController: NavHostController) {
 
         composable("signup_screen") {
             SignUpScreenTheme(navController = navController)
+        }
+
+        composable("forgotpassword_screen") {
+            ForgotPasswordTheme(navController = navController)
         }
     }
 }

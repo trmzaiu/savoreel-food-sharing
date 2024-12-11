@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -39,6 +40,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.ui.component.CustomButton
+import com.example.savoreel.ui.component.CustomInputField
+import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.backgroundLightColor
 import com.example.savoreel.ui.theme.disableButtonColor
@@ -55,12 +59,20 @@ import com.example.savoreel.ui.theme.secondaryLightColor
 fun SignUpScreenTheme(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+    var showErrorDialog by remember { mutableStateOf(false) }
+
+    val existEmail = "example@gmail.com"
+
+    val isFormValid = email.isNotEmpty() && password.isNotEmpty()
 
     fun isEmailValid(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    val isFormValid = email.isNotEmpty() && password.length >= 8 && isEmailValid(email)
+    fun existedEmail(email: String): Boolean {
+        return email == existEmail
+    }
 
     Box(
         modifier = Modifier
@@ -102,66 +114,19 @@ fun SignUpScreenTheme(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 //Email Input
-                BasicTextField(
+                CustomInputField(
                     value = email,
                     onValueChange = { email = it },
-                    modifier = Modifier
-                        .height(50.dp)
-                        .width(340.dp)
-                        .background(color = secondaryLightColor, shape = RoundedCornerShape(size = 15.dp))
-                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                    singleLine = true,
-                    decorationBox = { innerTextField ->
-                        Box(
-                            contentAlignment = Alignment.CenterStart,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            if (email.isEmpty()) {
-                                Text(
-                                    text = "Email",
-                                    style = TextStyle(
-                                        fontSize = 16.sp,
-//                                        fontFamily = nunitoFontFamily,
-                                        fontWeight = FontWeight.Normal,
-                                        color = lineColor
-                                    )
-                                )
-                            }
-                            innerTextField()
-                        }
-                    }
+                    placeholder = "Email",
+                    isPasswordField = false
                 )
 
                 // Password Input
-                BasicTextField(
+                CustomInputField(
                     value = password,
                     onValueChange = { password = it },
-                    modifier = Modifier
-                        .height(50.dp)
-                        .width(340.dp)
-                        .background(color = secondaryLightColor, shape = RoundedCornerShape(size = 15.dp))
-                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    decorationBox = { innerTextField ->
-                        Box(
-                            contentAlignment = Alignment.CenterStart,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            if (password.isEmpty()) {
-                                Text(
-                                    text = "Password",
-                                    style = TextStyle(
-                                        fontSize = 16.sp,
-//                                        fontFamily = nunitoFontFamily,
-                                        fontWeight = FontWeight.Normal,
-                                        color = lineColor
-                                    )
-                                )
-                            }
-                            innerTextField()
-                        }
-                    }
+                    placeholder = "Password",
+                    isPasswordField = true
                 )
 
                 // Noti
@@ -172,7 +137,7 @@ fun SignUpScreenTheme(navController: NavController) {
                     contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
-                        text = "Password must at least 6 characters",
+                        text = "Password must at least 8 characters",
                         style = TextStyle(
                             fontSize = 14.sp,
 //                            fontFamily = nunitoFontFamily,
@@ -186,27 +151,24 @@ fun SignUpScreenTheme(navController: NavController) {
             Spacer(modifier = Modifier.height(40.dp))
 
             // Sign Up Button
-            Button(
-                onClick = {
-                    println("Email: $email, Password: $password")
-                },
-                modifier = Modifier
-                    .width(360.dp)
-                    .height(50.dp),
+            CustomButton(
+                text = "Sign up",
                 enabled = isFormValid,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isFormValid) primaryButtonColor else disableButtonColor
-                )
-            ) {
-                Text(
-                    text = "Sign up",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-//                        fontFamily = nunitoFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        color = fontDarkColor
-                    ))
-            }
+                onClick = {
+                    if (!isEmailValid(email)) {
+                        errorMessage = "Make sure you entered email format correctly and try again."
+                        showErrorDialog = true
+                    } else if (existedEmail(email)) {
+                        errorMessage = "Email existed, please try another email."
+                        showErrorDialog = true
+                    } else if (password.length < 8) {
+                        errorMessage = "Password must at least 8 characters."
+                        showErrorDialog = true
+                    } else {
+                        println("Email: $email, Password: $password")
+                    }
+                }
+            )
 
             Spacer(modifier = Modifier.height(15.dp))
 
@@ -285,6 +247,14 @@ fun SignUpScreenTheme(navController: NavController) {
                         .clickable {
                             navController.navigate("signin_screen")
                         }
+                )
+            }
+
+            if (showErrorDialog) {
+                ErrorDialog(
+                    title = "Couldn't sign up",
+                    message = errorMessage,
+                    onDismiss = { showErrorDialog = false }
                 )
             }
         }
