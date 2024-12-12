@@ -1,6 +1,5 @@
 package com.example.savoreel.ui.onboarding
 
-import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,9 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,23 +27,17 @@ import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.backgroundLightColor
 
 @Composable
-fun ForgotPasswordTheme(navController: NavController) {
-    var email by remember { mutableStateOf("") }
+fun ResetPasswordTheme(navController: NavController) {
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
 
-    val validEmail = "example@gmail.com"
+    val isFormValid = password.isNotEmpty() && confirmPassword.isNotEmpty() && confirmPassword.length == password.length
 
-    fun validateEmail(email: String): Boolean {
-        return email == validEmail
+    fun isPasswordValid(password: String, confirmPassword: String): Boolean {
+        return password == confirmPassword
     }
-
-    fun isEmailValid(email: String): Boolean {
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-
-    val isFormValid = email.isNotEmpty() && isEmailValid(email)
-
 
     Box(
         modifier = Modifier
@@ -68,31 +58,40 @@ fun ForgotPasswordTheme(navController: NavController) {
             modifier = Modifier.padding(16.dp)
         ) {
             CustomTitle(
-                text = "Enter your email"
+                text = "Enter new password"
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Email Input
+            // Password Input
             CustomInputField(
-                value = email,
-                onValueChange = { email = it },
-                placeholder = "Email",
-                isPasswordField = false
+                value = password,
+                onValueChange = { password = it },
+                placeholder = "Password",
+                isPasswordField = true
             )
 
-            Spacer(modifier = Modifier.height(150.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            CustomInputField(
+                value = password,
+                onValueChange = { confirmPassword = it },
+                placeholder = "Confirm password",
+                isPasswordField = true
+            )
+
+            Spacer(modifier = Modifier.height(100.dp))
 
             // Button
             CustomButton(
-                text = "Continue",
+                text = "Confirm",
                 enabled = isFormValid,
                 onClick = {
-                    if (!validateEmail(email)) {
-                        errorMessage = "Make sure you entered your email correctly and try again."
+                    if (!isPasswordValid(password, confirmPassword)) {
+                        errorMessage = "The password and confirm password do not match. Please check and try again."
                         showErrorDialog = true
                     } else {
-                        navController.navigate("verify_code_screen")
+                        println("Password: $password, $confirmPassword")
                     }
                 }
             )
@@ -101,7 +100,7 @@ fun ForgotPasswordTheme(navController: NavController) {
 
             if (showErrorDialog) {
                 ErrorDialog(
-                    title = "Couldn't sign in",
+                    title = "Password mismatch",
                     message = errorMessage,
                     onDismiss = { showErrorDialog = false }
                 )
@@ -112,8 +111,8 @@ fun ForgotPasswordTheme(navController: NavController) {
 
 @Preview(showBackground = true)
 @Composable
-fun ForgotPasswordPreview() {
+fun ResetPasswordPreview() {
     SavoreelTheme {
-        ForgotPasswordTheme(navController = rememberNavController())
+        ResetPasswordTheme(navController = rememberNavController())
     }
 }

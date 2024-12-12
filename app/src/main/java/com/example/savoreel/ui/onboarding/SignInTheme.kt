@@ -129,7 +129,7 @@ fun SignInScreenTheme(navController: NavController) {
                         ),
                         modifier = Modifier
                             .clickable {
-                                navController.navigate("forgotpassword_screen")
+                                navController.navigate("forgot_password_screen")
                             }
 
                     )
@@ -228,7 +228,7 @@ fun SignInScreenTheme(navController: NavController) {
                     ),
                     modifier = Modifier
                         .clickable {
-                            navController.navigate("signup_screen")
+                            navController.navigate("sign_up_screen")
                         }
                 )
 
@@ -243,8 +243,6 @@ fun SignInScreenTheme(navController: NavController) {
         }
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable

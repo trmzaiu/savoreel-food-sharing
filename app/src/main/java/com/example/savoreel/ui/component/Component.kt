@@ -1,11 +1,14 @@
 package com.example.savoreel.ui.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -17,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -24,6 +29,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.savoreel.R
 import com.example.savoreel.ui.theme.disableButtonColor
 import com.example.savoreel.ui.theme.fontDarkColor
 import com.example.savoreel.ui.theme.fontLightColor
@@ -60,6 +66,7 @@ fun CustomInputField(
                         text = placeholder,
                         style = TextStyle(
                             fontSize = 16.sp,
+                            fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Normal,
                             color = lineColor
                         )
@@ -135,5 +142,20 @@ fun CustomTitle(
         color = fontLightColor,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun BackArrow(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Image(
+        painter = painterResource(id = R.drawable.chevron_left),
+        contentDescription = "Back arrow",
+        modifier = modifier
+            .padding(start = 20.dp, top = 40.dp)
+            .size(30.dp)
+            .clickable { onClick() }
     )
 }

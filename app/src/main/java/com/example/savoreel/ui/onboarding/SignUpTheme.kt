@@ -245,7 +245,7 @@ fun SignUpScreenTheme(navController: NavController) {
                     ),
                     modifier = Modifier
                         .clickable {
-                            navController.navigate("signin_screen")
+                            navController.navigate("sign_in_screen")
                         }
                 )
             }
