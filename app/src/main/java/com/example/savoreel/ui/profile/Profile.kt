@@ -35,10 +35,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.foundation.layout.Arrangement
 import com.example.savoreel.ui.theme.backgroundLightColor
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 
-import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.primaryButtonColor
-import com.example.savoreel.ui.theme.secondaryDarkColor
 @Composable
 fun Profile(profile: Map<String, List<ProfilePicturesData>>) {
     Column(
@@ -47,7 +46,38 @@ fun Profile(profile: Map<String, List<ProfilePicturesData>>) {
             .background(backgroundLightColor) // Đặt nền màu sáng
             .padding(1.dp) // Đảm bảo có padding bên ngoài để các phần tử không chạm vào mép màn hình
     ) {
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(30.dp))
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            Column(
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier.weight(1f), // Đảm bảo căn đều với các cột khác
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.Black,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier.weight(1f), // Đảm bảo căn đều với các cột khác
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Back",
+                    tint = Color.Black,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(30.dp))
 
         // Row chứa Avatar, Following và Followers
         Row(
