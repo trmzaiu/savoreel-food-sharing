@@ -97,7 +97,7 @@ fun SignUpScreenTheme(navController: NavController) {
             Text(
                 text = "Savoreel",
                 fontSize = 48.sp,
-                lineHeight = 19.5.sp,
+                lineHeight = 20.sp,
 //                fontFamily = domineFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = primaryButtonColor,
@@ -217,7 +217,7 @@ fun SignUpScreenTheme(navController: NavController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(120.dp))
+            Spacer(modifier = Modifier.height(111.dp))
 
             Row(){
                 Text(

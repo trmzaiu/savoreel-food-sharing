@@ -3,6 +3,7 @@ package com.example.savoreel.ui.onboarding
 import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,9 +41,11 @@ import com.example.savoreel.ui.component.CustomTitle
 import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.backgroundLightColor
+import com.example.savoreel.ui.theme.fontLightColor
 import com.example.savoreel.ui.theme.lineColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.example.savoreel.ui.theme.primaryButtonColor
+import com.example.savoreel.ui.theme.secondaryDarkColor
 import com.example.savoreel.ui.theme.secondaryLightColor
 
 @Composable
@@ -76,18 +79,17 @@ fun VerifyCodeTheme(navController: NavController) {
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
             CustomTitle(
                 text = "Enter verification code"
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
-            // Email Input
+            // Code Input
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(bottom = 24.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 repeat(4) { index ->
                     BasicTextField(
@@ -118,7 +120,39 @@ fun VerifyCodeTheme(navController: NavController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(150.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(){
+                Text(
+                    text = "Didn't get the code? ",
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        lineHeight = 20.sp,
+//                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        color = lineColor,
+                        textAlign = TextAlign.Center,
+                    )
+                )
+
+                Text(
+                    text = "Resend Code",
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        lineHeight = 20.sp,
+//                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = fontLightColor,
+                        textAlign = TextAlign.Center,
+                    ),
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate("sign_in_screen")
+                        }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(123.dp))
 
             // Button
             CustomButton(
@@ -134,7 +168,7 @@ fun VerifyCodeTheme(navController: NavController) {
                 }
             )
 
-            Spacer(modifier = Modifier.height(70.dp))
+            Spacer(modifier = Modifier.height(92.dp))
 
             if (showErrorDialog) {
                 ErrorDialog(

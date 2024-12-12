@@ -65,7 +65,7 @@ fun SignInScreenTheme(navController: NavController) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
             Spacer(modifier = Modifier.height(60.dp))
 
@@ -80,7 +80,7 @@ fun SignInScreenTheme(navController: NavController) {
             Text(
                 text = "Savoreel",
                 fontSize = 48.sp,
-                lineHeight = 19.5.sp,
+                lineHeight = 20.sp,
 //                fontFamily = domineFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = primaryButtonColor,
@@ -162,7 +162,7 @@ fun SignInScreenTheme(navController: NavController) {
                     fontSize = 16.sp,
 //                    fontFamily = nunitoFontFamily,
                     fontWeight = FontWeight.Medium,
-                    lineHeight = 19.5.sp,
+                    lineHeight = 20.sp,
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))

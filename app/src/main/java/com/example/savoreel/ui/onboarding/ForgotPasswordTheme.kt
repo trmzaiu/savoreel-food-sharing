@@ -65,7 +65,7 @@ fun ForgotPasswordTheme(navController: NavController) {
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
             CustomTitle(
                 text = "Enter your email"
@@ -81,7 +81,7 @@ fun ForgotPasswordTheme(navController: NavController) {
                 isPasswordField = false
             )
 
-            Spacer(modifier = Modifier.height(150.dp))
+            Spacer(modifier = Modifier.height(162.dp))
 
             // Button
             CustomButton(
@@ -97,7 +97,7 @@ fun ForgotPasswordTheme(navController: NavController) {
                 }
             )
 
-            Spacer(modifier = Modifier.height(70.dp))
+            Spacer(modifier = Modifier.height(80.dp))
 
             if (showErrorDialog) {
                 ErrorDialog(
