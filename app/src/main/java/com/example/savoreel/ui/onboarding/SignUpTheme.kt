@@ -152,7 +152,7 @@ fun SignUpScreenTheme(navController: NavController) {
 
             // Sign Up Button
             CustomButton(
-                text = "Sign up",
+                text = "Create account",
                 enabled = isFormValid,
                 onClick = {
                     if (!isEmailValid(email)) {
@@ -166,6 +166,7 @@ fun SignUpScreenTheme(navController: NavController) {
                         showErrorDialog = true
                     } else {
                         println("Email: $email, Password: $password")
+                        navController.navigate("name_screen")
                     }
                 }
             )

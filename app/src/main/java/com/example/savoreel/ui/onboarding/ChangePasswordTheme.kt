@@ -27,7 +27,7 @@ import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.backgroundLightColor
 
 @Composable
-fun ResetPasswordTheme(navController: NavController) {
+fun ChangePasswordTheme(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -113,6 +113,6 @@ fun ResetPasswordTheme(navController: NavController) {
 @Composable
 fun ResetPasswordPreview() {
     SavoreelTheme {
-        ResetPasswordTheme(navController = rememberNavController())
+        ChangePasswordTheme(navController = rememberNavController())
     }
 }

@@ -56,6 +56,12 @@ fun CustomInputField(
             .padding(horizontal = 10.dp, vertical = 5.dp),
         singleLine = true,
         visualTransformation = if (isPasswordField) PasswordVisualTransformation() else VisualTransformation.None,
+        textStyle = TextStyle(
+            fontSize = 16.sp,
+            fontFamily = nunitoFontFamily,
+            fontWeight = FontWeight.Normal,
+            color = fontLightColor
+        ),
         decorationBox = { innerTextField ->
             Box(
                 contentAlignment = Alignment.CenterStart,
