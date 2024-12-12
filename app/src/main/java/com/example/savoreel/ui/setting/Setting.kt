@@ -18,9 +18,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.navigation.compose.*
 import com.example.savoreel.ui.theme.backgroundLightColor
+import com.example.savoreel.ui.theme.disableButtonColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
+import com.example.savoreel.ui.theme.primaryButtonColor
 import com.example.savoreel.ui.theme.secondaryLightColor
 
 @Composable
@@ -49,7 +53,6 @@ fun SettingsScreen(navController: NavController) {
                     .size(20.dp)
                     .align(Alignment.CenterVertically) // Align vertically
             )
-
             // Centered Name
             Text(
                 text = "Setting",
@@ -60,7 +63,26 @@ fun SettingsScreen(navController: NavController) {
                 modifier = Modifier.weight(10f) // Weight for centering logic
             )
         }
+        Spacer(modifier = Modifier.height(30.dp))
+        Icon(
+            imageVector = Icons.Default.AccountCircle,
+            contentDescription = "User Avatar",
+            tint = Color.Gray,
+            modifier = Modifier
+                .size(150.dp)
+                .fillMaxWidth()  // Đảm bảo chiếm toàn bộ chiều rộng
+                .align(Alignment.CenterHorizontally)  // Căn giữa theo chiều ngang
+        )
 
+        Text (
+            text = "Name",
+            fontFamily = nunitoFontFamily,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
         // General Section
         SettingsSection(title = "General") {
             SettingItemWithNavigation(
@@ -143,7 +165,10 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
         Text(
             text = title,
             fontFamily = nunitoFontFamily,
-            modifier = Modifier.padding(bottom = 8.dp)
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier
+                .padding(bottom = 4.dp)
         )
         Column(
             modifier = Modifier
@@ -179,8 +204,11 @@ fun SettingItemWithNavigation(
         )
         Text(
             text = text,
+            fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
         )
     }
 }
@@ -202,14 +230,24 @@ fun SettingItemWithSwitch(icon: ImageVector, text: String, isChecked: Boolean, o
         )
         Text(
             text = text,
+            fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
         )
         Spacer(modifier = Modifier.weight(1f)) // Đẩy công tắc sang bên phải
         Switch(
             checked = isChecked,
             onCheckedChange = onCheckedChange,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = secondaryLightColor,  // Màu khi bật
+                uncheckedThumbColor = secondaryLightColor,  // Màu khi tắt
+                checkedTrackColor = primaryButtonColor,  // Màu track khi bật
+                uncheckedTrackColor = disableButtonColor  // Màu track khi tắt
+            ),
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
         )
     }
 }
