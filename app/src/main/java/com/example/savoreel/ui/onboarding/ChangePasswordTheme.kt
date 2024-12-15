@@ -25,7 +25,6 @@ import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.CustomTitle
 import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.backgroundLightColor
 
 @Composable
 fun ChangePasswordTheme(navController: NavController) {

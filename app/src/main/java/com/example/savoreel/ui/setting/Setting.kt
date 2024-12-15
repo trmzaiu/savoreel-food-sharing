@@ -89,7 +89,7 @@ fun SettingsScreen(navController: NavController) {
                 icon = Icons.Filled.Edit,
                 text = "Edit Name",
                 navController = navController,
-                destination = "edit_name"
+                destination = "name"
             )
             SettingItemWithNavigation(
                 icon = Icons.Filled.Email,
