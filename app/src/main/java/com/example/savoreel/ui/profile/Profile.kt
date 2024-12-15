@@ -34,49 +34,48 @@ import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import com.example.savoreel.ui.theme.backgroundLightColor
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.savoreel.ui.component.BackArrow
 
 @Composable
-fun Profile(profile: Map<String, List<ProfilePicturesData>>) {
+fun Profile(profile: Map<String, List<ProfilePicturesData>>, navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(backgroundLightColor) // Đặt nền màu sáng
             .padding(1.dp) // Đảm bảo có padding bên ngoài để các phần tử không chạm vào mép màn hình
     ) {
-        Spacer(modifier = Modifier.height(30.dp))
-        Row (
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ){
-            Column(
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier.weight(1f), // Đảm bảo căn đều với các cột khác
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.Black,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.weight(1f), // Đảm bảo căn đều với các cột khác
+                .padding(end = 16.dp) // Padding bên ngoài
+        ) {
+            BackArrow(
+                modifier = Modifier
+                    .align(Alignment.CenterStart),
+                onClick = { navController.popBackStack() }
+            )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd) // Căn phải
+                    .padding(top = 40.dp) // Padding chỉ ảnh hưởng đến vị trí bọc ngoài
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = "Back",
+                    contentDescription = "Setting",
                     tint = Color.Black,
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier
+                        .size(36.dp)
                 )
             }
         }
+
+
         Spacer(modifier = Modifier.height(30.dp))
 
         // Row chứa Avatar, Following và Followers
@@ -235,6 +234,9 @@ fun ProfilePreview() {
         )
     )
 
-    Profile(profile = profile)
+    Profile(
+        profile = profile,
+        navController = rememberNavController()
+    )
 }
 
