@@ -17,7 +17,9 @@ private val DarkColorScheme = darkColorScheme(
     background = backgroundDarkColor,
     outline = lineColor,
     tertiary = fontDarkColor,
-
+    surface = secondaryLightColor,
+    scrim = homeDarkColor
+    
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -26,6 +28,8 @@ private val LightColorScheme = lightColorScheme(
     background = backgroundLightColor,
     outline = lineColor,
     tertiary = fontLightColor,
+    surface = secondaryDarkColor,
+    scrim = homeLightColor
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -42,7 +46,7 @@ private val LightColorScheme = lightColorScheme(
 fun SavoreelTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

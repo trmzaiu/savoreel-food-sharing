@@ -65,16 +65,32 @@ fun EmailTheme(navController: NavController, isChangeEmail: Boolean, currentEmai
 
 @Preview(showBackground = true)
 @Composable
-fun EmailPreview() {
-    SavoreelTheme {
+fun EmailDarkPreview() {
+    SavoreelTheme(darkTheme = true) {
         EmailTheme(navController = rememberNavController(), isChangeEmail = false)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun ChangeEmailPreview() {
-    SavoreelTheme {
+fun ChangeEmailDarkPreview() {
+    SavoreelTheme(darkTheme = true) {
+        EmailTheme(navController = rememberNavController(), isChangeEmail = true, currentEmail = "example@gmail.com")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EmailLightPreview() {
+    SavoreelTheme(darkTheme = false) {
+        EmailTheme(navController = rememberNavController(), isChangeEmail = false)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChangeEmailLightPreview() {
+    SavoreelTheme(darkTheme = false) {
         EmailTheme(navController = rememberNavController(), isChangeEmail = true, currentEmail = "example@gmail.com")
     }
 }

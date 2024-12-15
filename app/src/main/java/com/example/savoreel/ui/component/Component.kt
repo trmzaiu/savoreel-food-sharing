@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,6 +34,7 @@ import com.example.savoreel.R
 import com.example.savoreel.ui.theme.disableButtonColor
 import com.example.savoreel.ui.theme.fontDarkColor
 import com.example.savoreel.ui.theme.fontLightColor
+import com.example.savoreel.ui.theme.homeDarkColor
 import com.example.savoreel.ui.theme.lineColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.example.savoreel.ui.theme.primaryButtonColor
@@ -52,7 +54,7 @@ fun CustomInputField(
         modifier = modifier
             .height(50.dp)
             .width(340.dp)
-            .background(color = secondaryLightColor, shape = RoundedCornerShape(size = 15.dp))
+            .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(size = 15.dp))
             .padding(horizontal = 10.dp, vertical = 5.dp),
         singleLine = true,
         visualTransformation = if (isPasswordField) PasswordVisualTransformation() else VisualTransformation.None,
@@ -60,7 +62,7 @@ fun CustomInputField(
             fontSize = 16.sp,
             fontFamily = nunitoFontFamily,
             fontWeight = FontWeight.Normal,
-            color = fontLightColor
+            color = MaterialTheme.colorScheme.tertiary
         ),
         decorationBox = { innerTextField ->
             Box(
@@ -74,7 +76,7 @@ fun CustomInputField(
                             fontSize = 16.sp,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Normal,
-                            color = lineColor
+                            color = MaterialTheme.colorScheme.outline
                         )
                     )
                 }
@@ -99,7 +101,7 @@ fun CustomButton(
             .width(360.dp)
             .height(50.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (enabled) primaryButtonColor else disableButtonColor
+            containerColor = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.scrim
         )
     ) {
         Text(
@@ -108,7 +110,7 @@ fun CustomButton(
                 fontSize = 18.sp,
                 fontFamily = nunitoFontFamily,
                 fontWeight = FontWeight.Bold,
-                color = fontDarkColor
+                color = if (enabled) secondaryLightColor else homeDarkColor
             )
         )
     }
@@ -124,11 +126,11 @@ fun ErrorDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(message) },
-        containerColor = secondaryLightColor,
+        containerColor = MaterialTheme.colorScheme.secondary,
 
         confirmButton = {
-            Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = lineColor)) {
-                Text("Ok", fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal)
+            Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.outline)) {
+                Text("Ok", fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, color = MaterialTheme.colorScheme.tertiary)
             }
         }
     )
@@ -145,7 +147,7 @@ fun CustomTitle(
         lineHeight = 45.sp,
         fontFamily = nunitoFontFamily,
         fontWeight = FontWeight.Bold,
-        color = fontLightColor,
+        color = MaterialTheme.colorScheme.tertiary,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth()
     )

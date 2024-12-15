@@ -1,6 +1,5 @@
 package com.example.savoreel.ui.onboarding
 
-import android.util.Patterns
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,8 +59,16 @@ fun PasswordTheme(navController: NavController, actionType: String ) {
 
 @Preview(showBackground = true)
 @Composable
-fun PasswordPreview() {
-    SavoreelTheme {
+fun PasswordDarkPreview() {
+    SavoreelTheme(darkTheme = true) {
+        PasswordTheme(navController = rememberNavController(), actionType = "change_password")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PasswordLightPreview() {
+    SavoreelTheme(darkTheme = false) {
         PasswordTheme(navController = rememberNavController(), actionType = "change_password")
     }
 }
