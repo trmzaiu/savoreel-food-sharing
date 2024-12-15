@@ -42,21 +42,25 @@ fun FollowScreen(navController: NavController) {
             .background(backgroundLightColor) // Đặt nền màu sáng
             .padding(16.dp)
     ) {
-        BackArrow(
-            modifier = Modifier,
-            onClick = { navController.popBackStack() }
-        )
-
-            // Centered Name
-        Text(
-            text = "Name",
-            fontFamily = nunitoFontFamily,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 32.sp,
+        Box(
             modifier = Modifier
-                .fillMaxWidth() // Weight for centering logic
-        )
+                .fillMaxWidth()
+        ) {
+            BackArrow(
+                modifier = Modifier.align(Alignment.CenterStart),
+                onClick = { navController.popBackStack() }
+            )
+            Text(
+                text = "Name",
+                fontFamily = nunitoFontFamily,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 32.sp,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(top = 40.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(30.dp))
         // Button Group
