@@ -50,7 +50,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -67,7 +66,11 @@ dependencies {
     implementation("com.google.accompanist:accompanist-flowlayout:0.24.13-rc")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.storage)
-    implementation(libs.androidx.ui.test.android)
+
+    // Correct dependencies for UI testing
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
+    androidTestImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

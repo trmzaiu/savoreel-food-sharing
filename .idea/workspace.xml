@@ -17,9 +17,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7a71b3a1-a878-45c1-82e3-69796ac7ec8b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Term of service.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Following.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Following.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Setting.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Setting.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
