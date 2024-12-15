@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.navigation.NavController
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
@@ -22,13 +23,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.theme.backgroundLightColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.example.savoreel.ui.theme.primaryButtonColor
 
 @Composable
-fun FollowScreen() {
+fun FollowScreen(navController: NavController) {
     var selectedTab by remember { mutableStateOf("Following") } // Quản lý trạng thái nút
     val followingList = getFollowingData()
     val followerList = getFollowerData()
@@ -39,34 +42,21 @@ fun FollowScreen() {
             .background(backgroundLightColor) // Đặt nền màu sáng
             .padding(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(30.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center // Center items horizontally
-        ) {
-            // Back Button
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.Black,
-                modifier = Modifier
-                    .size(20.dp)
-                    .align(Alignment.CenterVertically) // Align vertically
-            )
+        BackArrow(
+            modifier = Modifier,
+            onClick = { navController.popBackStack() }
+        )
 
             // Centered Name
-            Text(
-                text = "Name",
-                fontFamily = nunitoFontFamily,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 32.sp,
-                modifier = Modifier.weight(10f) // Weight for centering logic
-            )
-        }
+        Text(
+            text = "Name",
+            fontFamily = nunitoFontFamily,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 32.sp,
+            modifier = Modifier
+                .fillMaxWidth() // Weight for centering logic
+        )
 
         Spacer(modifier = Modifier.height(30.dp))
         // Button Group
@@ -87,7 +77,6 @@ fun FollowScreen() {
                 onClick = { selectedTab = "Follower" }
             )
         }
-
         // Danh sách hiển thị
         val items = if (selectedTab == "Following") followingList else followerList
         UserList(users = items)
@@ -176,7 +165,16 @@ fun getFollowingData(): List<User> {
     return listOf(
         User("User 1", R.drawable.food),
         User("User 2", R.drawable.food),
-        User("User 3", R.drawable.food)
+        User("User 3", R.drawable.food),
+        User("User 4", R.drawable.food),
+        User("User 5", R.drawable.food),
+        User("User 6", R.drawable.food),
+        User("User 7", R.drawable.food),
+        User("User 8", R.drawable.food),
+        User("User 9", R.drawable.food),
+        User("User 10", R.drawable.food),
+        User("User 11", R.drawable.food),
+        User("User 12", R.drawable.food)
     )
 }
 
@@ -195,5 +193,5 @@ data class User(val name: String, val avatarRes: Int)
 @Preview(showBackground = true)
 @Composable
 fun FollowScreenPreview() {
-    FollowScreen()
+    FollowScreen(navController = rememberNavController())
 }
