@@ -58,8 +58,8 @@ fun NameTheme(
 
 @Preview(showBackground = true)
 @Composable
-fun UpdateNamePreview() {
-    SavoreelTheme {
+fun UpdateNameDarkPreview() {
+    SavoreelTheme(darkTheme = true) {
         NameTheme(navController = rememberNavController(), currentName = "Tra My Vu") { name ->
             println("Changed name to: $name")
         }
@@ -68,8 +68,28 @@ fun UpdateNamePreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun CreateNamePreview() {
-    SavoreelTheme {
+fun CreateNameDarkPreview() {
+    SavoreelTheme(darkTheme = true) {
+        NameTheme(navController = rememberNavController(), currentName = null) { name ->
+            println("Created name: $name")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UpdateNameLightPreview() {
+    SavoreelTheme (darkTheme = false) {
+        NameTheme(navController = rememberNavController(), currentName = "Tra My Vu") { name ->
+            println("Changed name to: $name")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CreateNameLightPreview() {
+    SavoreelTheme(darkTheme = false) {
         NameTheme(navController = rememberNavController(), currentName = null) { name ->
             println("Created name: $name")
         }

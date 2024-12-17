@@ -1,6 +1,5 @@
 package com.example.savoreel.ui.onboarding
 
-import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,14 +9,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,17 +33,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.CustomButton
-import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.CustomTitle
 import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.backgroundLightColor
-import com.example.savoreel.ui.theme.fontLightColor
 import com.example.savoreel.ui.theme.lineColor
-import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.example.savoreel.ui.theme.primaryButtonColor
-import com.example.savoreel.ui.theme.secondaryDarkColor
-import com.example.savoreel.ui.theme.secondaryLightColor
 
 @Composable
 fun VerifyCodeTheme(navController: NavController) {
@@ -66,7 +56,7 @@ fun VerifyCodeTheme(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundLightColor),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         BackArrow(
@@ -106,14 +96,14 @@ fun VerifyCodeTheme(navController: NavController) {
                             lineHeight = 24.sp,
                             //fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Bold,
-                            color = primaryButtonColor,
+                            color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center,
                         ),
                         modifier = Modifier
                             .border(width = 1.dp, color = lineColor, shape = RoundedCornerShape(size = 12.dp))
                             .width(56.dp)
                             .height(56.dp)
-                            .background(color = secondaryLightColor, shape = RoundedCornerShape(size = 12.dp))
+                            .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(size = 12.dp))
                             .padding(8.dp)
                             .align(Alignment.CenterVertically)
                     )
@@ -130,7 +120,7 @@ fun VerifyCodeTheme(navController: NavController) {
                         lineHeight = 20.sp,
 //                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,
-                        color = lineColor,
+                        color = MaterialTheme.colorScheme.outline,
                         textAlign = TextAlign.Center,
                     )
                 )
@@ -142,7 +132,7 @@ fun VerifyCodeTheme(navController: NavController) {
                         lineHeight = 20.sp,
 //                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.ExtraBold,
-                        color = fontLightColor,
+                        color = MaterialTheme.colorScheme.tertiary,
                         textAlign = TextAlign.Center,
                     ),
                     modifier = Modifier
@@ -181,14 +171,20 @@ fun VerifyCodeTheme(navController: NavController) {
     }
 }
 
-fun onSubmit(code: String) {
-    TODO("Not yet implemented")
+
+
+@Preview(showBackground = true)
+@Composable
+fun VerifyCodeDarkPreview() {
+    SavoreelTheme(darkTheme = true) {
+        VerifyCodeTheme(navController = rememberNavController())
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun VerifyCodePreview() {
-    SavoreelTheme {
+fun VerifyCodeLightPreview() {
+    SavoreelTheme(darkTheme = false) {
         VerifyCodeTheme(navController = rememberNavController())
     }
 }

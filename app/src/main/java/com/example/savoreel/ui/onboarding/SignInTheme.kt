@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,7 +61,7 @@ fun SignInScreenTheme(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundLightColor),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -83,7 +84,7 @@ fun SignInScreenTheme(navController: NavController) {
                 lineHeight = 20.sp,
 //                fontFamily = domineFontFamily,
                 fontWeight = FontWeight.Bold,
-                color = primaryButtonColor,
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -125,7 +126,7 @@ fun SignInScreenTheme(navController: NavController) {
                             fontSize = 14.sp,
 //                            fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.SemiBold,
-                            color = secondaryDarkColor,
+                            color = MaterialTheme.colorScheme.tertiary,
                         ),
                         modifier = Modifier
                             .clickable {
@@ -161,6 +162,7 @@ fun SignInScreenTheme(navController: NavController) {
                     text = "Or connect with",
                     fontSize = 16.sp,
 //                    fontFamily = nunitoFontFamily,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Medium,
                     lineHeight = 20.sp,
                 )
@@ -210,7 +212,7 @@ fun SignInScreenTheme(navController: NavController) {
                         lineHeight = 20.sp,
 //                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,
-                        color = secondaryDarkColor,
+                        color = MaterialTheme.colorScheme.tertiary,
 
                         textAlign = TextAlign.Center,
                     )
@@ -223,7 +225,7 @@ fun SignInScreenTheme(navController: NavController) {
                         lineHeight = 20.sp,
 //                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.ExtraBold,
-                        color = primaryButtonColor,
+                        color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
                     ),
                     modifier = Modifier
@@ -246,8 +248,16 @@ fun SignInScreenTheme(navController: NavController) {
 
 @Preview(showBackground = true)
 @Composable
-fun SignInPreview() {
-    SavoreelTheme {
+fun SignInDarkPreview() {
+    SavoreelTheme(darkTheme = true, dynamicColor = false) {
+        SignInScreenTheme(navController = rememberNavController())
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SignInLightPreview() {
+    SavoreelTheme(darkTheme = false, dynamicColor = false) {
         SignInScreenTheme(navController = rememberNavController())
     }
 }

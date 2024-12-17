@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +25,6 @@ import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.CustomTitle
 import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.backgroundLightColor
 
 @Composable
 fun ChangePasswordTheme(navController: NavController) {
@@ -42,7 +42,7 @@ fun ChangePasswordTheme(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundLightColor),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         BackArrow(
@@ -111,8 +111,16 @@ fun ChangePasswordTheme(navController: NavController) {
 
 @Preview(showBackground = true)
 @Composable
-fun ResetPasswordPreview() {
-    SavoreelTheme {
+fun ResetPasswordDarkPreview() {
+    SavoreelTheme(darkTheme = true) {
+        ChangePasswordTheme(navController = rememberNavController())
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ResetPasswordLightPreview() {
+    SavoreelTheme(darkTheme = false) {
         ChangePasswordTheme(navController = rememberNavController())
     }
 }

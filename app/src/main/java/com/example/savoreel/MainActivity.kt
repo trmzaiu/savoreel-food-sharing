@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.ui.AppNavigation
+import com.example.savoreel.ui.setting.NavHostSetup
 import com.example.savoreel.ui.theme.SavoreelTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,10 +17,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SavoreelTheme() {
+            SavoreelTheme (dynamicColor = false) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val navController = rememberNavController()
                     AppNavigation(navController = navController)
+//                    NavHostSetup()
                 }
             }
         }

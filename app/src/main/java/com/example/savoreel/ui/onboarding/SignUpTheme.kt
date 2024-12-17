@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -77,7 +78,7 @@ fun SignUpScreenTheme(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundLightColor),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -100,7 +101,7 @@ fun SignUpScreenTheme(navController: NavController) {
                 lineHeight = 20.sp,
 //                fontFamily = domineFontFamily,
                 fontWeight = FontWeight.Bold,
-                color = primaryButtonColor,
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -142,7 +143,7 @@ fun SignUpScreenTheme(navController: NavController) {
                             fontSize = 14.sp,
 //                            fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.SemiBold,
-                            color = secondaryDarkColor,
+                            color = MaterialTheme.colorScheme.tertiary,
                         )
                     )
                 }
@@ -182,7 +183,7 @@ fun SignUpScreenTheme(navController: NavController) {
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
                     fontWeight = FontWeight.Normal,
-                    color = linkColor,
+                    color = MaterialTheme.colorScheme.outline,
                     textAlign = TextAlign.Center,
                 )
                 Row(
@@ -194,7 +195,7 @@ fun SignUpScreenTheme(navController: NavController) {
                         fontSize = 16.sp,
                         lineHeight = 20.sp,
                         fontWeight = FontWeight.Medium,
-                        color = primaryButtonColor,
+                        color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.clickable { println("Move to read Terms of Service") }
                     )
@@ -203,7 +204,7 @@ fun SignUpScreenTheme(navController: NavController) {
                         fontSize = 16.sp,
                         lineHeight = 20.sp,
                         fontWeight = FontWeight.Normal,
-                        color = linkColor,
+                        color = MaterialTheme.colorScheme.outline,
                         textAlign = TextAlign.Center,
                     )
                     Text(
@@ -211,7 +212,7 @@ fun SignUpScreenTheme(navController: NavController) {
                         fontSize = 16.sp,
                         lineHeight = 20.sp,
                         fontWeight = FontWeight.Medium,
-                        color = primaryButtonColor,
+                        color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.clickable { println("Move to read Privacy Policy") }
                     )
@@ -228,7 +229,7 @@ fun SignUpScreenTheme(navController: NavController) {
                         lineHeight = 20.sp,
 //                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,
-                        color = secondaryDarkColor,
+                        color = MaterialTheme.colorScheme.tertiary,
 
                         textAlign = TextAlign.Center,
                     )
@@ -241,7 +242,7 @@ fun SignUpScreenTheme(navController: NavController) {
                         lineHeight = 20.sp,
 //                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.ExtraBold,
-                        color = primaryButtonColor,
+                        color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
                     ),
                     modifier = Modifier
@@ -264,8 +265,17 @@ fun SignUpScreenTheme(navController: NavController) {
 
 @Preview(showBackground = true)
 @Composable
-fun SignUpPreview() {
-    SavoreelTheme {
+fun SignUpDarkPreview() {
+    SavoreelTheme(darkTheme = true, dynamicColor = false) {
         SignUpScreenTheme(navController = rememberNavController())
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun SignUpLightPreview() {
+    SavoreelTheme(darkTheme = false, dynamicColor = false) {
+        SignUpScreenTheme(navController = rememberNavController())
+    }
+}
+

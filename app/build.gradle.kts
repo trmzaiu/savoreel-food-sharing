@@ -64,6 +64,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-text:1.7.5")
     implementation("androidx.compose.animation:animation:1.7.5")
     implementation("androidx.navigation:navigation-compose:2.6.0")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.24.13-rc")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.storage)
     testImplementation(libs.junit)
