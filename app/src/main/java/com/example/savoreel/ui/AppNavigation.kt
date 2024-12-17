@@ -9,13 +9,15 @@ import androidx.navigation.compose.composable
 import com.example.savoreel.ui.onboarding.ChangePasswordTheme
 import com.example.savoreel.ui.onboarding.EmailTheme
 import com.example.savoreel.ui.onboarding.NameTheme
+import com.example.savoreel.ui.onboarding.OnboardingTheme
 import com.example.savoreel.ui.onboarding.VerifyCodeTheme
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = "sign_in_screen"
+//        startDestination = "sign_in_screen",
+        startDestination = "onboarding"
     ) {
         composable("sign_in_screen") {
             SignInScreenTheme(navController = navController)
@@ -46,6 +48,10 @@ fun AppNavigation(navController: NavHostController) {
             ) { newName ->
                 println("Submitted name: $newName")
             }
+        }
+
+        composable("onboarding") {
+            OnboardingTheme()
         }
     }
 }

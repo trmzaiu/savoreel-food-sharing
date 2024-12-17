@@ -67,7 +67,6 @@ dependencies {
     implementation("com.google.accompanist:accompanist-flowlayout:0.24.13-rc")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.storage)
-    implementation(libs.androidx.ui.test.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

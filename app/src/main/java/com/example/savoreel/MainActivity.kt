@@ -21,8 +21,7 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val navController = rememberNavController()
                     AppNavigation(navController = navController)
-                    NavHostSetup()
-
+//                    NavHostSetup()
                 }
             }
         }
