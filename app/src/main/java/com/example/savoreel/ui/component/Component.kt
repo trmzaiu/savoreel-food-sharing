@@ -3,24 +3,33 @@ package com.example.savoreel.ui.component
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.savoreel.R
+import com.example.savoreel.ui.home.SearchItem
 import com.example.savoreel.ui.theme.disableButtonColor
 import com.example.savoreel.ui.theme.fontDarkColor
 import com.example.savoreel.ui.theme.fontLightColor
@@ -52,7 +62,10 @@ fun CustomInputField(
         modifier = modifier
             .height(50.dp)
             .width(340.dp)
-            .background(color = secondaryLightColor, shape = RoundedCornerShape(size = 15.dp))
+            .background(
+                color = MaterialTheme.colorScheme.secondary,
+                shape = RoundedCornerShape(size = 15.dp)
+            )
             .padding(horizontal = 10.dp, vertical = 5.dp),
         singleLine = true,
         visualTransformation = if (isPasswordField) PasswordVisualTransformation() else VisualTransformation.None,
@@ -84,7 +97,6 @@ fun CustomInputField(
     )
 }
 
-
 @Composable
 fun CustomButton(
     text: String,
@@ -95,7 +107,7 @@ fun CustomButton(
     Button(
         onClick = onClick,
         enabled = enabled,
-        modifier = Modifier
+        modifier = modifier
             .width(360.dp)
             .height(50.dp),
         colors = ButtonDefaults.buttonColors(
@@ -147,7 +159,7 @@ fun CustomTitle(
         fontWeight = FontWeight.Bold,
         color = fontLightColor,
         textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     )
 }
 
@@ -164,4 +176,58 @@ fun BackArrow(
             .size(30.dp)
             .clickable { onClick() }
     )
+}
+
+@Composable
+fun IconTheme(
+    imageVector: ImageVector,
+    modifier: Modifier = Modifier
+) {
+    Image(
+        imageVector = imageVector,
+        contentDescription = "Icon",
+        modifier = modifier.size(30.dp),
+        colorFilter = tint(MaterialTheme.colorScheme.tertiary)
+    )
+}
+
+@Composable
+fun ImageCustom(
+    painter: Painter,
+    onClick: () -> Unit
+){
+    Box(
+        modifier = Modifier
+            .aspectRatio(1f)
+            .clip(MaterialTheme.shapes.medium)
+            .clickable { onClick },
+        contentAlignment = Alignment.BottomStart
+    ) {
+        Image(
+            painter = painter,
+            contentDescription = null,
+            alignment = Alignment.Center,
+
+            )
+    }
+}
+
+@Composable
+fun GridImage(posts: List<SearchItem>, onClick: (SearchItem) -> Unit){
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 100.dp),
+        contentPadding = PaddingValues(5.dp),
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+        modifier = Modifier
+            .padding(horizontal = 20.dp)
+            .padding(top = 20.dp)
+    ) {
+        items(posts) { post ->
+            ImageCustom(
+                painter = painterResource(post.imageRes),
+                onClick = {}
+            )
+        }
+    }
 }

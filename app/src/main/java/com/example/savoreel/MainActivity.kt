@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SavoreelTheme {
+            SavoreelTheme() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val navController = rememberNavController()
                     AppNavigation(navController = navController)

@@ -2,10 +2,15 @@ package com.example.savoreel.ui
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import com.example.savoreel.ui.onboarding.SignInScreenTheme
 import com.example.savoreel.ui.onboarding.SignUpScreenTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.savoreel.ui.home.Notifications
+import com.example.savoreel.ui.home.Searching
+import com.example.savoreel.ui.home.SearchingResult
 import com.example.savoreel.ui.onboarding.ChangePasswordTheme
 import com.example.savoreel.ui.onboarding.EmailTheme
 import com.example.savoreel.ui.onboarding.NameTheme
@@ -47,6 +52,20 @@ fun AppNavigation(navController: NavHostController) {
                 println("Submitted name: $newName")
             }
         }
+
+        composable("notification"){
+            Notifications(navController = navController)
+        }
+
+        composable("searching"){
+            Searching(navController = navController)
+        }
+
+        composable("searching_result/{query}", arguments = listOf(navArgument("query") { type = NavType.StringType })) { backStackEntry ->
+            val query = backStackEntry.arguments?.getString("query") ?: ""
+            SearchingResult(navController = navController, searchQuery = query)
+        }
+
     }
 }
 
