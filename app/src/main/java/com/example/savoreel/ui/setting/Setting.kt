@@ -46,12 +46,13 @@ import com.example.savoreel.ui.theme.SavoreelTheme
 fun SettingsScreen(navController: NavController) {
     var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
     var showModal by remember { mutableStateOf(false) }
+    val currentDarkMode = rememberUpdatedState(isDarkModeEnabled)
 
-    SavoreelTheme(darkTheme = isDarkModeEnabled) {
+    SavoreelTheme(darkTheme = currentDarkMode.value) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(backgroundLightColor)
+                .background(color = MaterialTheme.colorScheme.background)
                 .padding(16.dp)
         ) {
             Box(
@@ -68,6 +69,7 @@ fun SettingsScreen(navController: NavController) {
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 32.sp,
+                    color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier
                         .align(Alignment.Center)
                         .padding(top = 40.dp)
@@ -101,8 +103,10 @@ fun SettingsScreen(navController: NavController) {
                             onDismissRequest = { showModal = false }, // Đóng banner
                             sheetState = rememberModalBottomSheetState(
                                 skipPartiallyExpanded = true
-                            )
-                        ) {
+                            ),
+                            containerColor = MaterialTheme.colorScheme.secondary // Màu nền cho sheet
+                        )
+                        {
                             SheetContent(
                                 onOptionClick = { option ->
                                     showModal = false
@@ -118,7 +122,9 @@ fun SettingsScreen(navController: NavController) {
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.fillMaxWidth()
+
                     )
                     // General Section
                     Spacer(modifier = Modifier.height(20.dp))
@@ -127,19 +133,19 @@ fun SettingsScreen(navController: NavController) {
                             icon = Icons.Filled.Edit,
                             text = "Edit Name",
                             navController = navController,
-                            destination = "edit_name"
+                            destination = "name_screen"
                         )
                         SettingItemWithNavigation(
                             icon = Icons.Filled.Email,
                             text = "Change Email",
                             navController = navController,
-                            destination = "change_email"
+                            destination = "email_screen"
                         )
                         SettingItemWithNavigation(
                             icon = Icons.Filled.Lock,
                             text = "Change Password",
                             navController = navController,
-                            destination = "change_password"
+                            destination = "change_password_screen"
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -162,7 +168,7 @@ fun SettingsScreen(navController: NavController) {
                             icon = Icons.Filled.Notifications,
                             text = "Notifications",
                             navController = navController,
-                            destination = "notifications"
+                            destination = "notification_setting"
                         )
                         SettingItemWithNavigation(
                             icon = Icons.Filled.Warning,
@@ -230,13 +236,14 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
             fontFamily = nunitoFontFamily,
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .padding(bottom = 4.dp)
         )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(secondaryLightColor, shape = RoundedCornerShape(20.dp))
+                .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(20.dp))
                 .padding(16.dp)
         ) {
             content()
@@ -269,7 +276,8 @@ fun SettingItemWithNavigation(
             text = text,
             fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
         )
@@ -295,7 +303,8 @@ fun SettingItemWithSwitch(icon: ImageVector, text: String, isChecked: Boolean, o
             text = text,
             fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
         )
@@ -304,10 +313,10 @@ fun SettingItemWithSwitch(icon: ImageVector, text: String, isChecked: Boolean, o
             checked = isChecked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = secondaryLightColor,  // Màu khi bật
-                uncheckedThumbColor = secondaryLightColor,  // Màu khi tắt
-                checkedTrackColor = primaryButtonColor,  // Màu track khi bật
-                uncheckedTrackColor = disableButtonColor  // Màu track khi tắt
+                checkedThumbColor = MaterialTheme.colorScheme.secondary, // Màu khi bật
+                uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,  // Màu track khi bật
+                uncheckedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) // Mờ hơn cho track
             ),
             modifier = Modifier
                 .align(Alignment.CenterVertically)
@@ -315,28 +324,6 @@ fun SettingItemWithSwitch(icon: ImageVector, text: String, isChecked: Boolean, o
     }
 }
 
-@Composable
-fun NavHostSetup() {
-    val navController = rememberNavController()
-    SavoreelTheme(darkTheme = false) {
-        NavHost(navController = navController, startDestination = "settings_screen") {
-            composable("settings_screen") {
-                SettingsScreen(navController = navController)
-            }
-            // Các destination khác khi nhấn vào mục cài đặt
-            composable("edit_name") { /* Hiển thị trang Edit Name */ }
-            composable("change_email") { /* Hiển thị trang Change Email */ }
-            composable("change_password") { /* Hiển thị trang Change Password */ }
-            composable("language") { /* Hiển thị trang Language */ }
-            composable("notifications") {
-                NotificationSetting(navController = navController)
-            }
-            composable("share_account") { /* Hiển thị trang Share Account */ }
-            composable("terms_of_service") { /* Hiển thị trang Terms of Service */ }
-            composable("privacy") { /* Hiển thị trang Privacy */ }
-        }
-    }
-}
 
 @Composable
 fun SheetContent(onOptionClick: (String) -> Unit) {
@@ -357,8 +344,10 @@ fun SheetContent(onOptionClick: (String) -> Unit) {
                     .fillMaxWidth()
                     .clickable { onOptionClick(option) }
                     .padding(vertical = 8.dp),
-                textAlign = TextAlign.Center
-            )
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.tertiary,
+
+                )
         }
     }
 }
@@ -381,9 +370,18 @@ fun handleAvatarOption(option: String) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreviewDark() {
+    SavoreelTheme(darkTheme = true, dynamicColor = true) {
+        SettingsScreen(navController = rememberNavController()) // Pass the navController as normal
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreen(navController = rememberNavController())
+    SavoreelTheme(darkTheme = false, dynamicColor = false) {
+        SettingsScreen(navController = rememberNavController()) // Pass the navController as normal
+    }
 }

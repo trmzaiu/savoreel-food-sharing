@@ -12,8 +12,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.backgroundLightColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.example.savoreel.ui.theme.primaryButtonColor
@@ -35,58 +38,60 @@ fun FollowScreen(navController: NavController) {
     var selectedTab by remember { mutableStateOf("Following") } // Quản lý trạng thái nút
     val followingList = getFollowingData()
     val followerList = getFollowerData()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundLightColor) // Đặt nền màu sáng
-            .padding(16.dp)
-    ) {
-        Box(
+    var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
+    SavoreelTheme(darkTheme = isDarkModeEnabled) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background) // Đặt nền màu sáng
+                .padding(16.dp)
         ) {
-            BackArrow(
-                modifier = Modifier.align(Alignment.CenterStart),
-                onClick = { navController.popBackStack() }
-            )
-            Text(
-                text = "Name",
-                fontFamily = nunitoFontFamily,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 32.sp,
+            Box(
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(top = 40.dp)
-            )
-        }
+                    .fillMaxWidth()
+            ) {
+                BackArrow(
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    onClick = { navController.popBackStack() }
+                )
+                Text(
+                    text = "Name",
+                    fontFamily = nunitoFontFamily,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 32.sp,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(top = 40.dp)
+                )
+            }
 
-        Spacer(modifier = Modifier.height(30.dp))
-        // Button Group
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            TabButton(
-                text = "Following",
-                isSelected = selectedTab == "Following",
-                onClick = { selectedTab = "Following" }
-            )
+            Spacer(modifier = Modifier.height(30.dp))
+            // Button Group
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TabButton(
+                    text = "Following",
+                    isSelected = selectedTab == "Following",
+                    onClick = { selectedTab = "Following" }
+                )
 
-            TabButton(
-                text = "Follower",
-                isSelected = selectedTab == "Follower",
-                onClick = { selectedTab = "Follower" }
-            )
+                TabButton(
+                    text = "Follower",
+                    isSelected = selectedTab == "Follower",
+                    onClick = { selectedTab = "Follower" }
+                )
+            }
+            // Danh sách hiển thị
+            val items = if (selectedTab == "Following") followingList else followerList
+            UserList(users = items)
         }
-        // Danh sách hiển thị
-        val items = if (selectedTab == "Following") followingList else followerList
-        UserList(users = items)
     }
 }
-
 @Composable
 fun TabButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
@@ -102,17 +107,18 @@ fun TabButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
         ) {
             Text(
                 text = text,
-                fontSize = 16.sp,
+                fontSize = 20.sp,
                 fontFamily = nunitoFontFamily,
                 fontWeight = FontWeight.Normal,
-                color = if (isSelected) primaryButtonColor else Color.Black
+                color = if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.tertiary
             )
             Spacer(modifier = Modifier.height(4.dp))
             Box(
                 modifier = Modifier
                     .height(1.dp)
                     .fillMaxWidth()
-                    .background(if (isSelected) primaryButtonColor else Color.Transparent)
+                    .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
             )
         }
     }
@@ -152,10 +158,10 @@ fun UserItem(user: User) {
         // Tên người dùng
         Text(
             text = user.name,
-            fontSize = 16.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Normal,
             fontFamily = nunitoFontFamily,
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { /* Thêm hành động khi bấm vào user */ }

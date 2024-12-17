@@ -10,6 +10,10 @@ import com.example.savoreel.ui.onboarding.ChangePasswordTheme
 import com.example.savoreel.ui.onboarding.EmailTheme
 import com.example.savoreel.ui.onboarding.NameTheme
 import com.example.savoreel.ui.onboarding.VerifyCodeTheme
+import com.example.savoreel.ui.profile.FollowScreen
+import com.example.savoreel.ui.setting.NotificationSetting
+import com.example.savoreel.ui.setting.SettingsScreen
+import com.example.savoreel.ui.setting.TermsOfServiceScreen
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
@@ -46,6 +50,22 @@ fun AppNavigation(navController: NavHostController) {
             ) { newName ->
                 println("Submitted name: $newName")
             }
+        }
+
+        composable("settings_screen") {
+            SettingsScreen(navController = navController)
+        }
+
+        composable("notification_setting") {
+            NotificationSetting(navController = navController)
+        }
+
+        composable("follow") {
+            FollowScreen(navController = navController)
+        }
+
+        composable("terms_of_service") {
+            TermsOfServiceScreen(navController = navController)
         }
     }
 }
