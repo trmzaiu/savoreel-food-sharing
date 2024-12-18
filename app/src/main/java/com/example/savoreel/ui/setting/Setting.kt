@@ -5,12 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -21,25 +19,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.compose.*
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
-import com.example.savoreel.ui.theme.backgroundLightColor
-import com.example.savoreel.ui.theme.disableButtonColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.example.savoreel.ui.theme.primaryButtonColor
-import com.example.savoreel.ui.theme.secondaryLightColor
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.res.vectorResource
 import com.example.savoreel.ui.theme.SavoreelTheme
+import com.example.savoreel.ui.component.SettingItemWithSwitch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,11 +47,12 @@ fun SettingsScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.background)
-                .padding(16.dp)
+                .padding(horizontal = 20.dp)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             ) {
                 BackArrow(
                     modifier = Modifier.align(Alignment.CenterStart),
@@ -75,7 +70,6 @@ fun SettingsScreen(navController: NavController) {
                         .padding(top = 40.dp)
                 )
             }
-
             LazyColumn {
                 item {
                     Spacer(modifier = Modifier.height(30.dp))
@@ -89,7 +83,7 @@ fun SettingsScreen(navController: NavController) {
                             painter = painterResource(id = R.drawable.rounded_logo), // Replace with your actual icon
                             contentDescription = "User Avatar",
                             modifier = Modifier
-                                .clip(CircleShape) // Cắt ảnh thành hình tròng
+                                .clip(CircleShape) // Cắt ảnh thành hình tròn
                                 .clickable { showModal = true }
                                 .size(150.dp),
 
@@ -130,89 +124,100 @@ fun SettingsScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(20.dp))
                     SettingsSection(title = "General") {
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Edit,
+                            icon = ImageVector.vectorResource(id = R.drawable.pen),
                             text = "Edit Name",
                             navController = navController,
                             destination = "name_screen"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Email,
+                            icon = ImageVector.vectorResource(id = R.drawable.envelope),
                             text = "Change Email",
                             navController = navController,
                             destination = "email_screen"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Lock,
+                            icon = ImageVector.vectorResource(id = R.drawable.key),
                             text = "Change Password",
                             navController = navController,
                             destination = "change_password_screen"
                         )
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     // Support Section
                     SettingsSection(title = "Support") {
-                        SettingItemWithSwitch(
-                            icon = Icons.Default.Build, // Moon icon for Dark Mode
-                            text = "Dark Mode",
-                            isChecked = isDarkModeEnabled,
-                            onCheckedChange = { isDarkModeEnabled = it }
-                        )
+                        Row {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.moon),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.surface,
+                                modifier = Modifier
+                                    .padding(end = 16.dp)
+                                    .align(Alignment.CenterVertically)
+                                    .size(24.dp)
+                            )
+                            SettingItemWithSwitch(
+                                text = "Dark Mode",
+                                isChecked = isDarkModeEnabled,
+                                onCheckedChange = { isDarkModeEnabled = it }
+                            )
+                        }
+
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Place,
+                            icon = ImageVector.vectorResource(id = R.drawable.globe),
                             text = "Language",
                             navController = navController,
                             destination = "language"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Notifications,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_noti),
                             text = "Notifications",
                             navController = navController,
                             destination = "notification_setting"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Warning,
+                            icon = ImageVector.vectorResource(id = R.drawable.exclamation_circle),
                             text = "Report a problem",
                             navController = navController,
                             destination = "report_a_problem"
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     // About Section
                     SettingsSection(title = "About") {
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Share,
+                            icon = ImageVector.vectorResource(id = R.drawable.share),
                             text = "Share Account",
                             navController = navController,
                             destination = "share_account"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Phone,
+                            icon = ImageVector.vectorResource(id = R.drawable.whatsapp),
                             text = "Terms of Service",
                             navController = navController,
                             destination = "terms_of_service"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Lock,
+                            icon = ImageVector.vectorResource(id = R.drawable.lock),
                             text = "Privacy",
                             navController = navController,
                             destination = "privacy"
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     SettingsSection(title = "Danger Zone") {
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Delete,
+                            icon = ImageVector.vectorResource(id = R.drawable.trash3),
                             text = "Delete Account",
                             navController = navController,
                             destination = "confirm_password"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.ArrowBack,
+                            icon = ImageVector.vectorResource(id = R.drawable.box_arrow_in_left),
                             text = "Sign Out",
                             navController = navController,
                             destination = "sign_out"
@@ -261,68 +266,30 @@ fun SettingItemWithNavigation(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .height(48.dp)
+            .padding(vertical = 8.dp)
             .clickable { navController.navigate(destination) } // Điều hướng đến trang khác
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
+            tint = MaterialTheme.colorScheme.surface,
             modifier = Modifier
                 .padding(end = 16.dp)
                 .align(Alignment.CenterVertically)
+                .size(24.dp)
         )
         Text(
             text = text,
             fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.tertiary,
+            color = if (text == "Delete Account") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
         )
     }
 }
 
-@Composable
-fun SettingItemWithSwitch(icon: ImageVector, text: String, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .height(48.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier
-                .padding(end = 16.dp)
-                .align(Alignment.CenterVertically)
-        )
-        Text(
-            text = text,
-            fontSize = 20.sp,
-            fontFamily = nunitoFontFamily,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-        )
-        Spacer(modifier = Modifier.weight(1f)) // Đẩy công tắc sang bên phải
-        Switch(
-            checked = isChecked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.secondary, // Màu khi bật
-                uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
-                checkedTrackColor = MaterialTheme.colorScheme.primary,  // Màu track khi bật
-                uncheckedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) // Mờ hơn cho track
-            ),
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-        )
-    }
-}
 
 
 @Composable
@@ -345,7 +312,7 @@ fun SheetContent(onOptionClick: (String) -> Unit) {
                     .clickable { onOptionClick(option) }
                     .padding(vertical = 8.dp),
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = if (option == "Remove Avatar") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
 
                 )
         }

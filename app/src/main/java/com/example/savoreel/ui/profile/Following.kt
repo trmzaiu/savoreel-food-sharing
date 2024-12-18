@@ -8,9 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.navigation.NavController
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,9 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.backgroundLightColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.example.savoreel.ui.theme.primaryButtonColor
 
 @Composable
 fun FollowScreen(navController: NavController) {
@@ -44,7 +39,7 @@ fun FollowScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.background) // Đặt nền màu sáng
-                .padding(16.dp)
+                .padding(horizontal = 20.dp)
         ) {
             Box(
                 modifier = Modifier

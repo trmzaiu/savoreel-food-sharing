@@ -44,6 +44,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.ui.component.BackArrow
@@ -57,7 +59,7 @@ fun Profile(profile: Map<String, List<ProfilePicturesData>>, navController: NavC
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.background) // Đặt nền màu sáng
-                .padding(1.dp) // Đảm bảo có padding bên ngoài để các phần tử không chạm vào mép màn hình
+                .padding(horizontal = 20.dp) // Đảm bảo có padding bên ngoài để các phần tử không chạm vào mép màn hình
         ) {
             Box(
                 modifier = Modifier
@@ -75,7 +77,7 @@ fun Profile(profile: Map<String, List<ProfilePicturesData>>, navController: NavC
                         .padding(top = 40.dp) // Padding chỉ ảnh hưởng đến vị trí bọc ngoài
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Settings,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.gear),
                         contentDescription = "Setting",
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier
@@ -190,7 +192,6 @@ fun Profile(profile: Map<String, List<ProfilePicturesData>>, navController: NavC
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                .padding(vertical = 1.dp)
                                 .padding(horizontal = 1.dp)
                         ) {
                             ProfilePictures(chunk)
@@ -215,7 +216,7 @@ fun ProfilePictures(data: List<ProfilePicturesData>) {
                 painter = painterResource(id = R.drawable.food), // Replace with your actual icon
                 contentDescription = null,
                 modifier = Modifier
-                    .size(125.dp) // Size of each image
+                    .size(120.dp) // Size of each image
                     .clip(RoundedCornerShape(20.dp)) // Rounded corners
                     .padding(horizontal = 2.dp) // Padding between images
             )

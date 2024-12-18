@@ -4,25 +4,34 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -38,6 +47,7 @@ import com.example.savoreel.ui.theme.homeDarkColor
 import com.example.savoreel.ui.theme.lineColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.example.savoreel.ui.theme.primaryButtonColor
+import com.example.savoreel.ui.theme.secondaryDarkColor
 import com.example.savoreel.ui.theme.secondaryLightColor
 
 @Composable
@@ -167,3 +177,68 @@ fun BackArrow(
             .clickable { onClick() }
     )
 }
+
+@Composable
+fun SettingItemWithSwitch(text: String, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 20.sp,
+            fontFamily = nunitoFontFamily,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+        )
+        Spacer(modifier = Modifier.weight(1f)) // Đẩy công tắc sang bên phải
+        CustomSwitch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange
+        )
+    }
+}
+
+    @Composable
+    fun CustomSwitch(
+        checked: Boolean,
+        onCheckedChange: (Boolean) -> Unit
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp,26.dp)  // Set the size of the entire Switch
+                .clickable { onCheckedChange(!checked) }
+        ) {
+            // Track
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = if (checked) MaterialTheme.colorScheme.primary else Color.Gray,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .fillMaxSize()
+            )
+
+            // Thumb
+            Box(
+                modifier = Modifier
+                    .size(26.dp)
+                    .padding(horizontal = 2.dp)
+                    .align(if (checked) Alignment.CenterEnd else Alignment.CenterStart)
+
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.circle),
+                    contentDescription = null,
+                    tint = if (checked) Color.White else Color.DarkGray,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center)
+                )
+            }
+        }
+    }
+
