@@ -9,7 +9,9 @@ import androidx.navigation.compose.composable
 import com.example.savoreel.ui.onboarding.ChangePasswordTheme
 import com.example.savoreel.ui.onboarding.EmailTheme
 import com.example.savoreel.ui.onboarding.NameTheme
-import com.example.savoreel.ui.onboarding.OnboardingTheme
+import com.example.savoreel.ui.onboarding.Onboarding2Theme
+import com.example.savoreel.ui.onboarding.Onboarding3Preview
+import com.example.savoreel.ui.onboarding.Onboarding3Theme
 import com.example.savoreel.ui.onboarding.VerifyCodeTheme
 
 @Composable
@@ -51,7 +53,7 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         composable("onboarding") {
-            OnboardingTheme()
+            Onboarding3Theme(navController = navController)
         }
     }
 }
