@@ -16,6 +16,10 @@ import com.example.savoreel.ui.onboarding.OnboardingTheme
 import com.example.savoreel.ui.onboarding.SignInScreenTheme
 import com.example.savoreel.ui.onboarding.SignUpScreenTheme
 import com.example.savoreel.ui.onboarding.VerifyCodeTheme
+import com.example.savoreel.ui.profile.FollowScreen
+import com.example.savoreel.ui.setting.NotificationSetting
+import com.example.savoreel.ui.setting.SettingsScreen
+import com.example.savoreel.ui.setting.TermsOfServiceScreen
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
@@ -71,6 +75,22 @@ fun AppNavigation(navController: NavHostController) {
 
         composable("onboarding") {
             OnboardingTheme(navController = navController)
+        }
+
+        composable("settings_screen") {
+            SettingsScreen(navController = navController)
+        }
+
+        composable("notification_setting") {
+            NotificationSetting(navController = navController)
+        }
+
+        composable("follow") {
+            FollowScreen(navController = navController)
+        }
+
+        composable("terms_of_service") {
+            TermsOfServiceScreen(navController = navController)
         }
     }
 }

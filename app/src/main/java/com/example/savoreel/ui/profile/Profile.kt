@@ -2,6 +2,7 @@ package com.example.savoreel.ui.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,143 +39,162 @@ import androidx.compose.foundation.layout.Box
 import com.example.savoreel.ui.theme.backgroundLightColor
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.theme.SavoreelTheme
 
 @Composable
 fun Profile(profile: Map<String, List<ProfilePicturesData>>, navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundLightColor) // Đặt nền màu sáng
-            .padding(1.dp) // Đảm bảo có padding bên ngoài để các phần tử không chạm vào mép màn hình
-    ) {
-        Box(
+    var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
+    SavoreelTheme(darkTheme = isDarkModeEnabled) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 16.dp) // Padding bên ngoài
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background) // Đặt nền màu sáng
+                .padding(1.dp) // Đảm bảo có padding bên ngoài để các phần tử không chạm vào mép màn hình
         ) {
-            BackArrow(
-                modifier = Modifier
-                    .align(Alignment.CenterStart),
-                onClick = { navController.popBackStack() }
-            )
             Box(
                 modifier = Modifier
-                    .align(Alignment.CenterEnd) // Căn phải
-                    .padding(top = 40.dp) // Padding chỉ ảnh hưởng đến vị trí bọc ngoài
+                    .fillMaxWidth()
+                    .padding(end = 16.dp) // Padding bên ngoài
             ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Setting",
-                    tint = Color.Black,
+                BackArrow(
                     modifier = Modifier
-                        .size(36.dp)
+                        .align(Alignment.CenterStart),
+                    onClick = { navController.popBackStack() }
                 )
-            }
-        }
-
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        // Row chứa Avatar, Following và Followers
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Avatar và Tên
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f) // Đảm bảo căn đều với các cột khác
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "User Avatar",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(100.dp)
-                )
-                Text (
-                    text = "Name",
-                    fontFamily = nunitoFontFamily,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                    )
-            }
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f) // Đảm bảo căn đều với các cột khác
-            ) {
-                Text(
-                    text = "100", // Số lượng Following
-                    fontFamily = nunitoFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-                Text(
-                    text = "Following",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color.Gray
-                )
-            }
-
-            // Cột "Followers"
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f) // Đảm bảo căn đều với các cột khác
-            ) {
-                Text(
-                    text = "100", // Số lượng Followers
-                    fontFamily = nunitoFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-                Text(
-                    text = "Followers",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color.Gray
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // LazyColumn để hiển thị danh sách ProfilePictures
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(2.dp),
-        ) {
-            profile.forEach { (date, items) ->
-                item {
-                    Text(
-                        text = date,
-                        fontFamily = nunitoFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = Color.Gray,
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd) // Căn phải
+                        .padding(top = 40.dp) // Padding chỉ ảnh hưởng đến vị trí bọc ngoài
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Setting",
+                        tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .padding(vertical = 4.dp)
+                            .size(36.dp)
+                            .clickable {
+                                navController.navigate("settings_screen")
+                            }
                     )
-                    Divider(color = Color.LightGray, thickness = 1.dp)
-                    Spacer(modifier = Modifier.height(5.dp))
-
                 }
-                items(items.chunked(3)) { chunk ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .padding(vertical = 1.dp)
-                            .padding(horizontal = 1.dp)
-                    ) {
-                        ProfilePictures(chunk)
+            }
+
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // Row chứa Avatar, Following và Followers
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Avatar và Tên
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f) // Đảm bảo căn đều với các cột khác
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "User Avatar",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(100.dp)
+                    )
+                    Text(
+                        text = "Name",
+                        fontFamily = nunitoFontFamily,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontSize = 20.sp
+                    )
+                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f) // Đảm bảo căn đều với các cột khác
+                        .clickable {
+                            navController.navigate("follow")
+                        }
+                ) {
+                    Text(
+                        text = "100", // Số lượng Following
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                    Text(
+                        text = "Following",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                }
+
+                // Cột "Followers"
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f) // Đảm bảo căn đều với các cột khác
+                ) {
+                    Text(
+                        text = "100", // Số lượng Followers
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontSize = 20.sp
+                    )
+                    Text(
+                        text = "Followers",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // LazyColumn để hiển thị danh sách ProfilePictures
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(2.dp),
+            ) {
+                profile.forEach { (date, items) ->
+                    item {
+                        Text(
+                            text = date,
+                            fontFamily = nunitoFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp)
+                                .padding(vertical = 4.dp)
+                        )
+                        Divider(color = Color.LightGray, thickness = 1.dp)
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                    }
+                    items(items.chunked(3)) { chunk ->
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .padding(vertical = 1.dp)
+                                .padding(horizontal = 1.dp)
+                        ) {
+                            ProfilePictures(chunk)
+                        }
                     }
                 }
             }
