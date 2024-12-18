@@ -13,11 +13,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.backgroundLightColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.example.savoreel.ui.theme.secondaryLightColor
@@ -26,10 +28,12 @@ import com.example.savoreel.ui.theme.disableButtonColor
 
 @Composable
 fun NotificationSetting(navController: NavController) {
+    var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
+    SavoreelTheme(darkTheme = isDarkModeEnabled) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundLightColor)
+            .background(color = MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
         Box(
@@ -45,6 +49,7 @@ fun NotificationSetting(navController: NavController) {
                 fontFamily = nunitoFontFamily,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 32.sp,
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -63,7 +68,7 @@ fun NotificationSetting(navController: NavController) {
                 // Do Not Disturb Section
                 Box(
                     modifier = Modifier
-                        .background(secondaryLightColor, shape = RoundedCornerShape(10.dp))
+                        .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(10.dp))
                         .padding(horizontal = 16.dp)
                 ) {
                     SettingItemWithSwitch(
@@ -116,6 +121,7 @@ fun NotificationSetting(navController: NavController) {
         }
     }
 }
+    }
 
 @Composable
 fun SettingNotiSection(title: String, content: @Composable () -> Unit) {
@@ -130,6 +136,7 @@ fun SettingNotiSection(title: String, content: @Composable () -> Unit) {
             fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
             fontWeight = FontWeight.Normal,
+            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .padding(bottom = 8.dp)
         )
@@ -138,7 +145,7 @@ fun SettingNotiSection(title: String, content: @Composable () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(secondaryLightColor, shape = RoundedCornerShape(10.dp))
+                .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(10.dp))
                 .padding(16.dp)
         ) {
             content()
@@ -158,7 +165,8 @@ fun SettingItemWithSwitch(text: String, isChecked: Boolean = false, onCheckedCha
             text = text,
             fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
         )
@@ -167,10 +175,10 @@ fun SettingItemWithSwitch(text: String, isChecked: Boolean = false, onCheckedCha
             checked = isChecked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = secondaryLightColor,  // Màu khi bật
-                uncheckedThumbColor = secondaryLightColor,  // Màu khi tắt
-                checkedTrackColor = primaryButtonColor,  // Màu track khi bật
-                uncheckedTrackColor = disableButtonColor  // Màu track khi tắt
+                checkedThumbColor = MaterialTheme.colorScheme.secondary,  // Màu khi bật
+                uncheckedThumbColor = MaterialTheme.colorScheme.secondary,  // Màu khi tắt
+                checkedTrackColor = MaterialTheme.colorScheme.primary,  // Màu track khi bật
+                uncheckedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)  // Màu track khi tắt
             ),
             modifier = Modifier
                 .align(Alignment.CenterVertically)
