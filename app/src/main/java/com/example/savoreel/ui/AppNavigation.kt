@@ -2,13 +2,19 @@ package com.example.savoreel.ui
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import com.example.savoreel.ui.onboarding.SignInScreenTheme
-import com.example.savoreel.ui.onboarding.SignUpScreenTheme
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.savoreel.ui.home.Notifications
+import com.example.savoreel.ui.home.Searching
+import com.example.savoreel.ui.home.SearchingResult
 import com.example.savoreel.ui.onboarding.ChangePasswordTheme
 import com.example.savoreel.ui.onboarding.EmailTheme
 import com.example.savoreel.ui.onboarding.NameTheme
+import com.example.savoreel.ui.onboarding.OnboardingTheme
+import com.example.savoreel.ui.onboarding.SignInScreenTheme
+import com.example.savoreel.ui.onboarding.SignUpScreenTheme
 import com.example.savoreel.ui.onboarding.VerifyCodeTheme
 import com.example.savoreel.ui.profile.FollowScreen
 import com.example.savoreel.ui.setting.NotificationSetting
@@ -19,7 +25,8 @@ import com.example.savoreel.ui.setting.TermsOfServiceScreen
 fun AppNavigation(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = "sign_in_screen"
+//        startDestination = "sign_in_screen",
+        startDestination = "onboarding"
     ) {
         composable("sign_in_screen") {
             SignInScreenTheme(navController = navController)
@@ -50,6 +57,24 @@ fun AppNavigation(navController: NavHostController) {
             ) { newName ->
                 println("Submitted name: $newName")
             }
+        }
+
+        composable("notification"){
+            Notifications(navController = navController)
+        }
+
+        composable("searching"){
+            Searching(navController = navController)
+        }
+
+        composable("searching_result/{query}", arguments = listOf(navArgument("query") { type = NavType.StringType })) { backStackEntry ->
+            val query = backStackEntry.arguments?.getString("query") ?: ""
+            SearchingResult(navController = navController, searchQuery = query)
+        }
+
+
+        composable("onboarding") {
+            OnboardingTheme(navController = navController)
         }
 
         composable("settings_screen") {

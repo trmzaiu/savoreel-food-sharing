@@ -19,7 +19,7 @@ private val DarkColorScheme = darkColorScheme(
     tertiary = fontDarkColor,
     surface = secondaryLightColor,
     scrim = homeDarkColor
-    
+
 )
 
 private val LightColorScheme = lightColorScheme(

@@ -12,9 +12,9 @@ appcompat = "1.7.0"
 constraintlayout = "2.2.0"
 navigationCompose = "2.8.4"
 storage = "1.5.0"
-accompanist_pager = "0.24.13-rc"  # Ensure this is the correct version for Accompanist Pager
+playServices = "12.0.1"
+
 [libraries]
-accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist_pager" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -33,6 +33,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-storage = { group = "androidx.test.services", name = "storage", version.ref = "storage" }
+play-services = { group = "com.google.android.gms", name = "play-services", version.ref = "playServices" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
