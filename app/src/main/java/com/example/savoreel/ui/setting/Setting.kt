@@ -43,13 +43,7 @@ fun SettingsScreen(navController: NavController) {
     val currentDarkMode = rememberUpdatedState(isDarkModeEnabled)
 
     SavoreelTheme(darkTheme = currentDarkMode.value) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.background)
-                .padding(horizontal = 20.dp)
-        ) {
-            Box(
+         Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
@@ -70,6 +64,13 @@ fun SettingsScreen(navController: NavController) {
                         .padding(top = 40.dp)
                 )
             }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+                .padding(horizontal = 20.dp)
+        ) {
+           
             LazyColumn {
                 item {
                     Spacer(modifier = Modifier.height(30.dp))
@@ -111,7 +112,7 @@ fun SettingsScreen(navController: NavController) {
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Name",
+                        text = userName,
                         fontFamily = nunitoFontFamily,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
