@@ -1,27 +1,40 @@
 package com.example.savoreel.ui.profile
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.navigation.NavController
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
@@ -30,9 +43,10 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
 fun FollowScreen(navController: NavController) {
-    var selectedTab by remember { mutableStateOf("Following") } // Quản lý trạng thái nút
+    var selectedTab by remember { mutableStateOf(0) } // Quản lý trạng thái nút
     val followingList = getFollowingData()
     val followerList = getFollowerData()
+    val tabs = listOf("Following", "Follower")
     var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
         Column(
@@ -69,52 +83,33 @@ fun FollowScreen(navController: NavController) {
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                TabButton(
-                    text = "Following",
-                    isSelected = selectedTab == "Following",
-                    onClick = { selectedTab = "Following" }
-                )
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.tertiary
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = {
+                                Text(
+                                    text = title,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontFamily = nunitoFontFamily,
+                                    color = if (selectedTab == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                                ) }
+                        )
+                    }
+                }
 
-                TabButton(
-                    text = "Follower",
-                    isSelected = selectedTab == "Follower",
-                    onClick = { selectedTab = "Follower" }
-                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // User List based on tab
+                val items = if (selectedTab == 0) followingList else followerList
+                UserList(users = items)
             }
-            // Danh sách hiển thị
-            val items = if (selectedTab == "Following") followingList else followerList
-            UserList(users = items)
-        }
-    }
-}
-@Composable
-fun TabButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .width(160.dp)
-            .clickable { onClick() }
-            .background(Color.Transparent)
-            .padding(vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = text,
-                fontSize = 20.sp,
-                fontFamily = nunitoFontFamily,
-                fontWeight = FontWeight.Normal,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.tertiary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Box(
-                modifier = Modifier
-                    .height(1.dp)
-                    .fillMaxWidth()
-                    .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-            )
         }
     }
 }

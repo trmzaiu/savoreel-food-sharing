@@ -291,7 +291,7 @@ fun SettingItemWithSwitch(text: String, isChecked: Boolean, onCheckedChange: (Bo
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.circle),
                     contentDescription = null,
-                    tint = if (checked) Color.White else Color.White,
+                    tint = Color.White,
                     modifier = Modifier
                         .fillMaxSize()
                         .align(Alignment.Center)

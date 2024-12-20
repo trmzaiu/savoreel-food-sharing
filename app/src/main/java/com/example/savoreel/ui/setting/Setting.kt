@@ -25,8 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,23 +39,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.SettingItemWithSwitch
 import com.example.savoreel.ui.theme.SavoreelTheme
+import com.example.savoreel.ui.theme.ThemeViewModel
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController) {
-    var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
+fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel = viewModel()
+) {
     var showModal by remember { mutableStateOf(false) }
-    val currentDarkMode = rememberUpdatedState(isDarkModeEnabled)
-    var currentName by remember { mutableStateOf("") }
+    var currentName by remember { mutableStateOf("Thu") }
+    var isDarkModeEnabled = themeViewModel.isDarkModeEnabled
 
-    SavoreelTheme(darkTheme = currentDarkMode.value) {
+    SavoreelTheme(darkTheme = isDarkModeEnabled) {
          Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -162,20 +162,31 @@ fun SettingsScreen(navController: NavController) {
 
                     // Support Section
                     SettingsSection(title = "Support") {
-                        Row {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_darkmode),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.surface,
+                        Row (
+                            modifier = Modifier
+                                .padding(vertical = 12.dp)
+                        ){
+                            Box (
                                 modifier = Modifier
                                     .padding(end = 16.dp)
                                     .align(Alignment.CenterVertically)
-                                    .size(24.dp)
-                            )
+                                    .size(40.dp)
+                                    .clip(shape = CircleShape)
+                                    .background(Color.LightGray)
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_darkmode),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.surface,
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .size(24.dp)
+                                )
+                            }
                             SettingItemWithSwitch(
                                 text = "Dark Mode",
                                 isChecked = isDarkModeEnabled,
-                                onCheckedChange = { isDarkModeEnabled = it }
+                                onCheckedChange = { themeViewModel.toggleDarkMode() }
                             )
                         }
 
@@ -265,7 +276,7 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(20.dp))
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             content()
         }
@@ -282,22 +293,24 @@ fun SettingItemWithNavigation(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 12.dp)
             .clickable { navController.navigate(destination) } // Điều hướng đến trang khác
     ) {
         Box (
             modifier = Modifier
                 .padding(end = 16.dp)
                 .align(Alignment.CenterVertically)
-                .size(24.dp)
-                .background(Color.Gray)
+                .size(40.dp)
+                .clip(shape = CircleShape)
+                .background(Color.LightGray)
         ){
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.surface,
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(24.dp)
+                    .align(Alignment.Center)
             )
         }
         Text(

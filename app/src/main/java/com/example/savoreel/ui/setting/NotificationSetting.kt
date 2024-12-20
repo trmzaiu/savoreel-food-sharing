@@ -1,5 +1,6 @@
 package com.example.savoreel.ui.setting
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,10 +30,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.SettingItemWithSwitch
 import com.example.savoreel.ui.theme.SavoreelTheme
+import com.example.savoreel.ui.theme.ThemeViewModel
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
-fun NotificationSetting(navController: NavController) {
+fun NotificationSetting(navController: NavController, themeViewModel: ThemeViewModel) {
+    val isDarkModeEnabled = themeViewModel.isDarkModeEnabled
+    Log.i("NotificationSetting", "isDarkModeEnabled: $isDarkModeEnabled") // Log giá trị dark mode hiện tại
+
     var isDisturb by rememberSaveable { mutableStateOf(false) }
     var isNewActivities by rememberSaveable { mutableStateOf(false) }
     var isSuggested by rememberSaveable { mutableStateOf(false) }
@@ -40,7 +45,7 @@ fun NotificationSetting(navController: NavController) {
     var isMemories by rememberSaveable { mutableStateOf(false) }
     var isShowPreviews by rememberSaveable { mutableStateOf(false) }
 
-    SavoreelTheme (darkTheme = false){
+    SavoreelTheme(darkTheme = isDarkModeEnabled) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -164,5 +169,5 @@ fun SettingNotiSection(title: String, content: @Composable () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun NotificationSettingPreview() {
-    NotificationSetting(navController = rememberNavController())
+    NotificationSetting(navController = rememberNavController(), themeViewModel = ThemeViewModel())
 }

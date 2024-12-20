@@ -24,10 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,13 +40,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
-import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
 fun Profile(profile: Map<String, List<ProfilePicturesData>>, navController: NavController) {
-    var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
-    SavoreelTheme(darkTheme = isDarkModeEnabled) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -197,7 +190,6 @@ fun Profile(profile: Map<String, List<ProfilePicturesData>>, navController: NavC
             }
         }
     }
-}
 
 @Composable
 fun ProfilePictures(data: List<ProfilePicturesData>) {
@@ -212,7 +204,7 @@ fun ProfilePictures(data: List<ProfilePicturesData>) {
                 painter = painterResource(id = R.drawable.food), // Replace with your actual icon
                 contentDescription = null,
                 modifier = Modifier
-                    .size(120.dp) // Size of each image
+                    .size(115.dp) // Size of each image
                     .clip(RoundedCornerShape(20.dp)) // Rounded corners
                     .padding(horizontal = 2.dp) // Padding between images
             )
