@@ -2,7 +2,6 @@ package com.example.savoreel.ui.setting
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 
@@ -14,6 +13,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.text.font.FontWeight
@@ -22,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.navigation.compose.*
+import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.theme.nunitoFontFamily
@@ -41,6 +49,7 @@ fun SettingsScreen(navController: NavController) {
     var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
     var showModal by remember { mutableStateOf(false) }
     val currentDarkMode = rememberUpdatedState(isDarkModeEnabled)
+    var currentName by remember { mutableStateOf("") }
 
     SavoreelTheme(darkTheme = currentDarkMode.value) {
          Box(
@@ -70,7 +79,7 @@ fun SettingsScreen(navController: NavController) {
                 .background(color = MaterialTheme.colorScheme.background)
                 .padding(horizontal = 20.dp)
         ) {
-           
+
             LazyColumn {
                 item {
                     Spacer(modifier = Modifier.height(30.dp))
@@ -84,7 +93,7 @@ fun SettingsScreen(navController: NavController) {
                             painter = painterResource(id = R.drawable.rounded_logo), // Replace with your actual icon
                             contentDescription = "User Avatar",
                             modifier = Modifier
-                                .clip(CircleShape) // Cắt ảnh thành hình tròn
+                                .clip(CircleShape)
                                 .clickable { showModal = true }
                                 .size(150.dp),
 
@@ -112,7 +121,7 @@ fun SettingsScreen(navController: NavController) {
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = userName,
+                        text = currentName,
                         fontFamily = nunitoFontFamily,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
@@ -128,13 +137,13 @@ fun SettingsScreen(navController: NavController) {
                             icon = ImageVector.vectorResource(id = R.drawable.pen),
                             text = "Edit Name",
                             navController = navController,
-                            destination = "name_screen"
+                            destination = "name_screen/${currentName}"
                         )
                         SettingItemWithNavigation(
                             icon = ImageVector.vectorResource(id = R.drawable.envelope),
                             text = "Change Email",
                             navController = navController,
-                            destination = "email_screen"
+                            destination = "email_screen?isChangeEmail=false"
                         )
                         SettingItemWithNavigation(
                             icon = ImageVector.vectorResource(id = R.drawable.key),

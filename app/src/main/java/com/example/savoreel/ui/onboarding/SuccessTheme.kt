@@ -19,7 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -46,9 +47,9 @@ fun SuccessTheme(navController: NavController) {
 
         Box(
             modifier = Modifier
+                .shadow(elevation = 4.dp, spotColor = Color(0x80000000), ambientColor = Color(0x40000000), shape = RoundedCornerShape(size = 30.dp))
                 .width(350.dp)
                 .height(750.dp)
-                .alpha(0.7f)
                 .background(
                     color = MaterialTheme.colorScheme.secondary,
                     shape = RoundedCornerShape(size = 30.dp)
@@ -100,7 +101,7 @@ fun SuccessTheme(navController: NavController) {
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
-                onClick = {}
+                onClick = { navController.navigate("hashtag_screen")}
             ) {
                 Text(
                     text = "Continue",

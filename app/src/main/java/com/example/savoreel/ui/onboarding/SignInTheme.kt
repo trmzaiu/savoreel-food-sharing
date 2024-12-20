@@ -3,6 +3,7 @@ package com.example.savoreel.ui.onboarding
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,9 +38,8 @@ import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.backgroundLightColor
-import com.example.savoreel.ui.theme.primaryButtonColor
-import com.example.savoreel.ui.theme.secondaryDarkColor
+import com.example.savoreel.ui.theme.domineFontFamily
+import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
 fun SignInScreenTheme(navController: NavController) {
@@ -82,7 +82,7 @@ fun SignInScreenTheme(navController: NavController) {
                 text = "Savoreel",
                 fontSize = 48.sp,
                 lineHeight = 20.sp,
-//                fontFamily = domineFontFamily,
+                fontFamily = domineFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
@@ -124,13 +124,16 @@ fun SignInScreenTheme(navController: NavController) {
                         text = "Forgot Password",
                         style = TextStyle(
                             fontSize = 14.sp,
-//                            fontFamily = nunitoFontFamily,
+                            fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.tertiary,
                         ),
                         modifier = Modifier
-                            .clickable {
-                                navController.navigate("forgot_password_screen")
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                navController.navigate("email_screen?isChangeEmail=false")
                             }
 
                     )
@@ -161,7 +164,7 @@ fun SignInScreenTheme(navController: NavController) {
                 Text(
                     text = "Or connect with",
                     fontSize = 16.sp,
-//                    fontFamily = nunitoFontFamily,
+                    fontFamily = nunitoFontFamily,
                     color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Medium,
                     lineHeight = 20.sp,
@@ -182,8 +185,12 @@ fun SignInScreenTheme(navController: NavController) {
                         contentDescription = "Google Icon",
                         modifier = Modifier
                             .size(24.dp)
-                            .clickable {
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
                                 println("Sign in with google")
+                                navController.navigate("settings_screen")
                             }
                     )
 
@@ -195,7 +202,10 @@ fun SignInScreenTheme(navController: NavController) {
                         contentDescription = "Facebook Icon",
                         modifier = Modifier
                             .size(24.dp)
-                            .clickable {
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
                                 println("Sign in with facebook")
                             }
                     )
@@ -210,7 +220,7 @@ fun SignInScreenTheme(navController: NavController) {
                     style = TextStyle(
                         fontSize = 15.sp,
                         lineHeight = 20.sp,
-//                        fontFamily = nunitoFontFamily,
+                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.tertiary,
 
@@ -223,13 +233,15 @@ fun SignInScreenTheme(navController: NavController) {
                     style = TextStyle(
                         fontSize = 15.sp,
                         lineHeight = 20.sp,
-//                        fontFamily = nunitoFontFamily,
+                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
                     ),
                     modifier = Modifier
-                        .clickable {
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null) {
                             navController.navigate("sign_up_screen")
                         }
                 )

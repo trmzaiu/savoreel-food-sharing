@@ -61,7 +61,7 @@ fun CommonForm(
 
             additionalContent?.invoke()
 
-            Spacer(modifier = Modifier.height(162.dp))
+            Spacer(modifier = Modifier.height(159.dp))
 
             // Continue Button
             CustomButton(
@@ -69,6 +69,8 @@ fun CommonForm(
                 enabled = isButtonEnabled,
                 onClick = onClickButton
             )
+
+            Spacer(modifier = Modifier.height(78.dp))
         }
     }
 }

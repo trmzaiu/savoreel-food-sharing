@@ -32,8 +32,9 @@ fun ChangePasswordTheme(navController: NavController) {
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
-    val isFormValid = password.isNotEmpty() && confirmPassword.isNotEmpty() && confirmPassword.length == password.length
+    val isFormValid = password.isNotEmpty() && confirmPassword.isNotEmpty() && confirmPassword.length >= password.length
 
     fun isPasswordValid(password: String, confirmPassword: String): Boolean {
         return password == confirmPassword
@@ -74,7 +75,7 @@ fun ChangePasswordTheme(navController: NavController) {
             Spacer(modifier = Modifier.height(12.dp))
 
             CustomInputField(
-                value = password,
+                value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 placeholder = "Confirm password",
                 isPasswordField = true
@@ -91,6 +92,8 @@ fun ChangePasswordTheme(navController: NavController) {
                         errorMessage = "The password and confirm password do not match. Please check and try again."
                         showErrorDialog = true
                     } else {
+                        errorMessage = "Change password successfully!"
+                        showConfirmDialog = true
                         println("Password: $password, $confirmPassword")
                     }
                 }
@@ -103,6 +106,17 @@ fun ChangePasswordTheme(navController: NavController) {
                     title = "Password mismatch",
                     message = errorMessage,
                     onDismiss = { showErrorDialog = false }
+                )
+            }
+
+            if (showConfirmDialog) {
+                ErrorDialog(
+                    title = "Success",
+                    message = errorMessage,
+                    onDismiss = {
+                        showConfirmDialog = false
+                        navController.navigate("sign_in_screen")
+                    }
                 )
             }
         }

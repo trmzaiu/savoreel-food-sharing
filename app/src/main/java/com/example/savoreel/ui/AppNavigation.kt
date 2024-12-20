@@ -11,10 +11,12 @@ import com.example.savoreel.ui.home.Searching
 import com.example.savoreel.ui.home.SearchingResult
 import com.example.savoreel.ui.onboarding.ChangePasswordTheme
 import com.example.savoreel.ui.onboarding.EmailTheme
+import com.example.savoreel.ui.onboarding.HashTagTheme
 import com.example.savoreel.ui.onboarding.NameTheme
 import com.example.savoreel.ui.onboarding.OnboardingTheme
 import com.example.savoreel.ui.onboarding.SignInScreenTheme
 import com.example.savoreel.ui.onboarding.SignUpScreenTheme
+import com.example.savoreel.ui.onboarding.SuccessTheme
 import com.example.savoreel.ui.onboarding.VerifyCodeTheme
 import com.example.savoreel.ui.profile.FollowScreen
 import com.example.savoreel.ui.setting.NotificationSetting
@@ -53,10 +55,18 @@ fun AppNavigation(navController: NavHostController) {
             val currentName = backStackEntry.arguments?.getString("currentName")
             NameTheme(
                 navController = navController,
-                currentName = currentName
+                currentName = currentName.takeIf { it != "unknown" }
             ) { newName ->
                 println("Submitted name: $newName")
             }
+        }
+
+        composable("success_screen") {
+            SuccessTheme(navController = navController)
+        }
+
+        composable("hashtag_screen") {
+            HashTagTheme(navController = navController)
         }
 
         composable("notification"){
