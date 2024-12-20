@@ -2,44 +2,63 @@ package com.example.savoreel.ui.setting
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.navigation.compose.*
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
-import com.example.savoreel.ui.theme.backgroundLightColor
-import com.example.savoreel.ui.theme.disableButtonColor
-import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.example.savoreel.ui.theme.primaryButtonColor
-import com.example.savoreel.ui.theme.secondaryLightColor
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.example.savoreel.ui.theme.SavoreelTheme
+import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +66,7 @@ fun SettingsScreen(navController: NavController) {
     var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
     var showModal by remember { mutableStateOf(false) }
     val currentDarkMode = rememberUpdatedState(isDarkModeEnabled)
+    var currentName by remember { mutableStateOf("") }
 
     SavoreelTheme(darkTheme = currentDarkMode.value) {
         Column(
@@ -89,7 +109,7 @@ fun SettingsScreen(navController: NavController) {
                             painter = painterResource(id = R.drawable.rounded_logo), // Replace with your actual icon
                             contentDescription = "User Avatar",
                             modifier = Modifier
-                                .clip(CircleShape) // Cắt ảnh thành hình tròng
+                                .clip(CircleShape)
                                 .clickable { showModal = true }
                                 .size(150.dp),
 
@@ -133,13 +153,13 @@ fun SettingsScreen(navController: NavController) {
                             icon = Icons.Filled.Edit,
                             text = "Edit Name",
                             navController = navController,
-                            destination = "name_screen"
+                            destination = "name_screen/${currentName}"
                         )
                         SettingItemWithNavigation(
                             icon = Icons.Filled.Email,
                             text = "Change Email",
                             navController = navController,
-                            destination = "email_screen"
+                            destination = "email_screen?isChangeEmail=false"
                         )
                         SettingItemWithNavigation(
                             icon = Icons.Filled.Lock,
@@ -263,7 +283,7 @@ fun SettingItemWithNavigation(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .height(48.dp)
-            .clickable { navController.navigate(destination) } // Điều hướng đến trang khác
+            .clickable { navController.navigate(destination) }
     ) {
         Icon(
             imageVector = icon,

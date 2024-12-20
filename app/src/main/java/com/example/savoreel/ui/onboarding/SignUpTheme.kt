@@ -4,6 +4,7 @@ import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,13 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,16 +39,8 @@ import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.backgroundLightColor
-import com.example.savoreel.ui.theme.disableButtonColor
 import com.example.savoreel.ui.theme.domineFontFamily
-import com.example.savoreel.ui.theme.fontDarkColor
-import com.example.savoreel.ui.theme.lineColor
-import com.example.savoreel.ui.theme.linkColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.example.savoreel.ui.theme.primaryButtonColor
-import com.example.savoreel.ui.theme.secondaryDarkColor
-import com.example.savoreel.ui.theme.secondaryLightColor
 
 @Composable
 fun SignUpScreenTheme(navController: NavController) {
@@ -99,7 +85,7 @@ fun SignUpScreenTheme(navController: NavController) {
                 text = "Savoreel",
                 fontSize = 48.sp,
                 lineHeight = 20.sp,
-//                fontFamily = domineFontFamily,
+                fontFamily = domineFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
@@ -141,7 +127,7 @@ fun SignUpScreenTheme(navController: NavController) {
                         text = "Password must at least 8 characters",
                         style = TextStyle(
                             fontSize = 14.sp,
-//                            fontFamily = nunitoFontFamily,
+                            fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.tertiary,
                         )
@@ -167,7 +153,7 @@ fun SignUpScreenTheme(navController: NavController) {
                         showErrorDialog = true
                     } else {
                         println("Email: $email, Password: $password")
-                        navController.navigate("name_screen")
+                        navController.navigate("name_screen/unknown")
                     }
                 }
             )
@@ -227,7 +213,7 @@ fun SignUpScreenTheme(navController: NavController) {
                     style = TextStyle(
                         fontSize = 15.sp,
                         lineHeight = 20.sp,
-//                        fontFamily = nunitoFontFamily,
+                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.tertiary,
 
@@ -240,13 +226,16 @@ fun SignUpScreenTheme(navController: NavController) {
                     style = TextStyle(
                         fontSize = 15.sp,
                         lineHeight = 20.sp,
-//                        fontFamily = nunitoFontFamily,
+                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
                     ),
                     modifier = Modifier
-                        .clickable {
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
                             navController.navigate("sign_in_screen")
                         }
                 )

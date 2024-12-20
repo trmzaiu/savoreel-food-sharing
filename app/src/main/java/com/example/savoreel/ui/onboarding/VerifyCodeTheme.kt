@@ -37,6 +37,7 @@ import com.example.savoreel.ui.component.CustomTitle
 import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.lineColor
+import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
 fun VerifyCodeTheme(navController: NavController) {
@@ -94,7 +95,7 @@ fun VerifyCodeTheme(navController: NavController) {
                         textStyle = TextStyle(
                             fontSize = 32.sp,
                             lineHeight = 24.sp,
-                            //fontFamily = nunitoFontFamily,
+                            fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center,
@@ -118,7 +119,7 @@ fun VerifyCodeTheme(navController: NavController) {
                     style = TextStyle(
                         fontSize = 15.sp,
                         lineHeight = 20.sp,
-//                        fontFamily = nunitoFontFamily,
+                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.outline,
                         textAlign = TextAlign.Center,
@@ -130,7 +131,7 @@ fun VerifyCodeTheme(navController: NavController) {
                     style = TextStyle(
                         fontSize = 15.sp,
                         lineHeight = 20.sp,
-//                        fontFamily = nunitoFontFamily,
+                        fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.tertiary,
                         textAlign = TextAlign.Center,
@@ -153,7 +154,7 @@ fun VerifyCodeTheme(navController: NavController) {
                         errorMessage = "Verification code is incorrect. Please try again."
                         showErrorDialog = true
                     } else {
-                        navController.navigate("reset_password_screen")
+                        navController.navigate("change_password_screen")
                     }
                 }
             )

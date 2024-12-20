@@ -3,10 +3,9 @@ package com.example.savoreel.ui.onboarding
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,9 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -24,20 +21,19 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,15 +41,29 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.fontLightColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.example.savoreel.ui.theme.secondaryLightColor
 import com.google.accompanist.flowlayout.FlowRow
-
+import kotlinx.coroutines.delay
 
 @Composable
 fun HashTagTheme(navController: NavController) {
-    var selectedTag by remember { mutableStateOf<String?>(null) }
+    var selectedTags by remember { mutableStateOf<MutableSet<String>>(mutableSetOf()) }
+    var visibleHashtags by remember { mutableStateOf<List<String>>(emptyList()) }
+    val allHashtags = listOf(
+        "#fastfood", "#vietnamese", "#korean", "#vegetarian",
+        "#sushi", "#dessert", "#other", "#cake", "#chinese",
+        "#hotpot", "#cookie", "#pizza", "#burgers", "#pasta",
+        "#salad", "#steak", "#seafood", "#noodles", "#tacos",
+        "#soup", "#grill"
+    )
+
+    LaunchedEffect(Unit) {
+        allHashtags.forEachIndexed { index, tag ->
+            delay(100)
+            visibleHashtags = allHashtags.take(index + 1)
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -64,11 +74,12 @@ fun HashTagTheme(navController: NavController) {
 
         Box(
             modifier = Modifier
+                .shadow(elevation = 5.dp, spotColor = Color(0x80000000), ambientColor = Color(0x40000000), shape = RoundedCornerShape(size = 30.dp))
                 .width(350.dp)
                 .height(750.dp)
-                .alpha(0.7f)
+
                 .background(
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = secondaryLightColor,
                     shape = RoundedCornerShape(size = 30.dp)
                 )
         )
@@ -102,28 +113,26 @@ fun HashTagTheme(navController: NavController) {
             Box(
                 modifier = Modifier
                     .width(300.dp)
-                    .height(250.dp)
+                    .height(260.dp)
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                val hashtags = listOf(
-                    "#fastfood", "#vietnamese", "#korean", "#vegetarian",
-                    "#sushi", "#dessert", "#other", "#cake", "#chinese",
-                    "#hotpot", "#cookie", "#pizza", "#burgers", "#pasta",
-                    "#salad", "#steak", "#seafood", "#noodles", "#tacos",
-                    "#soup", "#grill"
-                )
-
                 FlowRow(
                     mainAxisSpacing = 10.dp,
                     crossAxisSpacing = 10.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    hashtags.forEach { tag ->
+                    visibleHashtags.forEach { tag ->
                         HashtagItem(
                             text = tag,
-                            isSelected = tag == selectedTag,
-                            onClick = { selectedTag = if (selectedTag == tag) null else tag }
+                            isSelected = selectedTags.contains(tag),
+                            onClick = {
+                                selectedTags = if (selectedTags.contains(tag)) {
+                                    selectedTags.toMutableSet().apply { remove(tag) }
+                                } else {
+                                    selectedTags.toMutableSet().apply { add(tag) }
+                                }
+                            }
                         )
                     }
                 }
@@ -138,7 +147,11 @@ fun HashTagTheme(navController: NavController) {
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
-                onClick = {}
+                onClick = {
+                    println("Selected hashtags: ${selectedTags.joinToString(", ")}")
+                    navController.navigate("takephoto_screen")
+                },
+                enabled = selectedTags.isNotEmpty()
             ) {
                 Text(
                     text = "Continue",
@@ -151,7 +164,7 @@ fun HashTagTheme(navController: NavController) {
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             Text(
                 text = "Skip",
@@ -161,7 +174,13 @@ fun HashTagTheme(navController: NavController) {
                     fontFamily = nunitoFontFamily,
                     fontWeight = FontWeight.Normal,
                     color = MaterialTheme.colorScheme.tertiary,
-                )
+                ),
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    navController.navigate("takephoto_screen")
+                }
             )
 
         }
@@ -176,11 +195,14 @@ fun HashtagItem(
 ) {
     Box(
         modifier = Modifier
+            .shadow(elevation = 4.dp, spotColor = Color(0x80000000), ambientColor = Color(0x40000000), shape = RoundedCornerShape(size = 8.dp))
             .background(
                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
                 shape = RoundedCornerShape(size = 8.dp)
             )
-            .clickable { onClick(text) }
+            .clickable {
+                onClick(text)
+            }
             .padding(horizontal = 12.dp, vertical = 5.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -190,7 +212,7 @@ fun HashtagItem(
                 fontSize = 16.sp,
                 fontFamily = nunitoFontFamily,
                 fontWeight = FontWeight.SemiBold,
-                color = if (isSelected) fontLightColor else MaterialTheme.colorScheme.tertiary // Màu chữ thay đổi
+                color = if (isSelected) secondaryLightColor else MaterialTheme.colorScheme.tertiary // Màu chữ thay đổi
             )
         )
     }
@@ -198,16 +220,8 @@ fun HashtagItem(
 
 @Preview(showBackground = true)
 @Composable
-fun HashTagDarkPreview() {
-    SavoreelTheme(darkTheme = true) {
-        HashTagTheme(navController = rememberNavController())
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HashTagLightPreview() {
-    SavoreelTheme(darkTheme = false) {
+fun HashTagPreview() {
+    SavoreelTheme() {
         HashTagTheme(navController = rememberNavController())
     }
 }
