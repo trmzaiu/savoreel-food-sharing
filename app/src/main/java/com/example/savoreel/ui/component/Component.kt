@@ -274,7 +274,7 @@ fun SettingItemWithSwitch(text: String, isChecked: Boolean, onCheckedChange: (Bo
             Box(
                 modifier = Modifier
                     .background(
-                        color = if (checked) MaterialTheme.colorScheme.primary else Color.Gray,
+                        color = if (checked) MaterialTheme.colorScheme.primary else Color.LightGray,
                         shape = RoundedCornerShape(20.dp)
                     )
                     .fillMaxSize()
@@ -291,7 +291,7 @@ fun SettingItemWithSwitch(text: String, isChecked: Boolean, onCheckedChange: (Bo
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.circle),
                     contentDescription = null,
-                    tint = if (checked) Color.White else Color.DarkGray,
+                    tint = if (checked) Color.White else Color.White,
                     modifier = Modifier
                         .fillMaxSize()
                         .align(Alignment.Center)

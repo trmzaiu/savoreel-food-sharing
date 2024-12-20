@@ -2,16 +2,6 @@ package com.example.savoreel.ui.setting
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,24 +14,40 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
-import com.example.savoreel.ui.theme.nunitoFontFamily
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.res.vectorResource
-import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.component.SettingItemWithSwitch
+import com.example.savoreel.ui.theme.SavoreelTheme
+import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,19 +140,19 @@ fun SettingsScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(20.dp))
                     SettingsSection(title = "General") {
                         SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.pen),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_name),
                             text = "Edit Name",
                             navController = navController,
                             destination = "name_screen/${currentName}"
                         )
                         SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.envelope),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_mail),
                             text = "Change Email",
                             navController = navController,
                             destination = "email_screen?isChangeEmail=false"
                         )
                         SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.key),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_key),
                             text = "Change Password",
                             navController = navController,
                             destination = "change_password_screen"
@@ -158,7 +164,7 @@ fun SettingsScreen(navController: NavController) {
                     SettingsSection(title = "Support") {
                         Row {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.moon),
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_darkmode),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.surface,
                                 modifier = Modifier
@@ -174,7 +180,7 @@ fun SettingsScreen(navController: NavController) {
                         }
 
                         SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.globe),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_language),
                             text = "Language",
                             navController = navController,
                             destination = "language"
@@ -186,7 +192,7 @@ fun SettingsScreen(navController: NavController) {
                             destination = "notification_setting"
                         )
                         SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.exclamation_circle),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_report),
                             text = "Report a problem",
                             navController = navController,
                             destination = "report_a_problem"
@@ -198,19 +204,19 @@ fun SettingsScreen(navController: NavController) {
                     // About Section
                     SettingsSection(title = "About") {
                         SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.share),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_share),
                             text = "Share Account",
                             navController = navController,
                             destination = "share_account"
                         )
                         SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.whatsapp),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_term),
                             text = "Terms of Service",
                             navController = navController,
                             destination = "terms_of_service"
                         )
                         SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.lock),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
                             text = "Privacy",
                             navController = navController,
                             destination = "privacy"
@@ -221,13 +227,13 @@ fun SettingsScreen(navController: NavController) {
 
                     SettingsSection(title = "Danger Zone") {
                         SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.trash3),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
                             text = "Delete Account",
                             navController = navController,
                             destination = "confirm_password"
                         )
                         SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.box_arrow_in_left),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
                             text = "Sign Out",
                             navController = navController,
                             destination = "sign_out"
@@ -279,15 +285,21 @@ fun SettingItemWithNavigation(
             .padding(vertical = 8.dp)
             .clickable { navController.navigate(destination) } // Điều hướng đến trang khác
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.surface,
+        Box (
             modifier = Modifier
                 .padding(end = 16.dp)
                 .align(Alignment.CenterVertically)
                 .size(24.dp)
-        )
+                .background(Color.Gray)
+        ){
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.surface,
+                modifier = Modifier
+                    .size(20.dp)
+            )
+        }
         Text(
             text = text,
             fontSize = 20.sp,
