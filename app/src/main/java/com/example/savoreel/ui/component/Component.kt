@@ -1,8 +1,11 @@
 package com.example.savoreel.ui.component
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,12 +15,14 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
@@ -28,11 +33,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -196,16 +203,50 @@ fun BackArrow(
 }
 
 @Composable
+fun ForwardArrow(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    destination: String
+) {
+    IconButton(
+        onClick = {
+            navController.navigate(destination)
+        },
+        modifier = modifier
+            .rotate(180F)
+            .size(16.dp),
+        content = {
+            Icon(
+                painter = painterResource(id = R.drawable.chevron_left),
+                contentDescription = "Back arrow",
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+        },
+    )
+}
+
+@Composable
 fun IconTheme(
     imageVector: ImageVector,
     modifier: Modifier = Modifier
 ) {
-    Image(
-        imageVector = imageVector,
-        contentDescription = "Icon",
-        modifier = modifier.size(30.dp),
-        colorFilter = tint(MaterialTheme.colorScheme.tertiary)
-    )
+    Box (
+        modifier = Modifier
+            .padding(end = 16.dp)
+            .size(40.dp)
+            .clip(shape = CircleShape)
+            .background(MaterialTheme.colorScheme.surface),
+        contentAlignment = Alignment.Center
+    ){
+        Icon(
+            imageVector = imageVector,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier
+                .size(20.dp)
+                .align(Alignment.Center)
+        )
+    }
 }
 
 @Composable
@@ -224,7 +265,6 @@ fun ImageCustom(
             painter = painter,
             contentDescription = null,
             alignment = Alignment.Center,
-
             )
     }
 }
@@ -254,18 +294,18 @@ fun SettingItemWithSwitch(text: String, isChecked: Boolean, onCheckedChange: (Bo
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 14.dp)
     ) {
         Text(
             text = text,
             fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.tertiary,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
         )
-        Spacer(modifier = Modifier.weight(1f)) // Đẩy công tắc sang bên phải
+        Spacer(modifier = Modifier.weight(1f))
         CustomSwitch(
             checked = isChecked,
             onCheckedChange = onCheckedChange
@@ -273,43 +313,51 @@ fun SettingItemWithSwitch(text: String, isChecked: Boolean, onCheckedChange: (Bo
     }
 }
 
-    @Composable
-    fun CustomSwitch(
-        checked: Boolean,
-        onCheckedChange: (Boolean) -> Unit
+@Composable
+fun CustomSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    val thumbOffset by animateDpAsState(
+        targetValue = if (checked) 22.dp else 0.dp,
+        animationSpec = tween(durationMillis = 300)
+    )
+
+    Box(
+        modifier = Modifier
+            .size(48.dp, 26.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { onCheckedChange(!checked) }
     ) {
+        // Track
         Box(
             modifier = Modifier
-                .size(48.dp,26.dp)  // Set the size of the entire Switch
-                .clickable { onCheckedChange(!checked) }
-        ) {
-            // Track
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = if (checked) MaterialTheme.colorScheme.primary else Color.LightGray,
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .fillMaxSize()
-            )
-
-            // Thumb
-            Box(
-                modifier = Modifier
-                    .size(26.dp)
-                    .padding(horizontal = 2.dp)
-                    .align(if (checked) Alignment.CenterEnd else Alignment.CenterStart)
-
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.circle),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .align(Alignment.Center)
+                .background(
+                    color = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                    shape = RoundedCornerShape(20.dp)
                 )
-            }
+                .fillMaxSize()
+        )
+
+        // Thumb
+        Box(
+            modifier = Modifier
+                .size(26.dp)
+                .padding(1.dp)
+                .offset(x = thumbOffset)
+                .align(Alignment.CenterStart)
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.circle),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.Center)
+            )
         }
     }
+}
 

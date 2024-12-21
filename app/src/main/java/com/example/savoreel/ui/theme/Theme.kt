@@ -28,6 +28,9 @@ private val LightColorScheme = lightColorScheme(
     tertiary = tertiaryLightColor,
     onTertiary = textTertiaryLightColor , // Font tertiary
 
+    // Quaternary
+    surface = quaternaryLightColor,
+
     // Scrim - màu nền mờ
     scrim = backgroundBlurLightColor,
 
@@ -53,6 +56,9 @@ private val DarkColorScheme = darkColorScheme(
     // Tertiary
     tertiary = tertiaryDarkColor,
     onTertiary = textTertiaryDarkColor, // Font tertiary
+
+    // Quaternary
+    surface = quaternaryDarkColor,
 
     // Scrim - màu nền mờ
     scrim = backgroundBlurDarkColor,

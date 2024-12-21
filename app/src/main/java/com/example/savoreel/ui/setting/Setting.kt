@@ -29,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -44,6 +43,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.component.ForwardArrow
 import com.example.savoreel.ui.component.SettingItemWithSwitch
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.ThemeViewModel
@@ -59,200 +59,214 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel 
 
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
          Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            ) {
-                BackArrow(
-                    navController = navController,
-                    modifier = Modifier.align(Alignment.TopStart)
-                )
-                Text(
-                    text = "Setting",
-                    fontFamily = nunitoFontFamily,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 32.sp,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(top = 40.dp)
-                )
-            }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.background)
-                .padding(horizontal = 20.dp)
-        ) {
+             modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+         ) {
+             Column(
+                 modifier = Modifier.fillMaxWidth()
+             ) {
+                 Box(
+                     modifier = Modifier
+                         .fillMaxWidth()
+                         .background(color = MaterialTheme.colorScheme.background)
+//                         .shadow(elevation = 4.dp, spotColor = Color(0x80000000), ambientColor = Color(0x40000000))
+                 ) {
+                     BackArrow(
+                         navController = navController,
+                         modifier = Modifier.align(Alignment.TopStart)
+                     )
 
-            LazyColumn {
-                item {
-                    Spacer(modifier = Modifier.height(30.dp))
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.rounded_logo), // Replace with your actual icon
-                            contentDescription = "User Avatar",
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .clickable { showModal = true }
-                                .size(150.dp),
+                     Text(
+                         text = "Setting",
+                         fontFamily = nunitoFontFamily,
+                         textAlign = TextAlign.Center,
+                         fontWeight = FontWeight.SemiBold,
+                         fontSize = 32.sp,
+                         color = MaterialTheme.colorScheme.onBackground,
+                         modifier = Modifier
+                             .align(Alignment.Center)
+                             .padding(top = 40.dp)
+                     )
+                 }
 
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+                 LazyColumn(
+                     modifier = Modifier.padding(horizontal = 20.dp)
+                 ) {
+                     item {
+                         Spacer(modifier = Modifier.height(30.dp))
 
-                    // Hiển thị ModalBottomSheet khi showModal = true
-                    if (showModal) {
-                        ModalBottomSheet(
-                            onDismissRequest = { showModal = false }, // Đóng banner
-                            sheetState = rememberModalBottomSheetState(
-                                skipPartiallyExpanded = true
-                            ),
-                            containerColor = MaterialTheme.colorScheme.secondary // Màu nền cho sheet
-                        )
-                        {
-                            SheetContent(
-                                onOptionClick = { option ->
-                                    showModal = false
-                                    handleAvatarOption(option) // Xử lý khi chọn tùy chọn
-                                }
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = currentName,
-                        fontFamily = nunitoFontFamily,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.fillMaxWidth()
+                         Box(
+                             contentAlignment = Alignment.Center,
+                             modifier = Modifier
+                                 .fillMaxWidth()
+                                 .align(Alignment.CenterHorizontally)
+                         ) {
+                             Image(
+                                 painter = painterResource(id = R.drawable.default_avatar),
+                                 contentDescription = "User Avatar",
+                                 modifier = Modifier
+                                     .clip(CircleShape)
+                                     .clickable { showModal = true }
+                                     .size(150.dp),
+                                 contentScale = ContentScale.Crop
+                             )
+                         }
 
-                    )
-                    // General Section
-                    Spacer(modifier = Modifier.height(20.dp))
-                    SettingsSection(title = "General") {
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_name),
-                            text = "Edit Name",
-                            navController = navController,
-                            destination = "name_screen/${currentName}"
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_mail),
-                            text = "Change Email",
-                            navController = navController,
-                            destination = "email_screen?isChangeEmail=false"
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_key),
-                            text = "Change Password",
-                            navController = navController,
-                            destination = "change_password_screen"
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
+                         if (showModal) {
+                             Box(
+                                 modifier = Modifier
+                                 .fillMaxSize()
+                                 .background(MaterialTheme.colorScheme.scrim)
+                             ){
+                                 ModalBottomSheet(
+                                     onDismissRequest = { showModal = false },
+                                     sheetState = rememberModalBottomSheetState(
+                                         skipPartiallyExpanded = true
+                                     ),
+                                     containerColor = MaterialTheme.colorScheme.secondary
+                                 )
+                                 {
+                                     SheetContent(
+                                         onOptionClick = { option ->
+                                             showModal = false
+                                             handleAvatarOption(option)
+                                         }
+                                     )
+                                 }
+                             }
+                         }
 
-                    // Support Section
-                    SettingsSection(title = "Support") {
-                        Row (
-                            modifier = Modifier
-                                .padding(vertical = 12.dp)
-                        ){
-                            Box (
-                                modifier = Modifier
-                                    .padding(end = 16.dp)
-                                    .align(Alignment.CenterVertically)
-                                    .size(40.dp)
-                                    .clip(shape = CircleShape)
-                                    .background(Color.LightGray)
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_darkmode),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.surface,
-                                    modifier = Modifier
-                                        .align(Alignment.Center)
-                                        .size(24.dp)
-                                )
-                            }
-                            SettingItemWithSwitch(
-                                text = "Dark Mode",
-                                isChecked = isDarkModeEnabled,
-                                onCheckedChange = { themeViewModel.toggleDarkMode() }
-                            )
-                        }
+                         Spacer(modifier = Modifier.height(15.dp))
 
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_language),
-                            text = "Language",
-                            navController = navController,
-                            destination = "language"
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_noti),
-                            text = "Notifications",
-                            navController = navController,
-                            destination = "notification_setting"
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_report),
-                            text = "Report a problem",
-                            navController = navController,
-                            destination = "report_a_problem"
-                        )
-                    }
+                         Text(
+                             text = currentName,
+                             fontFamily = nunitoFontFamily,
+                             textAlign = TextAlign.Center,
+                             fontWeight = FontWeight.Bold,
+                             fontSize = 24.sp,
+                             color = MaterialTheme.colorScheme.onBackground,
+                             modifier = Modifier.fillMaxWidth()
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                         )
+                         // General Section
+                         Spacer(modifier = Modifier.height(20.dp))
 
-                    // About Section
-                    SettingsSection(title = "About") {
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_share),
-                            text = "Share Account",
-                            navController = navController,
-                            destination = "share_account"
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_term),
-                            text = "Terms of Service",
-                            navController = navController,
-                            destination = "terms_of_service"
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
-                            text = "Privacy",
-                            navController = navController,
-                            destination = "privacy"
-                        )
-                    }
+                         SettingsSection(title = "General") {
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_name),
+                                 text = "Edit Name",
+                                 navController = navController,
+                                 destination = "name_screen/${currentName}"
+                             )
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_mail),
+                                 text = "Change Email",
+                                 navController = navController,
+                                 destination = "email_screen?isChangeEmail=false"
+                             )
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_key),
+                                 text = "Change Password",
+                                 navController = navController,
+                                 destination = "change_password_screen"
+                             )
+                         }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                         Spacer(modifier = Modifier.height(8.dp))
 
-                    SettingsSection(title = "Danger Zone") {
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                            text = "Delete Account",
-                            navController = navController,
-                            destination = "confirm_password"
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
-                            text = "Sign Out",
-                            navController = navController,
-                            destination = "sign_out"
-                        )
-                    }
-                }
-            }
-        }
+                         // Support Section
+                         SettingsSection(title = "Support") {
+                             Row (
+                                 modifier = Modifier
+                                     .padding(vertical = 12.dp)
+                             ){
+                                 Box (
+                                     modifier = Modifier
+                                         .padding(end = 16.dp)
+                                         .align(Alignment.CenterVertically)
+                                         .size(40.dp)
+                                         .clip(shape = CircleShape)
+                                         .background(MaterialTheme.colorScheme.surface)
+                                 ) {
+                                     Icon(
+                                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_darkmode),
+                                         contentDescription = null,
+                                         tint = MaterialTheme.colorScheme.onBackground,
+                                         modifier = Modifier
+                                             .align(Alignment.Center)
+                                             .size(20.dp)
+                                     )
+                                 }
+                                 SettingItemWithSwitch(
+                                     text = "Dark Mode",
+                                     isChecked = isDarkModeEnabled,
+                                     onCheckedChange = { themeViewModel.toggleDarkMode() }
+                                 )
+                             }
+
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_language),
+                                 text = "Language",
+                                 navController = navController,
+                                 destination = "language"
+                             )
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_noti),
+                                 text = "Notifications",
+                                 navController = navController,
+                                 destination = "notification_setting"
+                             )
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_report),
+                                 text = "Report a problem",
+                                 navController = navController,
+                                 destination = "report_a_problem"
+                             )
+                         }
+
+                         Spacer(modifier = Modifier.height(8.dp))
+
+                         // About Section
+                         SettingsSection(title = "About") {
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_share),
+                                 text = "Share Account",
+                                 navController = navController,
+                                 destination = "share_account"
+                             )
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_term),
+                                 text = "Terms of Service",
+                                 navController = navController,
+                                 destination = "terms_of_service"
+                             )
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
+                                 text = "Privacy",
+                                 navController = navController,
+                                 destination = "privacy"
+                             )
+                         }
+
+                         Spacer(modifier = Modifier.height(8.dp))
+
+                         SettingsSection(title = "Danger Zone") {
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                 text = "Delete Account",
+                                 navController = navController,
+                                 destination = "confirm_password"
+                             )
+                             SettingItemWithNavigation(
+                                 icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
+                                 text = "Sign Out",
+                                 navController = navController,
+                                 destination = "sign_out"
+                             )
+                         }
+                     }
+                 }
+             }
+         }
     }
 }
 
@@ -268,7 +282,7 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
             fontFamily = nunitoFontFamily,
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.tertiary,
+            color = MaterialTheme.colorScheme.onSecondary,
             modifier = Modifier
                 .padding(bottom = 4.dp)
         )
@@ -293,39 +307,43 @@ fun SettingItemWithNavigation(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
-            .clickable { navController.navigate(destination) } // Điều hướng đến trang khác
+            .padding(vertical = 10.dp)
+            .clickable { navController.navigate(destination) },
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box (
             modifier = Modifier
                 .padding(end = 16.dp)
-                .align(Alignment.CenterVertically)
                 .size(40.dp)
                 .clip(shape = CircleShape)
-                .background(Color.LightGray)
+                .background(MaterialTheme.colorScheme.surface),
+            contentAlignment = Alignment.Center
         ){
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.surface,
+                tint = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(20.dp)
                     .align(Alignment.Center)
             )
         }
+
         Text(
             text = text,
+            modifier = Modifier.weight(1f),
             fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
             fontWeight = FontWeight.Bold,
-            color = if (text == "Delete Account") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
+            color = if (text == "Delete Account") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+        )
+
+        ForwardArrow(
+            navController = navController,
+            destination = destination,
         )
     }
 }
-
-
 
 @Composable
 fun SheetContent(onOptionClick: (String) -> Unit) {

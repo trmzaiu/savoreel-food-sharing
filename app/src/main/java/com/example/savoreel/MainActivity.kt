@@ -18,16 +18,18 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SavoreelTheme (dynamicColor = false) {
-            val themeViewModel: ThemeViewModel = viewModel()
-            SavoreelTheme(darkTheme = themeViewModel.isDarkModeEnabled) {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    val navController = rememberNavController()
-                    // Pass themeViewModel to AppNavigation
-                    AppNavigation(navController = navController, themeViewModel = ThemeViewModel())
+            SavoreelTheme(dynamicColor = false) {
+                val themeViewModel: ThemeViewModel = viewModel()
+                SavoreelTheme(darkTheme = themeViewModel.isDarkModeEnabled) {
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        val navController = rememberNavController()
+                        // Pass the existing themeViewModel to AppNavigation
+                        AppNavigation(navController = navController, themeViewModel = themeViewModel)
+                    }
                 }
             }
         }
     }
 }
+
 

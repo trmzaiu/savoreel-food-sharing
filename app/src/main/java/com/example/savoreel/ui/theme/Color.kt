@@ -8,8 +8,9 @@ val disableButtonColor = Color(0xFFC86464)
 val outlineColor = Color(0xFFAAA5A5)
 
 val backgroundLightColor = Color(0xFFFDFDFD)
-val secondaryLightColor = Color(0xFFEFEFEF)
+val secondaryLightColor = Color(0xFFF7F5F5)
 val tertiaryLightColor =  Color(0xFFE6E6E6)
+val quaternaryLightColor = Color(0xFFEFEFEF)
 val backgroundBlurLightColor = Color(0xFFFDFDFD).copy(alpha = 0.8f)
 
 val textPrimaryLightColor = Color(0xFF444444)
@@ -19,6 +20,7 @@ val textTertiaryLightColor = Color(0XB23B3D3D)
 val backgroundDarkColor = Color(0xFF252728)
 val secondaryDarkColor = Color(0xFF333334)
 val tertiaryDarkColor = Color(0xFF676767)
+val quaternaryDarkColor = Color(0xFF3D3C3C)
 val backgroundBlurDarkColor = Color(0xFF252728).copy(alpha = 0.8f)
 
 val textPrimaryDarkColor = Color(0xFFFEFEFE)

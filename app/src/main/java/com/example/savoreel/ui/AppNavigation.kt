@@ -35,7 +35,7 @@ import com.example.savoreel.ui.setting.TermsOfServiceScreen
 import com.example.savoreel.ui.theme.ThemeViewModel
 
 @Composable
-fun AppNavigation(navController: NavHostController) {
+fun AppNavigation(navController: NavHostController, themeViewModel : ThemeViewModel) {
     NavHost(
         navController = navController,
 //        startDestination = "sign_in_screen",
