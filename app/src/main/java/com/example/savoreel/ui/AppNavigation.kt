@@ -32,6 +32,7 @@ import com.example.savoreel.ui.profile.ProfileScreen
 import com.example.savoreel.ui.setting.NotificationSetting
 import com.example.savoreel.ui.setting.SettingsScreen
 import com.example.savoreel.ui.setting.TermsOfServiceScreen
+import com.example.savoreel.ui.theme.ThemeViewModel
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
@@ -102,7 +103,7 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         composable("notification_setting") {
-            NotificationSetting(navController = navController)
+            NotificationSetting(navController = navController, themeViewModel = ThemeViewModel())
         }
 
         composable("follow") {

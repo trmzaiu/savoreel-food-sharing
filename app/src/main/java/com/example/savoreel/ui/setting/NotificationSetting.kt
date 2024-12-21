@@ -1,9 +1,9 @@
 package com.example.savoreel.ui.setting
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,106 +28,113 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.component.SettingItemWithSwitch
 import com.example.savoreel.ui.theme.SavoreelTheme
+import com.example.savoreel.ui.theme.ThemeViewModel
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.example.savoreel.ui.theme.secondaryLightColor
 
 @Composable
-fun NotificationSetting(navController: NavController) {
-    var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
+fun NotificationSetting(navController: NavController, themeViewModel: ThemeViewModel) {
+    val isDarkModeEnabled = themeViewModel.isDarkModeEnabled
+    Log.i("NotificationSetting", "isDarkModeEnabled: $isDarkModeEnabled") // Log giá trị dark mode hiện tại
+
+    var isDisturb by rememberSaveable { mutableStateOf(false) }
+    var isNewActivities by rememberSaveable { mutableStateOf(false) }
+    var isSuggested by rememberSaveable { mutableStateOf(false) }
+    var isReaction by rememberSaveable { mutableStateOf(false) }
+    var isMemories by rememberSaveable { mutableStateOf(false) }
+    var isShowPreviews by rememberSaveable { mutableStateOf(false) }
+
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
-            .padding(16.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            BackArrow(
-                navController = navController,
-                modifier = Modifier.align(Alignment.TopStart)
-            )
-            Text(
-                text = "Notification",
-                fontFamily = nunitoFontFamily,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.tertiary,
-                fontSize = 32.sp,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(top = 40.dp)
-            )
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .background(color = MaterialTheme.colorScheme.background)
+                .padding(horizontal = 20.dp)
         ) {
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Do Not Disturb Section
-                Box(
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                BackArrow(
+                    navController = navController,
+                    modifier = Modifier.align(Alignment.TopStart)
+                )
+                Text(
+                    text = "Notification",
+                    fontFamily = nunitoFontFamily,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontSize = 32.sp,
                     modifier = Modifier
-                        .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp)
-                ) {
-                    SettingItemWithSwitch(
-                        text = "Do Not Disturb",
-                    )
-                }
+                        .align(Alignment.Center)
+                        .padding(top = 40.dp)
+                )
+            }
 
+            Spacer(modifier = Modifier.height(20.dp))
 
-                Spacer(modifier = Modifier.height(40.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                item {
+                    // Do Not Disturb Section
+                    SettingNotiSection(title = "") {
+                        SettingItemWithSwitch(
+                            text = "Do Not Disturb",
+                            isChecked = isDisturb,
+                            onCheckedChange = { isDisturb = it }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                // Communities Group
-                SettingNotiSection(title = "Communities") {
-                    SettingItemWithSwitch(
-                        text = "New activities"
-                    )
-                    SettingItemWithSwitch(
-                        text = "Suggested for you"
-                    )
-                    SettingItemWithSwitch(
-                        text = "Reaction"
-                    )
-                }
+                // Communities Section
+                    SettingNotiSection(title = "Communities") {
+                        SettingItemWithSwitch(
+                            text = "New activities",
+                            isChecked = isNewActivities,
+                            onCheckedChange = { isNewActivities = it }
+                        )
+                        SettingItemWithSwitch(
+                            text = "Suggested for you",
+                            isChecked = isSuggested,
+                            onCheckedChange = { isSuggested = it }
+                        )
+                        SettingItemWithSwitch(
+                            text = "Reaction",
+                            isChecked = isReaction,
+                            onCheckedChange = { isReaction = it }
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(40.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                // Do Not Disturb Section
-                Box(
-                    modifier = Modifier
-                        .background(secondaryLightColor, shape = RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp)
-                ) {
-                    SettingItemWithSwitch(
-                        text = "Memories",
-                    )
-                }
+                    // Memories Section
+                    SettingNotiSection(title = "") {
+                        SettingItemWithSwitch(
+                            text = "Memories",
+                            isChecked = isMemories,
+                            onCheckedChange = { isMemories = it }
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(40.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                // Do Not Disturb Section
-                Box(
-                    modifier = Modifier
-                        .background(secondaryLightColor, shape = RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp)
-                ) {
-                    SettingItemWithSwitch(
-                        text = "Show previews",
-                    )
+                    // Show Previews Section
+                    SettingNotiSection(title = "") {
+                        SettingItemWithSwitch(
+                            text = "Show previews",
+                            isChecked = isShowPreviews,
+                            onCheckedChange = { isShowPreviews = it }
+                        )
+                    }
                 }
             }
         }
     }
 }
-    }
 
 @Composable
 fun SettingNotiSection(title: String, content: @Composable () -> Unit) {
@@ -138,7 +143,6 @@ fun SettingNotiSection(title: String, content: @Composable () -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
-        // Title of the section
         Text(
             text = title,
             fontSize = 20.sp,
@@ -148,54 +152,22 @@ fun SettingNotiSection(title: String, content: @Composable () -> Unit) {
             modifier = Modifier
                 .padding(bottom = 8.dp)
         )
-
-        // Background color for the section
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(10.dp))
-                .padding(16.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(10.dp)
+                )
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             content()
         }
     }
 }
 
-@Composable
-fun SettingItemWithSwitch(text: String, isChecked: Boolean = false, onCheckedChange: (Boolean) -> Unit = {}) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .height(48.dp)
-    ) {
-        Text(
-            text = text,
-            fontSize = 20.sp,
-            fontFamily = nunitoFontFamily,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-        )
-        Spacer(modifier = Modifier.weight(1f)) // Đẩy công tắc sang bên phải
-        Switch(
-            checked = isChecked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.secondary,  // Màu khi bật
-                uncheckedThumbColor = MaterialTheme.colorScheme.secondary,  // Màu khi tắt
-                checkedTrackColor = MaterialTheme.colorScheme.primary,  // Màu track khi bật
-                uncheckedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)  // Màu track khi tắt
-            ),
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-        )
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun NotificationSettingPreview() {
-    NotificationSetting(navController = rememberNavController())
+    NotificationSetting(navController = rememberNavController(), themeViewModel = ThemeViewModel())
 }

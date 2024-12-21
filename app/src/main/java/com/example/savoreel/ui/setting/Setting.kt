@@ -15,69 +15,53 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.component.SettingItemWithSwitch
 import com.example.savoreel.ui.theme.SavoreelTheme
+import com.example.savoreel.ui.theme.ThemeViewModel
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController) {
-    var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
+fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel = viewModel()
+) {
     var showModal by remember { mutableStateOf(false) }
-    val currentDarkMode = rememberUpdatedState(isDarkModeEnabled)
-    var currentName by remember { mutableStateOf("") }
+    var currentName by remember { mutableStateOf("Thu") }
+    var isDarkModeEnabled = themeViewModel.isDarkModeEnabled
 
-    SavoreelTheme(darkTheme = currentDarkMode.value) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.background)
-                .padding(16.dp)
-        ) {
-            Box(
+    SavoreelTheme(darkTheme = isDarkModeEnabled) {
+         Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             ) {
                 BackArrow(
                     navController = navController,
@@ -95,6 +79,12 @@ fun SettingsScreen(navController: NavController) {
                         .padding(top = 40.dp)
                 )
             }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+                .padding(horizontal = 20.dp)
+        ) {
 
             LazyColumn {
                 item {
@@ -137,7 +127,7 @@ fun SettingsScreen(navController: NavController) {
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Name",
+                        text = currentName,
                         fontFamily = nunitoFontFamily,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
@@ -150,89 +140,111 @@ fun SettingsScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(20.dp))
                     SettingsSection(title = "General") {
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Edit,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_name),
                             text = "Edit Name",
                             navController = navController,
                             destination = "name_screen/${currentName}"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Email,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_mail),
                             text = "Change Email",
                             navController = navController,
                             destination = "email_screen?isChangeEmail=false"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Lock,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_key),
                             text = "Change Password",
                             navController = navController,
                             destination = "change_password_screen"
                         )
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     // Support Section
                     SettingsSection(title = "Support") {
-                        SettingItemWithSwitch(
-                            icon = Icons.Default.Build, // Moon icon for Dark Mode
-                            text = "Dark Mode",
-                            isChecked = isDarkModeEnabled,
-                            onCheckedChange = { isDarkModeEnabled = it }
-                        )
+                        Row (
+                            modifier = Modifier
+                                .padding(vertical = 12.dp)
+                        ){
+                            Box (
+                                modifier = Modifier
+                                    .padding(end = 16.dp)
+                                    .align(Alignment.CenterVertically)
+                                    .size(40.dp)
+                                    .clip(shape = CircleShape)
+                                    .background(Color.LightGray)
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_darkmode),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.surface,
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .size(24.dp)
+                                )
+                            }
+                            SettingItemWithSwitch(
+                                text = "Dark Mode",
+                                isChecked = isDarkModeEnabled,
+                                onCheckedChange = { themeViewModel.toggleDarkMode() }
+                            )
+                        }
+
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Place,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_language),
                             text = "Language",
                             navController = navController,
                             destination = "language"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Notifications,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_noti),
                             text = "Notifications",
                             navController = navController,
                             destination = "notification_setting"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Warning,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_report),
                             text = "Report a problem",
                             navController = navController,
                             destination = "report_a_problem"
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     // About Section
                     SettingsSection(title = "About") {
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Share,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_share),
                             text = "Share Account",
                             navController = navController,
                             destination = "share_account"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Phone,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_term),
                             text = "Terms of Service",
                             navController = navController,
                             destination = "terms_of_service"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Lock,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
                             text = "Privacy",
                             navController = navController,
                             destination = "privacy"
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     SettingsSection(title = "Danger Zone") {
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.Delete,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
                             text = "Delete Account",
                             navController = navController,
                             destination = "confirm_password"
                         )
                         SettingItemWithNavigation(
-                            icon = Icons.Filled.ArrowBack,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
                             text = "Sign Out",
                             navController = navController,
                             destination = "sign_out"
@@ -264,7 +276,7 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(20.dp))
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             content()
         }
@@ -281,68 +293,38 @@ fun SettingItemWithNavigation(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .height(48.dp)
-            .clickable { navController.navigate(destination) }
+            .padding(vertical = 12.dp)
+            .clickable { navController.navigate(destination) } // Điều hướng đến trang khác
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
+        Box (
             modifier = Modifier
                 .padding(end = 16.dp)
                 .align(Alignment.CenterVertically)
-        )
+                .size(40.dp)
+                .clip(shape = CircleShape)
+                .background(Color.LightGray)
+        ){
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.surface,
+                modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.Center)
+            )
+        }
         Text(
             text = text,
             fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.tertiary,
+            color = if (text == "Delete Account") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
         )
     }
 }
 
-@Composable
-fun SettingItemWithSwitch(icon: ImageVector, text: String, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .height(48.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier
-                .padding(end = 16.dp)
-                .align(Alignment.CenterVertically)
-        )
-        Text(
-            text = text,
-            fontSize = 20.sp,
-            fontFamily = nunitoFontFamily,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-        )
-        Spacer(modifier = Modifier.weight(1f)) // Đẩy công tắc sang bên phải
-        Switch(
-            checked = isChecked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.secondary, // Màu khi bật
-                uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
-                checkedTrackColor = MaterialTheme.colorScheme.primary,  // Màu track khi bật
-                uncheckedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) // Mờ hơn cho track
-            ),
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-        )
-    }
-}
 
 
 @Composable
@@ -365,7 +347,7 @@ fun SheetContent(onOptionClick: (String) -> Unit) {
                     .clickable { onOptionClick(option) }
                     .padding(vertical = 8.dp),
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = if (option == "Remove Avatar") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
 
                 )
         }

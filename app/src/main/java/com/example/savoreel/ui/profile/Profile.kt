@@ -17,9 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,18 +44,15 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.BackArrow
-import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
 fun ProfileScreen(profile: Map<String, List<ProfilePicturesData>>, navController: NavController) {
-    var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
-    SavoreelTheme(darkTheme = isDarkModeEnabled) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.background) // Đặt nền màu sáng
-                .padding(1.dp) // Đảm bảo có padding bên ngoài để các phần tử không chạm vào mép màn hình
+                .padding(horizontal = 20.dp) // Đảm bảo có padding bên ngoài để các phần tử không chạm vào mép màn hình
         ) {
             Box(
                 modifier = Modifier
@@ -71,7 +69,7 @@ fun ProfileScreen(profile: Map<String, List<ProfilePicturesData>>, navController
                         .padding(top = 40.dp) // Padding chỉ ảnh hưởng đến vị trí bọc ngoài
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Settings,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_setting),
                         contentDescription = "Setting",
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier
@@ -186,7 +184,6 @@ fun ProfileScreen(profile: Map<String, List<ProfilePicturesData>>, navController
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                .padding(vertical = 1.dp)
                                 .padding(horizontal = 1.dp)
                         ) {
                             ProfilePictures(chunk)
@@ -196,7 +193,6 @@ fun ProfileScreen(profile: Map<String, List<ProfilePicturesData>>, navController
             }
         }
     }
-}
 
 @Composable
 fun ProfilePictures(data: List<ProfilePicturesData>) {
@@ -211,7 +207,7 @@ fun ProfilePictures(data: List<ProfilePicturesData>) {
                 painter = painterResource(id = R.drawable.food), // Replace with your actual icon
                 contentDescription = null,
                 modifier = Modifier
-                    .size(125.dp) // Size of each image
+                    .size(115.dp) // Size of each image
                     .clip(RoundedCornerShape(20.dp)) // Rounded corners
                     .padding(horizontal = 2.dp) // Padding between images
             )

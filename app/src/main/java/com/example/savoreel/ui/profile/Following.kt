@@ -12,12 +12,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,16 +43,17 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
 fun FollowScreen(navController: NavController) {
-    var selectedTab by remember { mutableStateOf("Following") } // Quản lý trạng thái nút
+    var selectedTab by remember { mutableStateOf(0) } // Quản lý trạng thái nút
     val followingList = getFollowingData()
     val followerList = getFollowerData()
+    val tabs = listOf("Following", "Follower")
     var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.background) // Đặt nền màu sáng
-                .padding(16.dp)
+                .padding(horizontal = 20.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -81,52 +83,33 @@ fun FollowScreen(navController: NavController) {
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                TabButton(
-                    text = "Following",
-                    isSelected = selectedTab == "Following",
-                    onClick = { selectedTab = "Following" }
-                )
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.tertiary
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = {
+                                Text(
+                                    text = title,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontFamily = nunitoFontFamily,
+                                    color = if (selectedTab == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                                ) }
+                        )
+                    }
+                }
 
-                TabButton(
-                    text = "Follower",
-                    isSelected = selectedTab == "Follower",
-                    onClick = { selectedTab = "Follower" }
-                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // User List based on tab
+                val items = if (selectedTab == 0) followingList else followerList
+                UserList(users = items)
             }
-            // Danh sách hiển thị
-            val items = if (selectedTab == "Following") followingList else followerList
-            UserList(users = items)
-        }
-    }
-}
-@Composable
-fun TabButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .width(160.dp)
-            .clickable { onClick() }
-            .background(Color.Transparent)
-            .padding(vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = text,
-                fontSize = 20.sp,
-                fontFamily = nunitoFontFamily,
-                fontWeight = FontWeight.Normal,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.tertiary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Box(
-                modifier = Modifier
-                    .height(1.dp)
-                    .fillMaxWidth()
-                    .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-            )
         }
     }
 }
