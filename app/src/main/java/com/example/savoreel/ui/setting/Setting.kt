@@ -39,7 +39,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
@@ -53,11 +52,11 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel = viewModel()
-) {
+fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel) {
     var showModal by remember { mutableStateOf(false) }
     var currentName by remember { mutableStateOf("Thu") }
-    var isDarkModeEnabled = themeViewModel.isDarkModeEnabled
+
+    val isDarkModeEnabled by remember { themeViewModel.isDarkModeEnabled }
 
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
          Box(
@@ -158,30 +157,18 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel 
                                  text = "Edit Name",
                                  navController = navController,
                                  destination = "name_screen/${currentName}",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_mail),
                                  text = "Change Email",
                                  navController = navController,
                                  destination = "email_screen?isChangeEmail=false",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_key),
                                  text = "Change Password",
                                  navController = navController,
                                  destination = "change_password_screen",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                          }
 
@@ -190,7 +177,6 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel 
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_darkmode),
                                  text = "Dark Mode",
-                                 withIcon = true,
                                  changeMode = true,
                                  isChecked = isDarkModeEnabled,
                                  onCheckedChange = { themeViewModel.toggleDarkMode() }
@@ -201,30 +187,18 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel 
                                  text = "Language",
                                  navController = navController,
                                  destination = "language",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_noti),
                                  text = "Notifications",
                                  navController = navController,
                                  destination = "notification_setting",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_report),
                                  text = "Report a problem",
                                  navController = navController,
                                  destination = "report_a_problem",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                          }
 
@@ -235,30 +209,18 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel 
                                  text = "Share Account",
                                  navController = navController,
                                  destination = "share_account",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_term),
                                  text = "Terms of Service",
                                  navController = navController,
                                  destination = "terms_of_service",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
                                  text = "Privacy",
                                  navController = navController,
                                  destination = "privacy",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                          }
 
@@ -268,20 +230,12 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel 
                                  text = "Delete Account",
                                  navController = navController,
                                  destination = "confirm_password",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
                                  text = "Sign Out",
                                  navController = navController,
                                  destination = "sign_out",
-                                 withIcon = true,
-                                 changeMode = false,
-                                 isChecked = false,
-                                 onCheckedChange = {}
                              )
                          }
                      }
@@ -324,11 +278,11 @@ fun SettingItemWithNavigation(
     text: String,
     navController: NavController? = null,
     destination: String? = null,
-    withIcon: Boolean = false,
     changeMode: Boolean = false,
     isChecked: Boolean = false,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -340,7 +294,7 @@ fun SettingItemWithNavigation(
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (withIcon && icon != null) {
+        if (icon != null) {
             IconTheme(
                 imageVector = icon,
                 alpha = 0.8f
@@ -422,7 +376,7 @@ fun handleAvatarOption(option: String) {
 @Composable
 fun SettingsScreenPreviewDark() {
     SavoreelTheme(darkTheme = true, dynamicColor = true) {
-        SettingsScreen(navController = rememberNavController()) // Pass the navController as normal
+        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel()) // Pass the navController as normal
     }
 }
 
@@ -430,6 +384,6 @@ fun SettingsScreenPreviewDark() {
 @Composable
 fun SettingsScreenPreview() {
     SavoreelTheme(darkTheme = false, dynamicColor = false) {
-        SettingsScreen(navController = rememberNavController()) // Pass the navController as normal
+        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel()) // Pass the navController as normal
     }
 }

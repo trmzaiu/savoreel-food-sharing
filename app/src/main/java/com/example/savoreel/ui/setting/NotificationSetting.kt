@@ -1,6 +1,5 @@
 package com.example.savoreel.ui.setting
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,14 +27,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.ui.component.BackArrow
-import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.ThemeViewModel
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
-fun NotificationSetting(navController: NavController, themeViewModel: ThemeViewModel) {
-    val isDarkModeEnabled = themeViewModel.isDarkModeEnabled
-    Log.i("NotificationSetting", "isDarkModeEnabled: $isDarkModeEnabled") // Log giá trị dark mode hiện tại
+fun NotificationSetting(navController: NavController) {
 
     var isDisturb by rememberSaveable { mutableStateOf(false) }
     var isNewActivities by rememberSaveable { mutableStateOf(false) }
@@ -44,92 +39,84 @@ fun NotificationSetting(navController: NavController, themeViewModel: ThemeViewM
     var isMemories by rememberSaveable { mutableStateOf(false) }
     var isShowPreviews by rememberSaveable { mutableStateOf(false) }
 
-    SavoreelTheme(darkTheme = isDarkModeEnabled) {
-        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)){
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(color = MaterialTheme.colorScheme.background)
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)){
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = MaterialTheme.colorScheme.background)
 //                        .shadow(elevation = 4.dp, spotColor = Color(0x80000000), ambientColor = Color(0x40000000))
-                ) {
-                    BackArrow(
-                        navController = navController,
-                        modifier = Modifier.align(Alignment.TopStart)
-                    )
-                    Text(
-                        text = "Notification",
-                        fontFamily = nunitoFontFamily,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = 32.sp,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(top = 40.dp)
-                    )
-                }
+            ) {
+                BackArrow(
+                    navController = navController,
+                    modifier = Modifier.align(Alignment.TopStart)
+                )
+                Text(
+                    text = "Notification",
+                    fontFamily = nunitoFontFamily,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 32.sp,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(top = 40.dp)
+                )
+            }
 
-                Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-                LazyColumn(modifier = Modifier.padding(horizontal = 35.dp)
-                ) {
-                    item {
-                        SettingsSection(title = "") {
-                            SettingItemWithNavigation(
-                                text = "Do Not Disturb",
-                                withIcon = false,
-                                changeMode = true,
-                                isChecked = isDisturb,
-                                onCheckedChange = { isDisturb = it }
-                            )
-                        }
+            LazyColumn(modifier = Modifier.padding(horizontal = 35.dp)
+            ) {
+                item {
+                    SettingsSection(title = "") {
+                        SettingItemWithNavigation(
+                            text = "Do Not Disturb",
+                            changeMode = true,
+                            isChecked = isDisturb,
+                            onCheckedChange = { isDisturb = it }
+                        )
+                    }
 
-                        SettingsSection(title = "Communities") {
-                            SettingItemWithNavigation(
-                                text = "New activities",
-                                withIcon = false,
-                                changeMode = true,
-                                isChecked = isNewActivities,
-                                onCheckedChange = { isNewActivities = it }
-                            )
-                            SettingItemWithNavigation(
-                                text = "Suggested for you",
-                                withIcon = false,
-                                changeMode = true,
-                                isChecked = isSuggested,
-                                onCheckedChange = { isSuggested = it }
-                            )
-                            SettingItemWithNavigation(
-                                text = "Reaction",
-                                withIcon = false,
-                                changeMode = true,
-                                isChecked = isReaction,
-                                onCheckedChange = { isReaction = it }
-                            )
-                        }
+                    SettingsSection(title = "Communities") {
+                        SettingItemWithNavigation(
+                            text = "New activities",
+                            changeMode = true,
+                            isChecked = isNewActivities,
+                            onCheckedChange = { isNewActivities = it }
+                        )
+                        SettingItemWithNavigation(
+                            text = "Suggested for you",
+                            changeMode = true,
+                            isChecked = isSuggested,
+                            onCheckedChange = { isSuggested = it }
+                        )
+                        SettingItemWithNavigation(
+                            text = "Reaction",
+                            changeMode = true,
+                            isChecked = isReaction,
+                            onCheckedChange = { isReaction = it }
+                        )
+                    }
 
-                        SettingsSection(title = "") {
-                            SettingItemWithNavigation(
-                                text = "Memories",
-                                withIcon = false,
-                                changeMode = true,
-                                isChecked = isMemories,
-                                onCheckedChange = { isMemories = it }
-                            )
-                        }
+                    SettingsSection(title = "") {
+                        SettingItemWithNavigation(
+                            text = "Memories",
+                            changeMode = true,
+                            isChecked = isMemories,
+                            onCheckedChange = { isMemories = it }
+                        )
+                    }
 
-                        SettingsSection(title = "") {
-                            SettingItemWithNavigation(
-                                text = "Show previews",
-                                withIcon = false,
-                                changeMode = true,
-                                isChecked = isShowPreviews,
-                                onCheckedChange = { isShowPreviews = it }
-                            )
-                        }
+                    SettingsSection(title = "") {
+                        SettingItemWithNavigation(
+                            text = "Show previews",
+                            changeMode = true,
+                            isChecked = isShowPreviews,
+                            onCheckedChange = { isShowPreviews = it }
+                        )
                     }
                 }
             }
@@ -170,5 +157,5 @@ fun SettingNotiSection(title: String, content: @Composable () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun NotificationSettingPreview() {
-    NotificationSetting(navController = rememberNavController(), themeViewModel = ThemeViewModel())
+    NotificationSetting(navController = rememberNavController())
 }

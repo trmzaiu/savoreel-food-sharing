@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -32,99 +33,103 @@ import com.example.savoreel.ui.profile.ProfileScreen
 import com.example.savoreel.ui.setting.NotificationSetting
 import com.example.savoreel.ui.setting.SettingsScreen
 import com.example.savoreel.ui.setting.TermsOfServiceScreen
+import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.ThemeViewModel
 
 @Composable
-fun AppNavigation(navController: NavHostController, themeViewModel : ThemeViewModel) {
-    NavHost(
-        navController = navController,
+fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel) {
+    val isDarkModeEnabled by themeViewModel.isDarkModeEnabled
+    SavoreelTheme(darkTheme = isDarkModeEnabled) {
+        NavHost(
+            navController = navController,
 //        startDestination = "sign_in_screen",
-        startDestination = "onboarding",
-    ) {
-        composable("sign_in_screen") {
-            SignInScreenTheme(navController = navController)
-        }
-
-        composable("sign_up_screen") {
-            SignUpScreenTheme(navController = navController)
-        }
-
-        composable("email_screen?isChangeEmail={isChangeEmail}") { backStackEntry ->
-            val isChangeEmail = backStackEntry.arguments?.getString("isChangeEmail")?.toBoolean() ?: false
-            EmailTheme(navController = navController, isChangeEmail = isChangeEmail)
-        }
-
-        composable("verify_code_screen") {
-            VerifyCodeTheme(navController = navController)
-        }
-
-        composable("change_password_screen") {
-            ChangePasswordTheme(navController = navController)
-        }
-
-        composable("name_screen/{currentName}") { backStackEntry ->
-            val currentName = backStackEntry.arguments?.getString("currentName")
-            NameTheme(
-                navController = navController,
-                currentName = currentName.takeIf { it != "unknown" }
-            ) { newName ->
-                println("Submitted name: $newName")
+            startDestination = "onboarding",
+        ) {
+            composable("sign_in_screen") {
+                SignInScreenTheme(navController = navController)
             }
-        }
 
-        composable("success_screen") {
-            SuccessTheme(navController = navController)
-        }
+            composable("sign_up_screen") {
+                SignUpScreenTheme(navController = navController)
+            }
 
-        composable("hashtag_screen") {
-            HashTagTheme(navController = navController)
-        }
+            composable("email_screen?isChangeEmail={isChangeEmail}") { backStackEntry ->
+                val isChangeEmail = backStackEntry.arguments?.getString("isChangeEmail")?.toBoolean() ?: false
+                EmailTheme(navController = navController, isChangeEmail = isChangeEmail)
+            }
 
-        composable("notification"){
-            Notifications(navController = navController)
-        }
+            composable("verify_code_screen") {
+                VerifyCodeTheme(navController = navController)
+            }
 
-        composable("searching"){
-            Searching(navController = navController)
-        }
+            composable("change_password_screen") {
+                ChangePasswordTheme(navController = navController)
+            }
 
-        composable("searching_result/{query}", arguments = listOf(navArgument("query") { type = NavType.StringType })) { backStackEntry ->
-            val query = backStackEntry.arguments?.getString("query") ?: ""
-            SearchingResult(navController = navController, searchQuery = query)
-        }
+            composable("name_screen/{currentName}") { backStackEntry ->
+                val currentName = backStackEntry.arguments?.getString("currentName")
+                NameTheme(
+                    navController = navController,
+                    currentName = currentName.takeIf { it != "unknown" },
+                ) { newName ->
+                    println("Submitted name: $newName")
+                }
+            }
+
+            composable("success_screen") {
+                SuccessTheme(navController = navController)
+            }
+
+            composable("hashtag_screen") {
+                HashTagTheme(navController = navController)
+            }
+
+            composable("notification"){
+                Notifications(navController = navController)
+            }
+
+            composable("searching"){
+                Searching(navController = navController)
+            }
+
+            composable("searching_result/{query}", arguments = listOf(navArgument("query") { type = NavType.StringType })) { backStackEntry ->
+                val query = backStackEntry.arguments?.getString("query") ?: ""
+                SearchingResult(navController = navController, searchQuery = query)
+            }
 
 
-        composable("onboarding") {
-            OnboardingTheme(navController = navController)
-        }
+            composable("onboarding") {
+                OnboardingTheme(navController = navController)
+            }
 
-        composable("settings_screen") {
-            SettingsScreen(navController = navController)
-        }
+            composable("settings_screen") {
+                SettingsScreen(navController = navController, themeViewModel = themeViewModel)
+            }
 
-        composable("notification_setting") {
-            NotificationSetting(navController = navController, themeViewModel = ThemeViewModel())
-        }
+            composable("notification_setting") {
+                NotificationSetting(navController = navController)
+            }
 
-        composable("follow") {
-            FollowScreen(navController = navController)
-        }
+            composable("follow") {
+                FollowScreen(navController = navController)
+            }
 
-        composable("terms_of_service") {
-            TermsOfServiceScreen(navController = navController)
-        }
+            composable("terms_of_service") {
+                TermsOfServiceScreen(navController = navController)
+            }
 
-        composable("profile_screen") {
-            val profile = mapOf(
-                "24/2/2024" to listOf(
-                    ProfilePicturesData("Title", "Description", "9:41 AM"),
-                    ProfilePicturesData("Title", "Description", "9:41 AM"),
-                    ProfilePicturesData("Title", "Description", "9:41 AM"),
-                    ProfilePicturesData("Title", "Description", "9:41 AM"),
-                    ProfilePicturesData("Title", "Description", "9:41 AM"),
-                    ProfilePicturesData("Title", "Description", "9:41 AM")
-                ))
-            ProfileScreen(profile = profile, navController = navController)
+            composable("profile_screen") {
+                val profile = mapOf(
+                    "24/2/2024" to listOf(
+                        ProfilePicturesData("Title", "Description", "9:41 AM"),
+                        ProfilePicturesData("Title", "Description", "9:41 AM"),
+                        ProfilePicturesData("Title", "Description", "9:41 AM"),
+                        ProfilePicturesData("Title", "Description", "9:41 AM"),
+                        ProfilePicturesData("Title", "Description", "9:41 AM"),
+                        ProfilePicturesData("Title", "Description", "9:41 AM")
+                    ))
+                ProfileScreen(profile = profile, navController = navController)
+            }
         }
     }
 }
