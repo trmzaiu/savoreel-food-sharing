@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.ui.component.BackArrow
-import com.example.savoreel.ui.component.SettingItemWithSwitch
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.ThemeViewModel
 import com.example.savoreel.ui.theme.nunitoFontFamily
@@ -75,55 +74,58 @@ fun NotificationSetting(navController: NavController, themeViewModel: ThemeViewM
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                LazyColumn(modifier = Modifier.padding(horizontal = 20.dp)
+                LazyColumn(modifier = Modifier.padding(horizontal = 35.dp)
                 ) {
                     item {
-                        // Do Not Disturb Section
-                        SettingNotiSection(title = "") {
-                            SettingItemWithSwitch(
+                        SettingsSection(title = "") {
+                            SettingItemWithNavigation(
                                 text = "Do Not Disturb",
+                                withIcon = false,
+                                changeMode = true,
                                 isChecked = isDisturb,
                                 onCheckedChange = { isDisturb = it }
                             )
                         }
-                        Spacer(modifier = Modifier.height(20.dp))
 
-                        // Communities Section
-                        SettingNotiSection(title = "Communities") {
-                            SettingItemWithSwitch(
+                        SettingsSection(title = "Communities") {
+                            SettingItemWithNavigation(
                                 text = "New activities",
+                                withIcon = false,
+                                changeMode = true,
                                 isChecked = isNewActivities,
                                 onCheckedChange = { isNewActivities = it }
                             )
-                            SettingItemWithSwitch(
+                            SettingItemWithNavigation(
                                 text = "Suggested for you",
+                                withIcon = false,
+                                changeMode = true,
                                 isChecked = isSuggested,
                                 onCheckedChange = { isSuggested = it }
                             )
-                            SettingItemWithSwitch(
+                            SettingItemWithNavigation(
                                 text = "Reaction",
+                                withIcon = false,
+                                changeMode = true,
                                 isChecked = isReaction,
                                 onCheckedChange = { isReaction = it }
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        // Memories Section
-                        SettingNotiSection(title = "") {
-                            SettingItemWithSwitch(
+                        SettingsSection(title = "") {
+                            SettingItemWithNavigation(
                                 text = "Memories",
+                                withIcon = false,
+                                changeMode = true,
                                 isChecked = isMemories,
                                 onCheckedChange = { isMemories = it }
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        // Show Previews Section
-                        SettingNotiSection(title = "") {
-                            SettingItemWithSwitch(
+                        SettingsSection(title = "") {
+                            SettingItemWithNavigation(
                                 text = "Show previews",
+                                withIcon = false,
+                                changeMode = true,
                                 isChecked = isShowPreviews,
                                 onCheckedChange = { isShowPreviews = it }
                             )
@@ -140,7 +142,7 @@ fun SettingNotiSection(title: String, content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+//            .padding(16.dp)
     ) {
         Text(
             text = title,
@@ -157,7 +159,8 @@ fun SettingNotiSection(title: String, content: @Composable () -> Unit) {
                     color = MaterialTheme.colorScheme.secondary,
                     shape = RoundedCornerShape(10.dp)
                 )
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+//                .padding(horizontal = 16.dp, vertical = 8.dp),
+
         ) {
             content()
         }

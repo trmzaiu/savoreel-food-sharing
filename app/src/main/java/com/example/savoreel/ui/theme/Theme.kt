@@ -29,7 +29,7 @@ private val LightColorScheme = lightColorScheme(
     onTertiary = textTertiaryLightColor , // Font tertiary
 
     // Quaternary
-    surface = quaternaryLightColor,
+    surface = tertiaryLightColor,
 
     // Scrim - màu nền mờ
     scrim = backgroundBlurLightColor,

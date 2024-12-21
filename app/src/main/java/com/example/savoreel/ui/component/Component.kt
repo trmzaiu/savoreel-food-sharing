@@ -214,12 +214,12 @@ fun ForwardArrow(
         },
         modifier = modifier
             .rotate(180F)
-            .size(16.dp),
+            .size(18.dp),
         content = {
             Icon(
                 painter = painterResource(id = R.drawable.chevron_left),
                 contentDescription = "Back arrow",
-                tint = MaterialTheme.colorScheme.onBackground
+                tint = MaterialTheme.colorScheme.onBackground,
             )
         },
     )
@@ -228,23 +228,23 @@ fun ForwardArrow(
 @Composable
 fun IconTheme(
     imageVector: ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    alpha: Float
 ) {
     Box (
-        modifier = Modifier
-            .padding(end = 16.dp)
+        modifier = modifier
             .size(40.dp)
             .clip(shape = CircleShape)
-            .background(MaterialTheme.colorScheme.surface),
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = alpha)),
         contentAlignment = Alignment.Center
     ){
         Icon(
             imageVector = imageVector,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier
+            modifier = modifier
                 .size(20.dp)
-                .align(Alignment.Center)
+                .align(Alignment.Center),
         )
     }
 }
@@ -294,7 +294,7 @@ fun SettingItemWithSwitch(text: String, isChecked: Boolean, onCheckedChange: (Bo
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 14.dp)
+//            .padding(vertical = 10.dp)
     ) {
         Text(
             text = text,

@@ -41,7 +41,6 @@ import com.example.savoreel.R
 import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.example.savoreel.ui.theme.secondaryLightColor
 import com.example.savoreel.ui.theme.textButtonColor
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.delay
@@ -68,7 +67,7 @@ fun HashTagTheme(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.tertiary),
         contentAlignment = Alignment.Center
     ) {
 
@@ -79,7 +78,7 @@ fun HashTagTheme(navController: NavController) {
                 .height(750.dp)
 
                 .background(
-                    color = secondaryLightColor,
+                    color = MaterialTheme.colorScheme.background,
                     shape = RoundedCornerShape(size = 30.dp)
                 )
         )
