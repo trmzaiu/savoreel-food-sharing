@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,9 +38,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.example.savoreel.ui.theme.secondaryLightColor
+import com.example.savoreel.ui.theme.textButtonColor
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.delay
 
@@ -103,7 +103,7 @@ fun HashTagTheme(navController: NavController) {
                     lineHeight = 30.sp,
                     fontFamily = nunitoFontFamily,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
                 )
             )
@@ -140,29 +140,17 @@ fun HashTagTheme(navController: NavController) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            Button(
-                modifier = Modifier
-                    .width(240.dp)
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
+            CustomButton(
+                text = "Continue",
+                enabled = selectedTags.isNotEmpty(),
                 onClick = {
                     println("Selected hashtags: ${selectedTags.joinToString(", ")}")
                     navController.navigate("takephoto_screen")
                 },
-                enabled = selectedTags.isNotEmpty()
-            ) {
-                Text(
-                    text = "Continue",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontFamily = nunitoFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        color = secondaryLightColor
-                    )
-                )
-            }
+                modifier = Modifier
+                    .width(240.dp)
+                    .height(50.dp),
+            )
 
             Spacer(modifier = Modifier.height(15.dp))
 
@@ -173,7 +161,7 @@ fun HashTagTheme(navController: NavController) {
                     lineHeight = 16.sp,
                     fontFamily = nunitoFontFamily,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.onSecondary,
                 ),
                 modifier = Modifier.clickable(
                     interactionSource = remember { MutableInteractionSource() },
@@ -212,7 +200,7 @@ fun HashtagItem(
                 fontSize = 16.sp,
                 fontFamily = nunitoFontFamily,
                 fontWeight = FontWeight.SemiBold,
-                color = if (isSelected) secondaryLightColor else MaterialTheme.colorScheme.tertiary // Màu chữ thay đổi
+                color = if (isSelected) textButtonColor else MaterialTheme.colorScheme.onBackground
             )
         )
     }

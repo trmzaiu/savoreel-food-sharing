@@ -47,11 +47,8 @@ fun ChangePasswordTheme(navController: NavController) {
         contentAlignment = Alignment.Center
     ) {
         BackArrow(
-            modifier = Modifier
-                .align(Alignment.TopStart),
-            onClick = {
-                navController.popBackStack()
-            }
+            navController = navController,
+            modifier = Modifier.align(Alignment.TopStart)
         )
 
         Column(
@@ -100,26 +97,26 @@ fun ChangePasswordTheme(navController: NavController) {
             )
 
             Spacer(modifier = Modifier.height(80.dp))
-
-            if (showErrorDialog) {
-                ErrorDialog(
-                    title = "Password mismatch",
-                    message = errorMessage,
-                    onDismiss = { showErrorDialog = false }
-                )
-            }
-
-            if (showConfirmDialog) {
-                ErrorDialog(
-                    title = "Success",
-                    message = errorMessage,
-                    onDismiss = {
-                        showConfirmDialog = false
-                        navController.navigate("sign_in_screen")
-                    }
-                )
-            }
         }
+    }
+
+    if (showErrorDialog) {
+        ErrorDialog(
+            title = "Password mismatch",
+            message = errorMessage,
+            onDismiss = { showErrorDialog = false }
+        )
+    }
+
+    if (showConfirmDialog) {
+        ErrorDialog(
+            title = "Success",
+            message = errorMessage,
+            onDismiss = {
+                showConfirmDialog = false
+                navController.navigate("sign_in_screen")
+            }
+        )
     }
 }
 

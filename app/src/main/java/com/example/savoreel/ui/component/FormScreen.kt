@@ -34,11 +34,8 @@ fun CommonForm(
         contentAlignment = Alignment.Center
     ) {
         BackArrow(
-            modifier = Modifier
-                .align(Alignment.TopStart),
-            onClick = {
-                navController.popBackStack()
-            }
+            navController = navController,
+            modifier = Modifier.align(Alignment.TopStart)
         )
 
         Column(
@@ -59,8 +56,6 @@ fun CommonForm(
                 isPasswordField = isPasswordField
             )
 
-            additionalContent?.invoke()
-
             Spacer(modifier = Modifier.height(159.dp))
 
             // Continue Button
@@ -73,4 +68,6 @@ fun CommonForm(
             Spacer(modifier = Modifier.height(78.dp))
         }
     }
+
+    additionalContent?.invoke()
 }

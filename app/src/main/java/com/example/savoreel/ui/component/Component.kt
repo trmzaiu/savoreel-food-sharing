@@ -3,7 +3,6 @@ package com.example.savoreel.ui.component
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,10 +21,11 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,11 +40,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.home.SearchItem
-import com.example.savoreel.ui.theme.homeDarkColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.example.savoreel.ui.theme.secondaryLightColor
 
 @Composable
 fun CustomInputField(
@@ -67,8 +66,8 @@ fun CustomInputField(
         textStyle = TextStyle(
             fontSize = 16.sp,
             fontFamily = nunitoFontFamily,
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.tertiary
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onBackground
         ),
         decorationBox = { innerTextField ->
             Box(
@@ -81,7 +80,7 @@ fun CustomInputField(
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontFamily = nunitoFontFamily,
-                            fontWeight = FontWeight.Normal,
+                            fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.outline
                         )
                     )
@@ -107,7 +106,7 @@ fun CustomButton(
             .width(360.dp)
             .height(50.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.scrim
+            containerColor = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
         )
     ) {
         Text(
@@ -116,7 +115,7 @@ fun CustomButton(
                 fontSize = 18.sp,
                 fontFamily = nunitoFontFamily,
                 fontWeight = FontWeight.Bold,
-                color = if (enabled) secondaryLightColor else homeDarkColor
+                color = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onTertiary
             )
         )
     }
@@ -128,19 +127,31 @@ fun ErrorDialog(
     message: String,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = { Text(message) },
-        containerColor = MaterialTheme.colorScheme.secondary,
+    Box(modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.scrim)){
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(title, fontFamily = nunitoFontFamily, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground) },
+            text = {
+                Text(
+                    message,
+                    style = TextStyle(
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    ),
+                )},
+            containerColor = MaterialTheme.colorScheme.secondary,
 
-        confirmButton = {
-            Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.outline)) {
-                Text("Ok", fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, color = MaterialTheme.colorScheme.tertiary)
+            confirmButton = {
+                Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
+                    Text("Ok", fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, color = MaterialTheme.colorScheme.onBackground)
+                }
             }
-        }
-    )
+        )
+    }
 }
+
 
 @Composable
 fun CustomTitle(
@@ -153,7 +164,7 @@ fun CustomTitle(
         lineHeight = 45.sp,
         fontFamily = nunitoFontFamily,
         fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.tertiary,
+        color = MaterialTheme.colorScheme.onBackground,
         textAlign = TextAlign.Center,
         modifier = modifier.fillMaxWidth()
     )
@@ -161,19 +172,23 @@ fun CustomTitle(
 
 @Composable
 fun BackArrow(
+    navController: NavController,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
 ) {
-    Image(
-        painter = painterResource(id = R.drawable.chevron_left),
-        contentDescription = "Back arrow",
+    IconButton(
+        onClick = {
+            navController.popBackStack()
+        },
         modifier = modifier
             .padding(start = 20.dp, top = 40.dp)
-            .size(30.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { onClick() }
+            .size(48.dp),
+        content = {
+            Icon(
+                painter = painterResource(id = R.drawable.chevron_left),
+                contentDescription = "Back arrow",
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+        },
     )
 }
 

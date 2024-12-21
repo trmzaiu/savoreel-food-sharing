@@ -31,7 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.CustomButton
@@ -42,7 +42,7 @@ import com.example.savoreel.ui.theme.domineFontFamily
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
-fun SignInScreenTheme(navController: NavController) {
+fun SignInScreenTheme(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -126,7 +126,7 @@ fun SignInScreenTheme(navController: NavController) {
                             fontSize = 14.sp,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.tertiary,
+                            color = MaterialTheme.colorScheme.onSecondary,
                         ),
                         modifier = Modifier
                             .clickable(
@@ -165,7 +165,7 @@ fun SignInScreenTheme(navController: NavController) {
                     text = "Or connect with",
                     fontSize = 16.sp,
                     fontFamily = nunitoFontFamily,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Medium,
                     lineHeight = 20.sp,
                 )
@@ -222,7 +222,7 @@ fun SignInScreenTheme(navController: NavController) {
                         lineHeight = 20.sp,
                         fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.tertiary,
+                        color = MaterialTheme.colorScheme.onSecondary,
 
                         textAlign = TextAlign.Center,
                     )
@@ -245,16 +245,15 @@ fun SignInScreenTheme(navController: NavController) {
                             navController.navigate("sign_up_screen")
                         }
                 )
-
-                if (showErrorDialog) {
-                    ErrorDialog(
-                        title = "Couldn't sign in",
-                        message = errorMessage,
-                        onDismiss = { showErrorDialog = false }
-                    )
-                }
             }
         }
+    }
+    if (showErrorDialog) {
+        ErrorDialog(
+            title = "Couldn't sign in",
+            message = errorMessage,
+            onDismiss = { showErrorDialog = false }
+        )
     }
 }
 

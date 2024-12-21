@@ -23,6 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,7 +39,6 @@ import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomTitle
 import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.lineColor
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
@@ -46,13 +48,14 @@ fun VerifyCodeTheme(navController: NavController) {
     var showErrorDialog by remember { mutableStateOf(false) }
 
     val isCodeValid = code.length == 4 && code.all { it.isDigit() }
-
     val validCode = "1234"
+
+    val focusRequesters = List(4) { FocusRequester() }
+    val focusManager = LocalFocusManager.current
 
     fun validateCode(code: String): Boolean {
         return code == validCode
     }
-
 
     Box(
         modifier = Modifier
@@ -61,11 +64,8 @@ fun VerifyCodeTheme(navController: NavController) {
         contentAlignment = Alignment.Center
     ) {
         BackArrow(
-            modifier = Modifier
-                .align(Alignment.TopStart),
-            onClick = {
-                navController.popBackStack()
-            }
+            navController = navController,
+            modifier = Modifier.align(Alignment.TopStart)
         )
 
         Column(
@@ -85,11 +85,31 @@ fun VerifyCodeTheme(navController: NavController) {
                 repeat(4) { index ->
                     BasicTextField(
                         value = code.getOrNull(index)?.toString() ?: "",
-                        onValueChange = {
-                            if (it.length <= 1 && it.all { char -> char.isDigit() }) {
-                                val newCode = StringBuilder(code)
-                                if (code.length > index) newCode[index] = it[0] else newCode.append(it)
+                        onValueChange = { input ->
+                            val newCode = StringBuilder(code)
+
+                            if (input.isNotEmpty() && input.all { it.isDigit() }) {
+                                if (code.length > index) {
+                                    newCode[index] = input[0]
+                                } else {
+                                    newCode.append(input)
+                                }
                                 code = newCode.toString().take(4)
+
+                                if (index < 3) {
+                                    focusRequesters[index + 1].requestFocus()
+                                } else {
+                                    focusManager.clearFocus()
+                                }
+                            } else if (input.isEmpty()) {
+                                if (code.length > index) {
+                                    newCode.deleteCharAt(index)
+                                    code = newCode.toString()
+                                }
+
+                                if (index > 0) {
+                                    focusRequesters[index - 1].requestFocus()
+                                }
                             }
                         },
                         textStyle = TextStyle(
@@ -101,19 +121,19 @@ fun VerifyCodeTheme(navController: NavController) {
                             textAlign = TextAlign.Center,
                         ),
                         modifier = Modifier
-                            .border(width = 1.dp, color = lineColor, shape = RoundedCornerShape(size = 12.dp))
+                            .border(width = 1.dp, color = MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(size = 12.dp))
                             .width(56.dp)
                             .height(56.dp)
                             .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(size = 12.dp))
                             .padding(8.dp)
-                            .align(Alignment.CenterVertically)
+                            .focusRequester(focusRequesters[index])
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Row(){
+            Row {
                 Text(
                     text = "Didn't get the code? ",
                     style = TextStyle(
@@ -121,7 +141,7 @@ fun VerifyCodeTheme(navController: NavController) {
                         lineHeight = 20.sp,
                         fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.outline,
+                        color = MaterialTheme.colorScheme.onTertiary,
                         textAlign = TextAlign.Center,
                     )
                 )
@@ -132,14 +152,13 @@ fun VerifyCodeTheme(navController: NavController) {
                         fontSize = 15.sp,
                         lineHeight = 20.sp,
                         fontFamily = nunitoFontFamily,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.tertiary,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center,
                     ),
-                    modifier = Modifier
-                        .clickable {
-                            navController.navigate("sign_in_screen")
-                        }
+                    modifier = Modifier.clickable {
+                        navController.navigate("sign_in_screen")
+                    }
                 )
             }
 
@@ -161,17 +180,17 @@ fun VerifyCodeTheme(navController: NavController) {
 
             Spacer(modifier = Modifier.height(92.dp))
 
-            if (showErrorDialog) {
-                ErrorDialog(
-                    title = "Unverifiable",
-                    message = errorMessage,
-                    onDismiss = { showErrorDialog = false }
-                )
-            }
+
         }
     }
+    if (showErrorDialog) {
+        ErrorDialog(
+            title = "Unverifiable",
+            message = errorMessage,
+            onDismiss = { showErrorDialog = false }
+        )
+    }
 }
-
 
 
 @Preview(showBackground = true)

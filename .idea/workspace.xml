@@ -18,20 +18,29 @@
   <component name="ChangeListManager">
     <list default="true" id="7a71b3a1-a878-45c1-82e3-69796ac7ec8b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/AppNavigation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/AppNavigation.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/component/Component.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/component/Component.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/component/FormScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/component/FormScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/Notification.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/Notification.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/Searching.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/Searching.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/SearchingResult.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/SearchingResult.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/ChangePasswordTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/ChangePasswordTheme.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/HashTagTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/HashTagTheme.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/NameTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/NameTheme.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/OnboaringTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/OnboaringTheme.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignInTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignInTheme.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignUpTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignUpTheme.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SuccessTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SuccessTheme.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/VerifyCodeTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/VerifyCodeTheme.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Following.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Following.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Profile.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Profile.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/NotificationSetting.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/NotificationSetting.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Setting.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Setting.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Term of service.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Term of service.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/theme/Color.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/theme/Color.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/theme/Theme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/theme/Theme.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/chevron_left.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/chevron_left.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +50,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\Fpt\.android\avd\Resizable_Experimental_API_34.avd)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=Default, isTemplate=false, identifier=serial=emulator-5554;connection=230d4158)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -113,7 +122,7 @@
     <option name="optimizeImportsOnTheFly" value="true" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="_Designer_Tab" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
@@ -130,13 +139,17 @@
   "keyToString": {
     "Android App.app.executor": "Run",
     "Compose Preview.EmailDarkPreview.executor": "Run",
+    "Compose Preview.EmailLightPreview.executor": "Run",
     "Compose Preview.FollowScreenPreview.executor": "Run",
     "Compose Preview.HashTagPreview.executor": "Run",
+    "Compose Preview.PasswordDarkPreview.executor": "Run",
+    "Compose Preview.PasswordLightPreview.executor": "Run",
     "Compose Preview.ProfilePreview.executor": "Run",
     "Compose Preview.SettingsScreenPreview.executor": "Run",
     "Compose Preview.SettingsScreenPreviewDark.executor": "Run",
     "Compose Preview.SignInLightPreview.executor": "Run",
     "Compose Preview.UpdateNameDarkPreview.executor": "Run",
+    "Compose Preview.VerifyCodeDarkPreview.executor": "Run",
     "ResourceManagerPrefKey.ResourceType": "DRAWABLE",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
@@ -165,7 +178,7 @@
       <recent name="com.example.savoreel.ui" />
     </key>
   </component>
-  <component name="RunManager" selected="Android App.app">
+  <component name="RunManager" selected="Compose Preview.PasswordLightPreview">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="Savoreel.app.main" />
       <option name="DEPLOY" value="true" />
@@ -230,7 +243,7 @@
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
       <method v="2" />
     </configuration>
-    <configuration name="EmailDarkPreview" type="ComposePreviewRunConfiguration" temporary="true">
+    <configuration name="EmailLightPreview" type="ComposePreviewRunConfiguration" temporary="true">
       <module name="Savoreel.app" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
@@ -241,7 +254,7 @@
       <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
       <option name="CLEAR_APP_STORAGE" value="false" />
       <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
-      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.onboarding.EmailThemeKt.EmailDarkPreview" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.onboarding.EmailThemeKt.EmailLightPreview" />
       <option name="MODE" value="specific_activity" />
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
@@ -292,7 +305,7 @@
       <option name="ACTIVITY_CLASS" value="androidx.compose.ui.tooling.PreviewActivity" />
       <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="true" />
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
-      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.onboarding.EmailThemeKt.EmailDarkPreview" />
+      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.onboarding.EmailThemeKt.EmailLightPreview" />
       <method v="2">
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
@@ -364,7 +377,7 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SettingsScreenPreviewDark" type="ComposePreviewRunConfiguration" temporary="true">
+    <configuration name="PasswordDarkPreview" type="ComposePreviewRunConfiguration" temporary="true">
       <module name="Savoreel.app" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
@@ -375,7 +388,7 @@
       <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
       <option name="CLEAR_APP_STORAGE" value="false" />
       <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
-      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.setting.SettingKt.SettingsScreenPreviewDark" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.onboarding.PasswordThemeKt.PasswordDarkPreview" />
       <option name="MODE" value="specific_activity" />
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
@@ -426,12 +439,12 @@
       <option name="ACTIVITY_CLASS" value="androidx.compose.ui.tooling.PreviewActivity" />
       <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="true" />
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
-      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.setting.SettingKt.SettingsScreenPreviewDark" />
+      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.onboarding.PasswordThemeKt.PasswordDarkPreview" />
       <method v="2">
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SignInLightPreview" type="ComposePreviewRunConfiguration" temporary="true">
+    <configuration name="PasswordLightPreview" type="ComposePreviewRunConfiguration" temporary="true">
       <module name="Savoreel.app" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
@@ -442,7 +455,7 @@
       <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
       <option name="CLEAR_APP_STORAGE" value="false" />
       <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
-      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.onboarding.SignInThemeKt.SignInLightPreview" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.onboarding.PasswordThemeKt.PasswordLightPreview" />
       <option name="MODE" value="specific_activity" />
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
@@ -493,12 +506,12 @@
       <option name="ACTIVITY_CLASS" value="androidx.compose.ui.tooling.PreviewActivity" />
       <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="true" />
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
-      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.onboarding.SignInThemeKt.SignInLightPreview" />
+      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.onboarding.PasswordThemeKt.PasswordLightPreview" />
       <method v="2">
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="UpdateNameDarkPreview" type="ComposePreviewRunConfiguration" temporary="true">
+    <configuration name="VerifyCodeDarkPreview" type="ComposePreviewRunConfiguration" temporary="true">
       <module name="Savoreel.app" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
@@ -509,7 +522,7 @@
       <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
       <option name="CLEAR_APP_STORAGE" value="false" />
       <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
-      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.onboarding.NameThemeKt.UpdateNameDarkPreview" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.onboarding.VerifyCodeThemeKt.VerifyCodeDarkPreview" />
       <option name="MODE" value="specific_activity" />
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
@@ -560,18 +573,18 @@
       <option name="ACTIVITY_CLASS" value="androidx.compose.ui.tooling.PreviewActivity" />
       <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="true" />
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
-      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.onboarding.NameThemeKt.UpdateNameDarkPreview" />
+      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.onboarding.VerifyCodeThemeKt.VerifyCodeDarkPreview" />
       <method v="2">
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Compose Preview.EmailDarkPreview" />
-        <item itemvalue="Compose Preview.SignInLightPreview" />
+        <item itemvalue="Compose Preview.PasswordLightPreview" />
+        <item itemvalue="Compose Preview.PasswordDarkPreview" />
+        <item itemvalue="Compose Preview.EmailLightPreview" />
         <item itemvalue="Compose Preview.HashTagPreview" />
-        <item itemvalue="Compose Preview.UpdateNameDarkPreview" />
-        <item itemvalue="Compose Preview.SettingsScreenPreviewDark" />
+        <item itemvalue="Compose Preview.VerifyCodeDarkPreview" />
       </list>
     </recent_temporary>
   </component>

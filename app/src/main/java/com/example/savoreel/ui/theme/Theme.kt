@@ -1,6 +1,5 @@
 package com.example.savoreel.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -11,41 +10,64 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = primaryButtonColor,
-    secondary = secondaryDarkColor,
-    background = backgroundDarkColor,
-    outline = lineColor,
-    tertiary = fontDarkColor,
-    surface = secondaryLightColor,
-    scrim = homeDarkColor
-
-)
-
 private val LightColorScheme = lightColorScheme(
-    primary = primaryButtonColor,
-    secondary = secondaryLightColor,
-    background = backgroundLightColor,
-    outline = lineColor,
-    tertiary = fontLightColor,
-    surface = secondaryDarkColor,
-    scrim = homeLightColor
+    // Button
+    primary = primaryColor,
+    onPrimary = textButtonColor,
+    primaryContainer = disableButtonColor,
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    // Background
+    background = backgroundLightColor,
+    onBackground = textPrimaryLightColor, // Font primary
+
+    // Secondary
+    secondary = secondaryLightColor,
+    onSecondary = textSecondaryLightColor, // Font secondary
+
+    // Tertiary
+    tertiary = tertiaryLightColor,
+    onTertiary = textTertiaryLightColor , // Font tertiary
+
+    // Scrim - màu nền mờ
+    scrim = backgroundBlurLightColor,
+
+    outline = outlineColor,
+
+//    scrim = homeLightColor
 )
+
+private val DarkColorScheme = darkColorScheme(
+    // Button
+    primary = primaryColor,
+    onPrimary = textButtonColor,
+    primaryContainer = disableButtonColor,
+
+    // Background
+    background = backgroundDarkColor,
+    onBackground = textPrimaryDarkColor, // Font primary
+
+    // Secondary
+    secondary = secondaryDarkColor,
+    onSecondary = textSecondaryDarkColor, // Font secondary
+
+    // Tertiary
+    tertiary = tertiaryDarkColor,
+    onTertiary = textTertiaryDarkColor, // Font tertiary
+
+    // Scrim - màu nền mờ
+    scrim = backgroundBlurDarkColor,
+
+    outline = outlineColor,
+
+//    scrim = homeDarkColor
+
+)
+
+
 
 @Composable
 fun SavoreelTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

@@ -51,8 +51,8 @@ fun Searching(navController: NavController) {
             ) {
                 Box {
                     BackArrow(
-                        onClick = { navController.popBackStack() },
-                        modifier = Modifier.align(Alignment.TopStart),
+                        navController = navController,
+                        modifier = Modifier.align(Alignment.TopStart)
                     )
                 }
                 CustomInputField(

@@ -52,18 +52,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.example.savoreel.ui.theme.primaryButtonColor
+import com.example.savoreel.ui.theme.primaryColor
 import com.example.savoreel.ui.theme.secondaryLightColor
+import com.example.savoreel.ui.theme.textButtonColor
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.delay
 
 @Composable
-fun OnboardingTheme(navController: NavController) {
+fun OnboardingTheme(navController: NavHostController) {
     val pagerState = rememberPagerState(pageCount = { 3 })
 
     LaunchedEffect(pagerState) {
@@ -99,7 +100,7 @@ fun OnboardingTheme(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(primaryButtonColor)
+                .background(primaryColor)
                 .height(320.dp)
                 .padding(24.dp)
                 .align(Alignment.BottomCenter)
@@ -134,7 +135,7 @@ fun OnboardingTheme(navController: NavController) {
                             lineHeight = 40.sp,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Bold,
-                            color = secondaryLightColor,
+                            color = textButtonColor,
                             textAlign = TextAlign.Center
                         )
                     )
@@ -146,7 +147,7 @@ fun OnboardingTheme(navController: NavController) {
                             lineHeight = 24.sp,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Normal,
-                            color = secondaryLightColor,
+                            color = textButtonColor,
                             textAlign = TextAlign.Center,
                             letterSpacing = 0.5.sp
                         )
@@ -156,26 +157,24 @@ fun OnboardingTheme(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(25.dp))
 
-                Row(horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(
-                        text = "Skip",
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            lineHeight = 24.sp,
-                            fontFamily = nunitoFontFamily,
-                            fontWeight = FontWeight.Normal,
-                            color = secondaryLightColor,
-                            textAlign = TextAlign.Center,
-                            letterSpacing = 0.5.sp
-                        ),
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { navController.navigate("sign_in_screen") }
-                    )
-                }
+                Text(
+                    text = "Skip",
+                    style = TextStyle(
+                        fontSize = 18.sp,
+                        lineHeight = 24.sp,
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        color = secondaryLightColor,
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 0.5.sp
+                    ),
+                    modifier = Modifier
+                        .padding(end = 16.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { navController.navigate("sign_in_screen") }
+                )
             }
         }
     }
@@ -218,7 +217,7 @@ fun Onboarding1Content() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(primaryButtonColor),
+            .background(primaryColor),
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -295,7 +294,7 @@ fun Onboarding2Content() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(primaryButtonColor),
+            .background(primaryColor),
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -359,7 +358,7 @@ fun Onboarding3Content() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(primaryButtonColor),
+            .background(primaryColor),
         contentAlignment = Alignment.Center
     ) {
         Box(modifier = Modifier.offset(y = -135.dp)) {
@@ -429,7 +428,7 @@ fun Hashtag(
                     fontSize = 10.sp,
                     fontFamily = nunitoFontFamily,
                     fontWeight = FontWeight.SemiBold,
-                    color = secondaryLightColor
+                    color = textButtonColor
                 )
             )
             Text(
@@ -465,7 +464,7 @@ fun PageIndicator(
                     .height(8.dp)
                     .width(if (isSelected) 24.dp else 12.dp)
                     .background(
-                        color = if (isSelected) secondaryLightColor else Color(0xFFBD4343),
+                        color = if (isSelected) textButtonColor else Color(0xFFBD4343),
                         shape = RoundedCornerShape(4.dp)
                     )
 

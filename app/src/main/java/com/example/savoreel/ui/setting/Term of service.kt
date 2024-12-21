@@ -48,8 +48,8 @@ fun TermsOfServiceScreen(navController: NavController) {
                 .fillMaxWidth()
         ) {
             BackArrow(
-                modifier = Modifier.align(Alignment.CenterStart),
-                onClick = { navController.popBackStack() }
+                navController = navController,
+                modifier = Modifier.align(Alignment.TopStart)
             )
             Text(
                 text = "Term of service",

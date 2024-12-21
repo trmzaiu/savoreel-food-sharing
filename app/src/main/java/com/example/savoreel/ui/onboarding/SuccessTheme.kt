@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,9 +29,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.example.savoreel.ui.theme.secondaryLightColor
 
 
 @Composable
@@ -75,7 +73,7 @@ fun SuccessTheme(navController: NavController) {
                     lineHeight = 20.sp,
                     fontFamily = nunitoFontFamily,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
                 )
             )
@@ -87,32 +85,23 @@ fun SuccessTheme(navController: NavController) {
                     lineHeight = 20.sp,
                     fontFamily = nunitoFontFamily,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
                 )
             )
 
             Spacer(modifier = Modifier.height(120.dp))
 
-            Button(
+            CustomButton(
+                text = "Continue",
+                enabled = true,
+                onClick = {
+                    navController.navigate("hashtag_screen")
+                },
                 modifier = Modifier
                     .width(240.dp)
                     .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                onClick = { navController.navigate("hashtag_screen")}
-            ) {
-                Text(
-                    text = "Continue",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontFamily = nunitoFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        color = secondaryLightColor
-                    )
-                )
-            }
+            )
 
         }
     }

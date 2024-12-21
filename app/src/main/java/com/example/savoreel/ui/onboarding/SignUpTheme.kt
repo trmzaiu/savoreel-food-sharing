@@ -129,7 +129,7 @@ fun SignUpScreenTheme(navController: NavController) {
                             fontSize = 14.sp,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.tertiary,
+                            color = MaterialTheme.colorScheme.onSecondary,
                         )
                     )
                 }
@@ -169,7 +169,7 @@ fun SignUpScreenTheme(navController: NavController) {
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.outline,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
                 )
                 Row(
@@ -190,7 +190,7 @@ fun SignUpScreenTheme(navController: NavController) {
                         fontSize = 16.sp,
                         lineHeight = 20.sp,
                         fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.outline,
+                        color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center,
                     )
                     Text(
@@ -215,7 +215,7 @@ fun SignUpScreenTheme(navController: NavController) {
                         lineHeight = 20.sp,
                         fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.tertiary,
+                        color = MaterialTheme.colorScheme.onSecondary,
 
                         textAlign = TextAlign.Center,
                     )
@@ -240,15 +240,14 @@ fun SignUpScreenTheme(navController: NavController) {
                         }
                 )
             }
-
-            if (showErrorDialog) {
-                ErrorDialog(
-                    title = "Couldn't sign up",
-                    message = errorMessage,
-                    onDismiss = { showErrorDialog = false }
-                )
-            }
         }
+    }
+    if (showErrorDialog) {
+        ErrorDialog(
+            title = "Couldn't sign up",
+            message = errorMessage,
+            onDismiss = { showErrorDialog = false }
+        )
     }
 }
 

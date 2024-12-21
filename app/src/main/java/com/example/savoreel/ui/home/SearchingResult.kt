@@ -71,8 +71,7 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 BackArrow(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier.align(Alignment.Top),
+                    navController = navController
                 )
                 CustomInputField(
                     value = searchQuery,
