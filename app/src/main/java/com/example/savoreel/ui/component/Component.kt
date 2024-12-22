@@ -30,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.savoreel.R
-import com.example.savoreel.ui.home.SearchItem
+import com.example.savoreel.ui.home.Post
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
@@ -183,15 +184,13 @@ fun CustomTitle(
 @Composable
 fun BackArrow(
     navController: NavController,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.padding(start = 20.dp, top = 40.dp),
 ) {
     IconButton(
         onClick = {
             navController.popBackStack()
         },
-        modifier = modifier
-            .padding(start = 20.dp, top = 40.dp)
-            .size(48.dp),
+        modifier = modifier.size(48.dp),
         content = {
             Icon(
                 painter = painterResource(id = R.drawable.chevron_left),
@@ -226,14 +225,51 @@ fun ForwardArrow(
 }
 
 @Composable
+fun navButton(
+    painter: Painter,
+    navController: NavController,
+    destination: String,
+    modifier: Modifier = Modifier,
+    isChecked: Boolean = false
+) {
+    IconButton(
+        onClick = {
+            navController.navigate(destination)
+        },
+        modifier = modifier
+            .size(48.dp)
+            .clip(RoundedCornerShape(50)),
+        colors = IconButtonDefaults.filledIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f)
+        )
+    ) {
+        if (isChecked){
+            Image(
+                painter = painter,
+                contentDescription = null,
+                modifier = modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(50)),
+            )
+        } else {
+            Icon(
+                painter = painter,
+                contentDescription = null,
+                modifier = modifier,
+                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f)
+            )
+        }
+    }
+}
+
+@Composable
 fun IconTheme(
     imageVector: ImageVector,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.size(40.dp),
     alpha: Float
 ) {
     Box (
-        modifier = modifier
-            .size(40.dp)
+        modifier = Modifier
             .clip(shape = CircleShape)
             .background(MaterialTheme.colorScheme.surface.copy(alpha = alpha)),
         contentAlignment = Alignment.Center
@@ -270,7 +306,7 @@ fun ImageCustom(
 }
 
 @Composable
-fun GridImage(posts: List<SearchItem>, onClick: (SearchItem) -> Unit){
+fun GridImage(posts: List<Post>, onClick: (Post) -> Unit){
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 100.dp),
         contentPadding = PaddingValues(5.dp),

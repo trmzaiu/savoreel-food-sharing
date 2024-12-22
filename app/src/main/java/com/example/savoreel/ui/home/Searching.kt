@@ -46,24 +46,17 @@ fun Searching(navController: NavController) {
         ) {
             Row(
                 horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+//                modifier = Modifier.fillMaxWidth(),
             ) {
-                Box {
-                    BackArrow(
-                        navController = navController,
-                        modifier = Modifier.align(Alignment.TopStart)
-                    )
-                }
+                BackArrow(navController = navController)
                 CustomInputField(
-                    value = "searchQuery",
+                    value = "search",
                     onValueChange = {},
                     placeholder = "Search...",
                     modifier = Modifier
-                        .height(50.dp)
-                        .padding(top = 15.dp, start = 5.dp, end = 20.dp)
+                        .padding(top = 40.dp, start = 5.dp, end = 20.dp)
                 )
-
             }
             Column (modifier = Modifier.padding(start = 20.dp, top = 10.dp)) {
                 SearchCategory(
@@ -109,21 +102,20 @@ fun SearchCategory(title: String, items: List<String>, isSuggestion: Boolean, na
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp),
-            color = MaterialTheme.colorScheme.tertiary
+            modifier = Modifier.padding(bottom = 5.dp),
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             maxLines = 3,
             overflow = FlowRowOverflow.Clip,
-            horizontalArrangement = Arrangement.Start,
-            verticalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
 
         ) {
             items.forEach { item ->
                 SearchItemCard(item = item, isSuggestion = isSuggestion, navController = navController)
-                Spacer(modifier = Modifier.width(8.dp))
             }
         }
 
@@ -143,20 +135,20 @@ fun SearchItemCard(item: String, isSuggestion: Boolean, navController: NavContro
             modifier = Modifier
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondary)
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .padding(horizontal = 12.dp, vertical = 4.dp)
         ) {
             Image(
                 painter = painterResource(if (isSuggestion) R.drawable.ic_increase_red else R.drawable.ic_history),
                 contentDescription = null,
-                modifier = Modifier.size(16.dp),
-                colorFilter = tint(if (isSuggestion) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
+                modifier = Modifier.size(20.dp),
+                colorFilter = tint(if (isSuggestion) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground)
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(5.dp))
 
             Text(
                 text = item,
-                color = if (isSuggestion) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                color = if (isSuggestion) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

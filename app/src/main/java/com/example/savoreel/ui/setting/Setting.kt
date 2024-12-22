@@ -73,7 +73,6 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
                  ) {
                      BackArrow(
                          navController = navController,
-                         modifier = Modifier.align(Alignment.TopStart)
                      )
 
                      Text(

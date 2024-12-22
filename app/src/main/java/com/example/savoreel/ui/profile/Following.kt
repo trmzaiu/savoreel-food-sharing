@@ -2,6 +2,7 @@ package com.example.savoreel.ui.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,71 +45,70 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
 fun FollowScreen(navController: NavController) {
-    var selectedTab by remember { mutableStateOf(0) } // Quản lý trạng thái nút
+    var selectedTab by remember { mutableIntStateOf(0) }
     val followingList = getFollowingData()
     val followerList = getFollowerData()
+    val items = if (selectedTab == 0) followingList else followerList
     val tabs = listOf("Following", "Follower")
-    var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }  // Add this state
+    var isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.background) // Đặt nền màu sáng
-                .padding(horizontal = 20.dp)
+        Box(
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
+            Column(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                BackArrow(
-                    navController = navController,
-                    modifier = Modifier.align(Alignment.TopStart)
-                )
-                Text(
-                    text = "Name",
-                    fontFamily = nunitoFontFamily,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 32.sp,
-                    color = MaterialTheme.colorScheme.tertiary,
+                Box(
                     modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(top = 40.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(30.dp))
-            // Button Group
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                TabRow(
-                    selectedTabIndex = selectedTab,
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.tertiary
+                        .fillMaxWidth()
+                        .background(color = MaterialTheme.colorScheme.background)
                 ) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedTab == index,
-                            onClick = { selectedTab = index },
-                            text = {
-                                Text(
-                                    text = title,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontFamily = nunitoFontFamily,
-                                    color = if (selectedTab == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
-                                ) }
-                        )
+                    BackArrow(
+                        navController = navController,
+                        modifier = Modifier.align(Alignment.TopStart)
+                    )
+
+                    Text(
+                        text = "Name",
+                        fontFamily = nunitoFontFamily,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 32.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(top = 40.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(30.dp))
+                // Button Group
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    TabRow(
+                        selectedTabIndex = selectedTab,
+                        containerColor = MaterialTheme.colorScheme.background,
+                        contentColor = MaterialTheme.colorScheme.onBackground
+                    ) {
+                        tabs.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTab == index,
+                                onClick = { selectedTab = index },
+                                text = {
+                                    Text(
+                                        text = title,
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontFamily = nunitoFontFamily,
+                                        color = if (selectedTab == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // User List based on tab
-                val items = if (selectedTab == 0) followingList else followerList
                 UserList(users = items)
             }
         }
@@ -119,7 +120,7 @@ fun UserList(users: List<User>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(4.dp),
+            .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(users.size) { index ->
@@ -133,6 +134,10 @@ fun UserItem(user: User) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { /* Thêm hành động khi bấm vào user */ }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -151,10 +156,9 @@ fun UserItem(user: User) {
             fontSize = 20.sp,
             fontWeight = FontWeight.Normal,
             fontFamily = nunitoFontFamily,
-            color = MaterialTheme.colorScheme.tertiary,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { /* Thêm hành động khi bấm vào user */ }
                 .padding(horizontal = 16.dp)
         )
     }
@@ -194,4 +198,5 @@ data class User(val name: String, val avatarRes: Int)
 @Composable
 fun FollowScreenPreview() {
     FollowScreen(navController = rememberNavController())
+
 }

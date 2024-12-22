@@ -31,7 +31,6 @@ import com.example.savoreel.ui.onboarding.SignUpScreenTheme
 import com.example.savoreel.ui.onboarding.SuccessTheme
 import com.example.savoreel.ui.onboarding.VerifyCodeTheme
 import com.example.savoreel.ui.profile.FollowScreen
-import com.example.savoreel.ui.profile.ProfilePicturesData
 import com.example.savoreel.ui.profile.ProfileScreen
 import com.example.savoreel.ui.setting.NotificationSetting
 import com.example.savoreel.ui.setting.SettingsScreen
@@ -53,7 +52,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
                 OnboardingTheme(navController = navController)
             }
 
-            composable("sign_in_screen") {backStackEntry ->
+            composable("sign_in_screen") { backStackEntry ->
                 SignInScreenTheme(navController, userViewModel)
             }
 
@@ -69,7 +68,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
                 HashTagTheme(navController = navController)
             }
 
-            composable("settings_screen/{userId}") {backStackEntry ->
+            composable("settings_screen/{userId}") { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: -1
 
                 SettingsScreen(navController, themeViewModel, userViewModel, userId)
@@ -77,7 +76,8 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
             composable("name_screen/{userId}?isChangeName={isChangeName}") { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: 1
-                val isChangeName = backStackEntry.arguments?.getString("isChangeName")?.toBoolean() ?: false
+                val isChangeName =
+                    backStackEntry.arguments?.getString("isChangeName")?.toBoolean() ?: false
 
                 NameTheme(
                     navController = navController,
@@ -109,6 +109,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
                                     popUpTo("password_screen") { inclusive = true }
                                 }
                             }
+
                             "change_password" -> {
                                 navController.navigate("change_password_screen/${userId}") {
                                     popUpTo("password_screen") { inclusive = true }
@@ -121,7 +122,8 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
             composable("email_screen/{userId}?isChangeEmail={isChangeEmail}") { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
-                val isChangeEmail = backStackEntry.arguments?.getString("isChangeEmail")?.toBoolean() ?: false
+                val isChangeEmail =
+                    backStackEntry.arguments?.getString("isChangeEmail")?.toBoolean() ?: false
 
                 EmailTheme(navController, isChangeEmail, userViewModel, userId)
             }
@@ -136,24 +138,27 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
                 ChangePasswordTheme(navController, userViewModel, userId)
             }
 
-            composable("notification"){
+            composable("notification") {
                 Notifications(navController = navController)
             }
 
-            composable("searching"){
+            composable("searching") {
                 Searching(navController = navController)
             }
-        composable("notification"){
-            Notifications(navController = navController)
-        }
-        composable("takephoto_screen") {
-            PostView(navController = navController)
-        }
-        composable("searching"){
-            Searching(navController = navController)
-        }
+            composable("notification") {
+                Notifications(navController = navController)
+            }
+            composable("takephoto_screen") {
+                PostView(navController = navController)
+            }
+            composable("searching") {
+                Searching(navController = navController)
+            }
 
-            composable("searching_result/{query}", arguments = listOf(navArgument("query") { type = NavType.StringType })) { backStackEntry ->
+            composable(
+                "searching_result/{query}",
+                arguments = listOf(navArgument("query") { type = NavType.StringType })
+            ) { backStackEntry ->
                 val query = backStackEntry.arguments?.getString("query") ?: ""
                 SearchingResult(navController = navController, searchQuery = query)
             }
@@ -171,16 +176,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             }
 
             composable("profile_screen") {
-                val profile = mapOf(
-                    "24/2/2024" to listOf(
-                        ProfilePicturesData("Title", "Description", "9:41 AM"),
-                        ProfilePicturesData("Title", "Description", "9:41 AM"),
-                        ProfilePicturesData("Title", "Description", "9:41 AM"),
-                        ProfilePicturesData("Title", "Description", "9:41 AM"),
-                        ProfilePicturesData("Title", "Description", "9:41 AM"),
-                        ProfilePicturesData("Title", "Description", "9:41 AM")
-                    ))
-                ProfileScreen(profile = profile, navController = navController)
+                ProfileScreen(navController = navController)
             }
         }
     }

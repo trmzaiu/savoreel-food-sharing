@@ -60,7 +60,7 @@ fun GridPost(navController: NavController) {
                     unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = MaterialTheme.colorScheme.tertiary,
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
                 ),
                 textStyle = MaterialTheme.typography.bodyLarge
             )
@@ -82,7 +82,7 @@ fun GridPost(navController: NavController) {
                 }
             }
         }
-        GridImage(searchresults, {})
+        GridImage(posts, {})
     }
 }
 

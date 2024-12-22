@@ -15,29 +15,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -50,10 +49,9 @@ import com.example.savoreel.ui.theme.SavoreelTheme
 
 @Composable
 fun SearchingResult(navController: NavController, searchQuery: String) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("All", "People", "Post")
-    val persons = searchresults.filter { it.type == "Person" }
-    val posts = searchresults.filter { it.type == "Post" }
+    val (users, setResultList) = remember { mutableStateOf(users) }
 
     Box(
         modifier = Modifier
@@ -67,19 +65,16 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
             // Top bar with Back Arrow and Input Field
             Row(
                 horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                BackArrow(
-                    navController = navController
-                )
+                BackArrow(navController = navController)
                 CustomInputField(
                     value = searchQuery,
                     onValueChange = {},
                     placeholder = "Search...",
                     modifier = Modifier
-                        .height(50.dp)
-                        .padding(top = 15.dp, start = 5.dp, end = 20.dp)
+                        .padding(top = 40.dp, start = 5.dp, end = 20.dp)
                 )
             }
 
@@ -88,7 +83,7 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
                 selectedTabIndex = selectedTab,
                 modifier = Modifier.fillMaxWidth(),
                 containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.tertiary
+                contentColor = MaterialTheme.colorScheme.onBackground
             ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
@@ -105,9 +100,28 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
                 "People" -> LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
                     content = {
-                        items(persons.size) { index ->
-                            SearchResultItem(result = persons[index], onFollowClick = {})
+                        items(
+                            count = users.size,
+                            key = { index -> users[index].userID }
+                        ) { index ->
+                            val person = users[index]
+                            SearchResultItem(
+                                result = person,
+                                onFollowClick = { updatedItem ->
+                                    // Cập nhật danh sách bằng cách tạo danh sách mới với các thay đổi cần thiết
+                                    setResultList(
+                                        users.map { user ->
+                                            if (user.userID == updatedItem.userID) {
+                                                user.copy(isFollowing = !user.isFollowing)
+                                            } else {
+                                                user
+                                            }
+                                        }
+                                    )
+                                }
+                            )
                         }
+
                     }
                 )
                 "Post" -> GridImage(
@@ -115,19 +129,33 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
                     onClick = {}
                 )
                 "All" -> {
-                    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                         Text(
                             text = "People",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(8.dp),
-                            color = MaterialTheme.colorScheme.tertiary
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            color = MaterialTheme.colorScheme.onBackground
                         )
-                        Column(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 20.dp)) {
                             val displayCount = 3
-                            for (person in persons.take(displayCount)) {
-                                SearchResultItem(result = person, onFollowClick = {})
+                            users.take(displayCount).forEach { person ->
+                                SearchResultItem(
+                                    result = person,
+                                    onFollowClick = { updatedItem ->
+                                        setResultList(
+                                            users.map { user ->
+                                                if (user.userID == updatedItem.userID) {
+                                                    user.copy(isFollowing = !user.isFollowing)
+                                                } else {
+                                                    user
+                                                }
+                                            }
+                                        )
+                                    }
+                                )
                             }
                         }
+
 
                         Text(
                             text = "See more",
@@ -138,13 +166,11 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
                             style = MaterialTheme.typography.bodySmall
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
                         Text(
                             text = "Posts",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(8.dp),
-                            color = MaterialTheme.colorScheme.tertiary
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         GridImage(
                             posts = posts.take(9),
@@ -167,54 +193,41 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
 }
 
 @Composable
-fun SearchResultItem(result: SearchItem, onFollowClick: (SearchItem) -> Unit) {
+fun SearchResultItem(result: User, onFollowClick: (User) -> Unit) {
     Row(
         modifier = Modifier
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .fillMaxWidth().padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            painter = painterResource(id = result.imageRes),
+            painter = painterResource(id = result.avatar),
             contentDescription = null,
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onSurface)
+            modifier = Modifier.size(40.dp).clip(MaterialTheme.shapes.extraLarge)
         )
-        Spacer(modifier = Modifier.width(16.dp))
-
+        Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = result.name,
-            style = MaterialTheme.typography.bodyMedium,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
             modifier = Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.tertiary
+            style = MaterialTheme.typography.bodyMedium
         )
-
         Button(
-            onClick = {
-                result.isFollowing = !result.isFollowing // Ensure state change here
-                onFollowClick(result) // Trigger the callback with the updated result
-            },
-            modifier = Modifier
-                .clip(MaterialTheme.shapes.large)
-                .height(40.dp)
-                .background(if (result.isFollowing) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary),
+            onClick = { onFollowClick(result) },
+            colors = ButtonDefaults.buttonColors(containerColor = if(result.isFollowing) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary)
         ) {
-            Icon(
+            Image(
                 imageVector = if (result.isFollowing) Icons.Default.Check else Icons.Default.Add,
                 contentDescription = null,
-                tint = if (result.isFollowing) MaterialTheme.colorScheme.tertiary else Color.White
+                colorFilter = ColorFilter.tint(if (result.isFollowing) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onPrimary)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(5.dp))
             Text(
                 text = if (result.isFollowing) "Unfollow" else "Follow",
-                color = if (result.isFollowing) MaterialTheme.colorScheme.tertiary else Color.White
+                color = if (result.isFollowing) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onPrimary
             )
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
@@ -236,48 +249,25 @@ fun SearchingResultPreview1() {
     }
 }
 
-data class SearchItem(
-    val type: String,
-    val name: String,
+data class Post(
+    val postid: Int,
+    val userid: Int,
+    val title: String,
     val imageRes: Int,
+    val date: Int,
+)
+
+data class User(
+    val userID: Int,
+    val name: String,
+    val avatar: Int,
     var isFollowing: Boolean = false
 )
 
-val searchresults = listOf(
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Post", "Post", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-    SearchItem("Person", "Person", R.drawable.food),
-)
+val posts = List(24) { i ->
+    Post(i + 1, i + 1, "Post ${i + 1}", R.drawable.food, i)
+}
+
+var users = List(12) { i ->
+    User(i + 1, "Person ${i + 1}", R.drawable.food)
+}

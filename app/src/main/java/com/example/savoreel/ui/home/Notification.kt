@@ -2,12 +2,12 @@ package com.example.savoreel.ui.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,32 +41,33 @@ fun Notifications(navController: NavController) {
     val notifications = notifications
 
     Box (modifier = Modifier.background(MaterialTheme.colorScheme.background)){
-        BackArrow(
-            navController = navController,
-            modifier = Modifier.align(Alignment.TopStart)
-        )
-
-        Text(
-            text = "Notifications",
-            color = MaterialTheme.colorScheme.tertiary,
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top=40.dp),
-        )
-
-        Column {
-            Spacer(modifier = Modifier.height(70.dp))
-
+        Column(modifier = Modifier.padding(top = 40.dp).padding(horizontal = 20.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(50.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+                content = {
+                    BackArrow(
+                        navController = navController,
+                        modifier = Modifier
+                            .padding(0.dp)
+                            .size(48.dp)
+                    )
+                    Text(
+                        text = "Notifications",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                }
+            )
             LazyColumn(
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp),
             ) {
                 notifications.forEach { (date, items) ->
                     item {
                         Text(
                             text = date,
-                            color = MaterialTheme.colorScheme.tertiary,
-                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
@@ -115,7 +116,7 @@ fun NotificationItem(data: NotificationItemData) {
                 }
             },
             fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.tertiary,
+            color = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(0.7f)
