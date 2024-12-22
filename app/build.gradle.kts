@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -67,6 +68,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-flowlayout:0.24.13-rc")
     implementation("com.google.accompanist:accompanist-navigation-animation:0.24.13-rc")
     implementation(libs.androidx.navigation.compose)
+    implementation("com.github.bumptech.glide:compose:1.0.0-alpha.1")
     implementation(libs.androidx.storage)
 
     // Correct dependencies for UI testing
@@ -80,6 +82,15 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("androidx.camera:camera-core:1.4.1")
+    implementation("androidx.camera:camera-camera2:1.4.1")
+    implementation("androidx.camera:camera-lifecycle:1.4.1")
+    implementation("androidx.camera:camera-view:1.4.1")
+
+
+    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
+    implementation("com.google.firebase:firebase-analytics")
     implementation ("androidx.compose.ui:ui:1.7.6" )
     implementation ("androidx.compose.material3:material3:1.3.1")
     implementation ("androidx.navigation:navigation-compose:2.8.5")

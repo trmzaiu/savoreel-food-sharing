@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.AppNavigation
+import com.example.savoreel.ui.home.PostView
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.ThemeViewModel
 

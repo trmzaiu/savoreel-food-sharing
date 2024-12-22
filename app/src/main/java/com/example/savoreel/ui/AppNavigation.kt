@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.home.Notifications
+import com.example.savoreel.ui.home.PostView
 import com.example.savoreel.ui.home.Searching
 import com.example.savoreel.ui.home.SearchingResult
 import com.example.savoreel.ui.onboarding.ChangePasswordTheme
@@ -145,6 +146,15 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             composable("searching"){
                 Searching(navController = navController)
             }
+        composable("notification"){
+            Notifications(navController = navController)
+        }
+        composable("takephoto_screen") {
+            PostView(navController = navController)
+        }
+        composable("searching"){
+            Searching(navController = navController)
+        }
 
             composable("searching_result/{query}", arguments = listOf(navArgument("query") { type = NavType.StringType })) { backStackEntry ->
                 val query = backStackEntry.arguments?.getString("query") ?: ""
