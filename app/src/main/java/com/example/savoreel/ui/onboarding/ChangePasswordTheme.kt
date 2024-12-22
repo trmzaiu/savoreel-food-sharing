@@ -15,19 +15,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.CustomTitle
 import com.example.savoreel.ui.component.ErrorDialog
-import com.example.savoreel.ui.theme.SavoreelTheme
 
 @Composable
-fun ChangePasswordTheme(navController: NavController) {
+fun ChangePasswordTheme(navController: NavController, userViewModel: UserViewModel, userId: Int) {
+    val user = userViewModel.findUserById(userId)
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -114,24 +113,26 @@ fun ChangePasswordTheme(navController: NavController) {
             message = errorMessage,
             onDismiss = {
                 showConfirmDialog = false
-                navController.navigate("sign_in_screen")
+                navController.navigate("sign_in_screen") {
+                    popUpTo("sign_in_screen") { inclusive = true }
+                }
             }
         )
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ResetPasswordDarkPreview() {
-    SavoreelTheme(darkTheme = true) {
-        ChangePasswordTheme(navController = rememberNavController())
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ResetPasswordLightPreview() {
-    SavoreelTheme(darkTheme = false) {
-        ChangePasswordTheme(navController = rememberNavController())
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ResetPasswordDarkPreview() {
+//    SavoreelTheme(darkTheme = true) {
+//        ChangePasswordTheme(navController = rememberNavController())
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun ResetPasswordLightPreview() {
+//    SavoreelTheme(darkTheme = false) {
+//        ChangePasswordTheme(navController = rememberNavController())
+//    }
+//}

@@ -36,12 +36,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.CustomSwitch
 import com.example.savoreel.ui.component.ForwardArrow
@@ -52,11 +51,12 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel) {
+fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel, userId: Int) {
     var showModal by remember { mutableStateOf(false) }
-    var currentName by remember { mutableStateOf("Thu") }
 
     val isDarkModeEnabled by remember { themeViewModel.isDarkModeEnabled }
+
+    val user = userViewModel.findUserById(userId)
 
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
          Box(
@@ -138,16 +138,28 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel)
 
                          Spacer(modifier = Modifier.height(15.dp))
 
-                         Text(
-                             text = currentName,
-                             fontFamily = nunitoFontFamily,
-                             textAlign = TextAlign.Center,
-                             fontWeight = FontWeight.Bold,
-                             fontSize = 24.sp,
-                             color = MaterialTheme.colorScheme.onBackground,
-                             modifier = Modifier.fillMaxWidth()
+                         if (user != null) {
+                             Text(
+                                 text = user.name,
+                                 fontFamily = nunitoFontFamily,
+                                 textAlign = TextAlign.Center,
+                                 fontWeight = FontWeight.Bold,
+                                 fontSize = 24.sp,
+                                 color = MaterialTheme.colorScheme.onBackground,
+                                 modifier = Modifier.fillMaxWidth()
+                             )
+                         } else {
+                             Text(
+                                 text = "User not found",
+                                 fontFamily = nunitoFontFamily,
+                                 textAlign = TextAlign.Center,
+                                 fontWeight = FontWeight.Bold,
+                                 fontSize = 24.sp,
+                                 color = MaterialTheme.colorScheme.error,
+                                 modifier = Modifier.fillMaxWidth()
+                             )
+                         }
 
-                         )
                          // General Section
                          Spacer(modifier = Modifier.height(20.dp))
 
@@ -156,19 +168,19 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel)
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_name),
                                  text = "Edit Name",
                                  navController = navController,
-                                 destination = "name_screen/${currentName}",
+                                 destination = "name_screen/${userId}?isCreateMode=false",
                              )
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_mail),
                                  text = "Change Email",
                                  navController = navController,
-                                 destination = "email_screen?isChangeEmail=false",
+                                 destination = "password_screen/${userId}?actionType=change_email",
                              )
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_key),
                                  text = "Change Password",
                                  navController = navController,
-                                 destination = "change_password_screen",
+                                 destination = "password_screen/${userId}?actionType=change_password",
                              )
                          }
 
@@ -372,18 +384,18 @@ fun handleAvatarOption(option: String) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreviewDark() {
-    SavoreelTheme(darkTheme = true, dynamicColor = true) {
-        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel()) // Pass the navController as normal
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreview() {
-    SavoreelTheme(darkTheme = false, dynamicColor = false) {
-        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel()) // Pass the navController as normal
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun SettingsScreenPreviewDark() {
+//    SavoreelTheme(darkTheme = true, dynamicColor = true) {
+//        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel(), currentName = "My Vu", userId = 1) // Pass the navController as normal
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun SettingsScreenPreview() {
+//    SavoreelTheme(darkTheme = false, dynamicColor = false) {
+//        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel()) // Pass the navController as normal
+//    }
+//}

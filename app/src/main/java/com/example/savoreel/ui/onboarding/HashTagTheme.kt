@@ -205,10 +205,10 @@ fun HashtagItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HashTagPreview() {
-    SavoreelTheme() {
-        HashTagTheme(navController = rememberNavController())
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun HashTagPreview() {
+//    SavoreelTheme() {
+//        HashTagTheme(navController = rememberNavController())
+//    }
+//}

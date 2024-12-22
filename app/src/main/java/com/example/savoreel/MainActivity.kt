@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.AppNavigation
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.ThemeViewModel
@@ -20,13 +21,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val themeViewModel: ThemeViewModel = viewModel()
+            val userViewModel: UserViewModel = viewModel()
             val isDarkMode by themeViewModel.isDarkModeEnabled
 
             SavoreelTheme(darkTheme = isDarkMode) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val navController = rememberNavController()
-                    // Pass the existing themeViewModel to AppNavigation
-                    AppNavigation(navController = navController, themeViewModel = themeViewModel)
+                    AppNavigation(navController = navController, themeViewModel = themeViewModel, userViewModel = userViewModel)
                 }
             }
         }

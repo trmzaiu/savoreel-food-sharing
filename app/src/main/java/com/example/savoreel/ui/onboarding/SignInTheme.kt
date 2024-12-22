@@ -31,9 +31,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.model.LoginState
+import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.ErrorDialog
@@ -42,21 +44,13 @@ import com.example.savoreel.ui.theme.domineFontFamily
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
-fun SignInScreenTheme(navController: NavHostController) {
+fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
 
-    val validEmail = "example@gmail.com"
-    val validPassword = "12345678"
-
     val isFormValid = email.isNotEmpty() && password.isNotEmpty()
-
-
-    fun validateLogin(email: String, password: String): Boolean {
-        return email == validEmail && password == validPassword
-    }
 
     Box(
         modifier = Modifier
@@ -147,11 +141,19 @@ fun SignInScreenTheme(navController: NavHostController) {
                 text = "Sign in",
                 enabled = isFormValid,
                 onClick = {
-                    if (!validateLogin(email, password)) {
-                        errorMessage = "Make sure you entered your email and password correctly and try again."
-                        showErrorDialog = true
-                    } else {
-                        println("Email: $email, Password: $password")
+                    userViewModel.login(email, password)
+                    val loginState = userViewModel.loginState.value
+                    when (loginState) {
+                        is LoginState.Success -> {
+                            navController.navigate("settings_screen/${loginState.user.userId}")
+                        }
+                        is LoginState.Error -> {
+                            errorMessage = loginState.message
+                            showErrorDialog = true
+                        }
+                        else -> {
+                            // Idle or Loading, handle as needed
+                        }
                     }
                 }
             )
@@ -190,7 +192,7 @@ fun SignInScreenTheme(navController: NavHostController) {
                                 indication = null
                             ) {
                                 println("Sign in with google")
-                                navController.navigate("settings_screen")
+//                                navController.navigate("settings_screen/${userId}")
                             }
                     )
 
@@ -261,14 +263,14 @@ fun SignInScreenTheme(navController: NavHostController) {
 @Composable
 fun SignInDarkPreview() {
     SavoreelTheme(darkTheme = true, dynamicColor = false) {
-        SignInScreenTheme(navController = rememberNavController())
+        SignInScreenTheme(navController = rememberNavController(), userViewModel = UserViewModel())
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun SignInLightPreview() {
-    SavoreelTheme(darkTheme = false, dynamicColor = false) {
-        SignInScreenTheme(navController = rememberNavController())
-    }
-}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun SignInLightPreview() {
+//    SavoreelTheme(darkTheme = false, dynamicColor = false) {
+//        SignInScreenTheme(navController = rememberNavController())
+//    }
+//}
