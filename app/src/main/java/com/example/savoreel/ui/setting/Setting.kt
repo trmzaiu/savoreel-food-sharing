@@ -36,9 +36,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
@@ -53,7 +55,6 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 @Composable
 fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel, userId: Int) {
     var showModal by remember { mutableStateOf(false) }
-
     val isDarkModeEnabled by remember { themeViewModel.isDarkModeEnabled }
 
     val user = userViewModel.findUserById(userId)
@@ -69,7 +70,6 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
                      modifier = Modifier
                          .fillMaxWidth()
                          .background(color = MaterialTheme.colorScheme.background)
-//                         .shadow(elevation = 4.dp, spotColor = Color(0x80000000), ambientColor = Color(0x40000000))
                  ) {
                      BackArrow(
                          navController = navController,
@@ -384,13 +384,13 @@ fun handleAvatarOption(option: String) {
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun SettingsScreenPreviewDark() {
-//    SavoreelTheme(darkTheme = true, dynamicColor = true) {
-//        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel(), currentName = "My Vu", userId = 1) // Pass the navController as normal
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreviewDark() {
+    SavoreelTheme(darkTheme = true, dynamicColor = true) {
+        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel(), userViewModel = UserViewModel(), userId = 1) // Pass the navController as normal
+    }
+}
 //
 //@Preview(showBackground = true)
 //@Composable

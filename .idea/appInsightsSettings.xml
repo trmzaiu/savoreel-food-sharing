@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.savoreel" />
+                  <option name="mobileSdkAppId" value="1:712995394518:android:51b29852bb6c394b56ca77" />
+                  <option name="projectId" value="savoreel-0001" />
+                  <option name="projectNumber" value="712995394518" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

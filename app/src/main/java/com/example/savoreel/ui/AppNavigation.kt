@@ -54,10 +54,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             }
 
             composable("sign_in_screen") {backStackEntry ->
-                SignInScreenTheme(
-                    navController = navController,
-                    userViewModel = userViewModel,
-                )
+                SignInScreenTheme(navController, userViewModel)
             }
 
             composable("sign_up_screen") {
