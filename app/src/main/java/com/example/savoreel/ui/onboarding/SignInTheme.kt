@@ -152,6 +152,7 @@ fun SignInScreenTheme(navController: NavHostController) {
                         showErrorDialog = true
                     } else {
                         println("Email: $email, Password: $password")
+                        navController.navigate("takephoto_screen")
                     }
                 }
             )
