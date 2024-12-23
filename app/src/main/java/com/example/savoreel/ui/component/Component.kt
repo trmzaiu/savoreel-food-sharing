@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.savoreel.R
-import com.example.savoreel.ui.home.Post
+import com.example.savoreel.model.Post
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
@@ -306,15 +306,13 @@ fun ImageCustom(
 }
 
 @Composable
-fun GridImage(posts: List<Post>, onClick: (Post) -> Unit){
+fun GridImage(posts: List<Post>, onClick: (Post) -> Unit, modifier: Modifier = Modifier){
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 100.dp),
         contentPadding = PaddingValues(5.dp),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
-        modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .padding(top = 20.dp)
+        modifier = modifier
     ) {
         items(posts) { post ->
             ImageCustom(
@@ -397,3 +395,36 @@ fun CustomSwitch(
     }
 }
 
+@Composable
+fun PostTopBar(onNavigateTo: NavController) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            navButton(
+                painter = painterResource(R.drawable.default_avatar),
+                navController = onNavigateTo,
+                destination = "",
+                isChecked = true
+            )
+        }
+        Row {
+            navButton(
+                painter = painterResource(id = R.drawable.ic_search),
+                navController = onNavigateTo,
+                destination = "",
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            navButton(
+                painter = painterResource(id = R.drawable.ic_noti),
+                navController = onNavigateTo,
+                destination = "",
+            )
+        }
+    }
+}

@@ -15,21 +15,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,79 +46,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.savoreel.R
+import com.example.savoreel.ui.component.PostTopBar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.secondaryDarkColor
 import kotlinx.coroutines.launch
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PostTopBar(onNavigateTo: NavHostController) {
-    TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White
-        ),
-        title = {},
-        modifier = Modifier
-            .padding(10.dp, 5.dp, 10.dp, 0.dp),
-        actions = {
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xF0F0F0F0))
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_search),
-                    contentDescription = "Search",
-                    modifier = Modifier
-                        .size(30.dp)
-                        .align(Alignment.Center)
-                        .clickable { }
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xF0F0F0F0))
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_noti),
-                    contentDescription = "Notifications",
-                    modifier = Modifier
-                        .size(30.dp)
-                        .align(Alignment.Center)
-                        .clickable { }
-
-                )
-            }
-        },
-        navigationIcon = {
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xF0F0F0F0))
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_avar),
-                    contentDescription = "User Icon",
-                    modifier = Modifier
-                        .size(30.dp)
-                        .align(Alignment.Center)
-                        .clickable { }
-                )
-            }
-        }
-    )
-}
 
 
 @OptIn(ExperimentalGlideComposeApi::class, ExperimentalMaterial3Api::class)
@@ -131,7 +63,7 @@ fun PostTopBar(onNavigateTo: NavHostController) {
 fun PostView(
     navController : NavHostController,
     postViewModel: PostViewModel = viewModel(),
-    onNavigateTo: NavHostController = rememberNavController()
+    onNavigateTo: NavController = rememberNavController()
 ) {
     val photoUri by postViewModel.photoUri
     val isPhotoTaken by postViewModel.isPhotoTaken

@@ -26,6 +26,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.model.postss
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.GridImage
@@ -49,7 +51,7 @@ import com.example.savoreel.ui.theme.SavoreelTheme
 
 @Composable
 fun SearchingResult(navController: NavController, searchQuery: String) {
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(2) }
     val tabs = listOf("All", "People", "Post")
     val (users, setResultList) = remember { mutableStateOf(users) }
 
@@ -125,18 +127,18 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
                     }
                 )
                 "Post" -> GridImage(
-                    posts = posts,
-                    onClick = {}
+                    posts = postss,
+                    onClick = {},
+                    modifier = Modifier.padding(horizontal = 20.dp)
                 )
                 "All" -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
+                    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
                         Text(
                             text = "People",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(horizontal = 20.dp),
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 20.dp)) {
+                        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                             val displayCount = 3
                             users.take(displayCount).forEach { person ->
                                 SearchResultItem(
@@ -169,11 +171,11 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
                         Text(
                             text = "Posts",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(horizontal = 20.dp),
+                            modifier = Modifier.padding(vertical = 8.dp),
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         GridImage(
-                            posts = posts.take(9),
+                            posts = postss.take(9),
                             onClick = {}
                         )
 
@@ -249,13 +251,7 @@ fun SearchingResultPreview1() {
     }
 }
 
-data class Post(
-    val postid: Int,
-    val userid: Int,
-    val title: String,
-    val imageRes: Int,
-    val date: Int,
-)
+
 
 data class User(
     val userID: Int,
@@ -263,10 +259,6 @@ data class User(
     val avatar: Int,
     var isFollowing: Boolean = false
 )
-
-val posts = List(24) { i ->
-    Post(i + 1, i + 1, "Post ${i + 1}", R.drawable.food, i)
-}
 
 var users = List(12) { i ->
     User(i + 1, "Person ${i + 1}", R.drawable.food)

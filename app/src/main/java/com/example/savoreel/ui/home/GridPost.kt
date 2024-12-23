@@ -1,9 +1,11 @@
 package com.example.savoreel.ui.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,7 +28,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.savoreel.model.postss
 import com.example.savoreel.ui.component.GridImage
+import com.example.savoreel.ui.component.PostTopBar
 import com.example.savoreel.ui.theme.SavoreelTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,53 +40,62 @@ fun GridPost(navController: NavController) {
     val options = listOf("Everyone", "Follower")
     var expanded by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)
-    ) {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded },
+    Box (
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background)
+    ){
+        Column(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
+                .padding(top = 40.dp)
+                .padding(horizontal = 20.dp)
         ) {
-            TextField(
-                value = selectedOption,
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .height(50.dp)
-                    .width(180.dp)
-                    .clip(MaterialTheme.shapes.extraLarge),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                ),
-                textStyle = MaterialTheme.typography.bodyLarge
-            )
-
-            ExposedDropdownMenu(
+            PostTopBar(navController)
+            ExposedDropdownMenuBox(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
             ) {
-                options.forEach { selectionOption ->
-                    DropdownMenuItem(
-                        text = { Text(selectionOption) },
-                        onClick = {
-                            selectedOption = selectionOption
-                            expanded = false
-                        },
+                TextField(
+                    value = selectedOption,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .height(50.dp)
+                        .width(100.dp)
+                        .clip(MaterialTheme.shapes.extraLarge),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.secondary,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    ),
+                    textStyle = MaterialTheme.typography.bodyLarge
+                )
 
-                    )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
+                ) {
+                    options.forEach { selectionOption ->
+                        DropdownMenuItem(
+                            text = { Text(selectionOption) },
+                            onClick = {
+                                selectedOption = selectionOption
+                                expanded = false
+                            },
+
+                            )
+                    }
                 }
             }
+            GridImage(postss, {})
         }
-        GridImage(posts, {})
     }
 }
 
