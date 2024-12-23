@@ -9,8 +9,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.savoreel.R
-import com.example.savoreel.ui.home.Post
+import com.example.savoreel.model.Post
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
@@ -156,7 +154,7 @@ fun ErrorDialog(
             containerColor = MaterialTheme.colorScheme.secondary,
 
             confirmButton = {
-                Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)) {
+                Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)) {
                     Text("Ok", fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, color = MaterialTheme.colorScheme.onBackground)
                 }
             }
@@ -184,7 +182,7 @@ fun CustomTitle(
 @Composable
 fun BackArrow(
     navController: NavController,
-    modifier: Modifier = Modifier.padding(start = 20.dp, top = 40.dp),
+    modifier: Modifier = Modifier,
 ) {
     IconButton(
         onClick = {
@@ -265,13 +263,13 @@ fun navButton(
 @Composable
 fun IconTheme(
     imageVector: ImageVector,
-    modifier: Modifier = Modifier.size(40.dp),
-    alpha: Float
+    modifier: Modifier = Modifier,
 ) {
     Box (
         modifier = Modifier
             .clip(shape = CircleShape)
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = alpha)),
+            .size(40.dp)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)),
         contentAlignment = Alignment.Center
     ){
         Icon(
@@ -306,15 +304,13 @@ fun ImageCustom(
 }
 
 @Composable
-fun GridImage(posts: List<Post>, onClick: (Post) -> Unit){
+fun GridImage(posts: List<Post>, onClick: (Post) -> Unit, modifier: Modifier = Modifier){
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 100.dp),
         contentPadding = PaddingValues(5.dp),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
-        modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .padding(top = 20.dp)
+        modifier = modifier
     ) {
         items(posts) { post ->
             ImageCustom(
@@ -322,30 +318,6 @@ fun GridImage(posts: List<Post>, onClick: (Post) -> Unit){
                 onClick = {}
             )
         }
-    }
-}
-
-@Composable
-fun SettingItemWithSwitch(text: String, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-//            .padding(vertical = 10.dp)
-    ) {
-        Text(
-            text = text,
-            fontSize = 20.sp,
-            fontFamily = nunitoFontFamily,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        CustomSwitch(
-            checked = isChecked,
-            onCheckedChange = onCheckedChange
-        )
     }
 }
 
@@ -397,3 +369,36 @@ fun CustomSwitch(
     }
 }
 
+@Composable
+fun PostTopBar(onNavigateTo: NavController) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            navButton(
+                painter = painterResource(R.drawable.default_avatar),
+                navController = onNavigateTo,
+                destination = "",
+                isChecked = true
+            )
+        }
+        Row {
+            navButton(
+                painter = painterResource(id = R.drawable.ic_search),
+                navController = onNavigateTo,
+                destination = "",
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            navButton(
+                painter = painterResource(id = R.drawable.ic_noti),
+                navController = onNavigateTo,
+                destination = "",
+            )
+        }
+    }
+}

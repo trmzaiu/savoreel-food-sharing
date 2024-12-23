@@ -23,6 +23,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,11 +37,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
@@ -53,11 +52,20 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel, userId: Int) {
+fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel, userId: String) {
+    var name by remember { mutableStateOf("") }
     var showModal by remember { mutableStateOf(false) }
     val isDarkModeEnabled by remember { themeViewModel.isDarkModeEnabled }
 
-    val user = userViewModel.findUserById(userId)
+    LaunchedEffect(userId) {
+        userViewModel.getUser(userId, onSuccess = { user ->
+            user?.let {
+                name = it.name ?: ""
+            }
+        }, onFailure = {
+
+        })
+    }
 
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
          Box(
@@ -73,6 +81,7 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
                  ) {
                      BackArrow(
                          navController = navController,
+                         modifier = Modifier.align(Alignment.TopStart).padding(start = 20.dp, top = 40.dp)
                      )
 
                      Text(
@@ -137,27 +146,15 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
 
                          Spacer(modifier = Modifier.height(15.dp))
 
-                         if (user != null) {
-                             Text(
-                                 text = user.name,
-                                 fontFamily = nunitoFontFamily,
-                                 textAlign = TextAlign.Center,
-                                 fontWeight = FontWeight.Bold,
-                                 fontSize = 24.sp,
-                                 color = MaterialTheme.colorScheme.onBackground,
-                                 modifier = Modifier.fillMaxWidth()
-                             )
-                         } else {
-                             Text(
-                                 text = "User not found",
-                                 fontFamily = nunitoFontFamily,
-                                 textAlign = TextAlign.Center,
-                                 fontWeight = FontWeight.Bold,
-                                 fontSize = 24.sp,
-                                 color = MaterialTheme.colorScheme.error,
-                                 modifier = Modifier.fillMaxWidth()
-                             )
-                         }
+                         Text(
+                             text = name,
+                             fontFamily = nunitoFontFamily,
+                             textAlign = TextAlign.Center,
+                             fontWeight = FontWeight.Bold,
+                             fontSize = 24.sp,
+                             color = MaterialTheme.colorScheme.onBackground,
+                             modifier = Modifier.fillMaxWidth()
+                         )
 
                          // General Section
                          Spacer(modifier = Modifier.height(20.dp))
@@ -179,7 +176,7 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
                                  icon = ImageVector.vectorResource(id = R.drawable.ic_key),
                                  text = "Change Password",
                                  navController = navController,
-                                 destination = "password_screen/${userId}?actionType=change_password",
+                                 destination = "password_screen/${userId}?isChangePassword=true",
                              )
                          }
 
@@ -308,7 +305,6 @@ fun SettingItemWithNavigation(
         if (icon != null) {
             IconTheme(
                 imageVector = icon,
-                alpha = 0.8f
             )
             Spacer(modifier = Modifier.width(16.dp))
         }
@@ -383,13 +379,13 @@ fun handleAvatarOption(option: String) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreviewDark() {
-    SavoreelTheme(darkTheme = true, dynamicColor = true) {
-        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel(), userViewModel = UserViewModel(), userId = 1) // Pass the navController as normal
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun SettingsScreenPreviewDark() {
+//    SavoreelTheme(darkTheme = true, dynamicColor = true) {
+//        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel(), userViewModel = UserViewModel(), userId = ) // Pass the navController as normal
+//    }
+//}
 //
 //@Preview(showBackground = true)
 //@Composable

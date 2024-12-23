@@ -1,7 +1,7 @@
 package com.example.savoreel.ui.onboarding
 
-import android.util.Patterns
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,19 +16,55 @@ fun EmailTheme(
     navController: NavController,
     isChangeEmail: Boolean,
     userViewModel: UserViewModel,
-    userId: Int
+    userId: String
 ) {
-    val user = userViewModel.findUserById(userId)
-    var email by remember { mutableStateOf(user?.email ?: "") }
+    var email by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var isError by remember { mutableStateOf(false) }
 
-    fun validateEmail(email: String): Boolean {
-        return user?.email == email
+    LaunchedEffect(userId, isChangeEmail) {
+        fun getUser(userId: String) {
+            userViewModel.getUser(userId, onSuccess = { user ->
+                user?.let {
+                    email = it.email ?: ""
+                }
+            }, onFailure = { error ->
+                errorMessage = error
+                isError = true
+            })
+        }
+
+        if (isChangeEmail) {
+            getUser(userId)
+        }
     }
 
+    // Email validation logic
     fun isEmailValid(email: String): Boolean {
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        return email.contains("@") && email.contains(".")
+    }
+
+    fun changeEmail() {
+        userViewModel.updateUserEmail(userId, email, onSuccess = {
+            println("Email successfully updated to: $email")
+            navController.popBackStack()
+        },
+            onFailure = { error ->
+                errorMessage = error
+                showErrorDialog = true
+            }
+        )
+    }
+
+    fun resetPassword() {
+        userViewModel.sendPasswordResetEmail(email, onSuccess = {
+            println("Password reset email sent to: $email")
+            navController.navigate("sign_in_screen")
+        }, onFailure = { error ->
+            errorMessage = error
+            showErrorDialog = true
+        })
     }
 
     CommonForm(
@@ -42,17 +78,9 @@ fun EmailTheme(
         isButtonEnabled = isEmailValid(email),
         onClickButton = {
             if (isChangeEmail) {
-                println("Email changed to: $email")
-                navController.popBackStack()
+                changeEmail()
             } else {
-                if (!validateEmail(email)) {
-                    errorMessage = "Make sure you entered your email correctly and try again."
-                    showErrorDialog = true
-                } else {
-                    navController.navigate("verify_code_screen") {
-                        popUpTo("email_screen") { inclusive = true }
-                    }
-                }
+                resetPassword()
             }
         },
         additionalContent = {

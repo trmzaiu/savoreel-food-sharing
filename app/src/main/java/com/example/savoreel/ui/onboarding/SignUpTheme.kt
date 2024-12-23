@@ -1,5 +1,6 @@
 package com.example.savoreel.ui.onboarding
 
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,27 +30,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.ErrorDialog
-import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.domineFontFamily
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
-fun SignUpScreenTheme(navController: NavController) {
+fun SignUpScreenTheme(navController: NavController, userViewModel: UserViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
-
-    val existEmail = "example@gmail.com"
+    var isLoading by remember { mutableStateOf(false) }
 
     val isFormValid = email.isNotEmpty() && password.isNotEmpty()
 
@@ -57,8 +55,21 @@ fun SignUpScreenTheme(navController: NavController) {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    fun existedEmail(email: String): Boolean {
-        return email == existEmail
+    fun createAccount() {
+        isLoading = true
+        userViewModel.createAccount(email, password,
+            onSuccess = { userId ->
+                isLoading = false
+                Log.d("CreateAccount", "Success! User ID: $userId")
+                navController.navigate("name_screen/${userId}?isChangeName=false")
+            },
+            onFailure = { errorMsg ->
+                isLoading = false
+                errorMessage = errorMsg ?: "Unknown error occurred"
+                showErrorDialog = true
+                Log.e("CreateAccount", "Error: $errorMsg")
+            }
+        )
     }
 
     Box(
@@ -139,21 +150,17 @@ fun SignUpScreenTheme(navController: NavController) {
 
             // Sign Up Button
             CustomButton(
-                text = "Create account",
+                text = if (isLoading) "Loading..." else "Create account",
                 enabled = isFormValid,
                 onClick = {
                     if (!isEmailValid(email)) {
                         errorMessage = "Make sure you entered email format correctly and try again."
                         showErrorDialog = true
-                    } else if (existedEmail(email)) {
-                        errorMessage = "Email existed, please try another email."
-                        showErrorDialog = true
                     } else if (password.length < 8) {
                         errorMessage = "Password must at least 8 characters."
                         showErrorDialog = true
                     } else {
-                        println("Email: $email, Password: $password")
-                        navController.navigate("name_screen/unknown")
+                        createAccount()
                     }
                 }
             )
@@ -250,20 +257,20 @@ fun SignUpScreenTheme(navController: NavController) {
         )
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun SignUpDarkPreview() {
-    SavoreelTheme(darkTheme = true, dynamicColor = false) {
-        SignUpScreenTheme(navController = rememberNavController())
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SignUpLightPreview() {
-    SavoreelTheme(darkTheme = false, dynamicColor = false) {
-        SignUpScreenTheme(navController = rememberNavController())
-    }
-}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun SignUpDarkPreview() {
+//    SavoreelTheme(darkTheme = true, dynamicColor = false) {
+//        SignUpScreenTheme(navController = rememberNavController())
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun SignUpLightPreview() {
+//    SavoreelTheme(darkTheme = false, dynamicColor = false) {
+//        SignUpScreenTheme(navController = rememberNavController())
+//    }
+//}
 

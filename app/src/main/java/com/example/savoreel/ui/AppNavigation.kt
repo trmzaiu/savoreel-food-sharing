@@ -29,7 +29,6 @@ import com.example.savoreel.ui.onboarding.PasswordTheme
 import com.example.savoreel.ui.onboarding.SignInScreenTheme
 import com.example.savoreel.ui.onboarding.SignUpScreenTheme
 import com.example.savoreel.ui.onboarding.SuccessTheme
-import com.example.savoreel.ui.onboarding.VerifyCodeTheme
 import com.example.savoreel.ui.profile.FollowScreen
 import com.example.savoreel.ui.profile.ProfileScreen
 import com.example.savoreel.ui.setting.NotificationSetting
@@ -49,7 +48,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             startDestination = "onboarding",
         ) {
             composable("onboarding") {
-                OnboardingTheme(navController = navController)
+                OnboardingTheme(navController)
             }
 
             composable("sign_in_screen") { backStackEntry ->
@@ -57,33 +56,29 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             }
 
             composable("sign_up_screen") {
-                SignUpScreenTheme(navController = navController)
+                SignUpScreenTheme(navController, userViewModel)
             }
 
             composable("success_screen") {
-                SuccessTheme(navController = navController)
+                SuccessTheme(navController)
             }
 
             composable("hashtag_screen") {
-                HashTagTheme(navController = navController)
+                HashTagTheme(navController)
             }
 
             composable("settings_screen/{userId}") { backStackEntry ->
-                val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: -1
+                val userId = backStackEntry.arguments?.getString("userId")?.toString() ?: ""
 
                 SettingsScreen(navController, themeViewModel, userViewModel, userId)
             }
 
             composable("name_screen/{userId}?isChangeName={isChangeName}") { backStackEntry ->
-                val userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: 1
-                val isChangeName =
-                    backStackEntry.arguments?.getString("isChangeName")?.toBoolean() ?: false
+                val userId = backStackEntry.arguments?.getString("userId")?: ""
+                val isChangeName = backStackEntry.arguments?.getBoolean("isChangeName") ?: false
 
                 NameTheme(
-                    navController = navController,
-                    isChangeName = isChangeName,
-                    userViewModel = userViewModel,
-                    userId = userId,
+                    navController, userViewModel, userId, isChangeName,
                     onNameSubmitted = {
                         if (isChangeName) {
                             navController.popBackStack()
@@ -94,46 +89,27 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
                 )
             }
 
-            composable("password_screen/{userId}?actionType={actionType}") { backStackEntry ->
-                val userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
-                val actionType = backStackEntry.arguments?.getString("actionType") ?: ""
+            composable("password_screen/{userId}?isChangePassword={isChangePassword}") { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")?: ""
+                val isChangePassword = backStackEntry.arguments?.getBoolean("isChangePassword") ?: false
 
-                PasswordTheme(
-                    navController = navController,
-                    userViewModel = userViewModel,
-                    userId = userId,
-                    onPasswordVerified = {
-                        when (actionType) {
-                            "change_email" -> {
-                                navController.navigate("email_screen/${userId}?isChangeEmail=true") {
-                                    popUpTo("password_screen") { inclusive = true }
-                                }
-                            }
-
-                            "change_password" -> {
-                                navController.navigate("change_password_screen/${userId}") {
-                                    popUpTo("password_screen") { inclusive = true }
-                                }
-                            }
-                        }
-                    }
-                )
+                PasswordTheme(navController, userViewModel, userId, isChangePassword)
             }
 
             composable("email_screen/{userId}?isChangeEmail={isChangeEmail}") { backStackEntry ->
-                val userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
-                val isChangeEmail =
-                    backStackEntry.arguments?.getString("isChangeEmail")?.toBoolean() ?: false
+                val userId = backStackEntry.arguments?.getString("userId")?: ""
+                val isChangeEmail = backStackEntry.arguments?.getBoolean("isChangeEmail") ?: false
 
                 EmailTheme(navController, isChangeEmail, userViewModel, userId)
             }
 
-            composable("verify_code_screen") {
-                VerifyCodeTheme(navController)
-            }
+//            composable("verify_code_screen/{email}") { backStackEntry ->
+//                val email = backStackEntry.arguments?.getString("email")?.toString() ?: ""
+//                VerifyCodeTheme(navController, userViewModel, email)
+//            }
 
             composable("change_password_screen/{userId}") { backStackEntry ->
-                val userId = backStackEntry.arguments?.getString("userId")?.toInt() ?: -1
+                val userId = backStackEntry.arguments?.getString("userId")?: ""
 
                 ChangePasswordTheme(navController, userViewModel, userId)
             }

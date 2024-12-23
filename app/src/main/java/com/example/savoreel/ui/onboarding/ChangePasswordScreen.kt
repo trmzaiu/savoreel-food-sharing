@@ -25,17 +25,41 @@ import com.example.savoreel.ui.component.CustomTitle
 import com.example.savoreel.ui.component.ErrorDialog
 
 @Composable
-fun ChangePasswordTheme(navController: NavController, userViewModel: UserViewModel, userId: Int) {
+fun ChangePasswordTheme(navController: NavController, userViewModel: UserViewModel, userId: String) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showConfirmDialog by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }  // Added for loading state
 
+    // Form validity check
     val isFormValid = password.isNotEmpty() && confirmPassword.isNotEmpty() && confirmPassword.length >= password.length
 
+    // Password validation function
     fun isPasswordValid(password: String, confirmPassword: String): Boolean {
         return password == confirmPassword
+    }
+
+    // Expanded password strength validation (add rules here)
+    fun isPasswordStrong(password: String): Boolean {
+        val passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#\$%^&+=]).{8,}$".toRegex()
+        return password.matches(passwordPattern)
+    }
+
+    // Change password function
+    fun changePassword() {
+        isLoading = true  // Start loading
+        userViewModel.updateUserPassword(userId, password, onSuccess = {
+            println("Password successfully updated to: $password")
+            navController.navigate("sign_in_screen")
+        },
+            onFailure = { error ->
+                errorMessage = error
+                showErrorDialog = true
+                isLoading = false  // End loading on failure
+            }
+        )
     }
 
     Box(
@@ -80,16 +104,18 @@ fun ChangePasswordTheme(navController: NavController, userViewModel: UserViewMod
 
             // Button
             CustomButton(
-                text = "Confirm",
-                enabled = isFormValid,
+                text = if (isLoading) "Loading..." else "Confirm",  // Button text changes during loading
+                enabled = isFormValid && !isLoading,
                 onClick = {
                     if (!isPasswordValid(password, confirmPassword)) {
                         errorMessage = "The password and confirm password do not match. Please check and try again."
                         showErrorDialog = true
+                    } else if (!isPasswordStrong(password)) {
+                        errorMessage = "Password is too weak. Make sure it contains at least 8 characters, a number, and a special character."
+                        showErrorDialog = true
                     } else {
                         errorMessage = "Change password successfully!"
                         showConfirmDialog = true
-                        println("Password: $password, $confirmPassword")
                     }
                 }
             )
@@ -98,40 +124,24 @@ fun ChangePasswordTheme(navController: NavController, userViewModel: UserViewMod
         }
     }
 
+    // Show error dialog if passwords don't match
     if (showErrorDialog) {
         ErrorDialog(
-            title = "Password mismatch",
+            title = "Error",
             message = errorMessage,
             onDismiss = { showErrorDialog = false }
         )
     }
 
+    // Show confirmation dialog after successful validation
     if (showConfirmDialog) {
         ErrorDialog(
             title = "Success",
             message = errorMessage,
             onDismiss = {
                 showConfirmDialog = false
-                navController.navigate("sign_in_screen") {
-                    popUpTo("sign_in_screen") { inclusive = true }
-                }
+                changePassword()
             }
         )
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun ResetPasswordDarkPreview() {
-//    SavoreelTheme(darkTheme = true) {
-//        ChangePasswordTheme(navController = rememberNavController())
-//    }
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun ResetPasswordLightPreview() {
-//    SavoreelTheme(darkTheme = false) {
-//        ChangePasswordTheme(navController = rememberNavController())
-//    }
-//}

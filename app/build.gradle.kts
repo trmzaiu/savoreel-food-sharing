@@ -70,6 +70,12 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation("com.github.bumptech.glide:compose:1.0.0-alpha.1")
     implementation(libs.androidx.storage)
+    implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.espresso.core)
+    implementation(libs.firebase.functions.ktx)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.androidx.runtime.livedata)
 
     // Correct dependencies for UI testing
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
@@ -83,18 +89,16 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("androidx.camera:camera-core:1.4.1")
-    implementation("androidx.camera:camera-camera2:1.4.1")
-    implementation("androidx.camera:camera-lifecycle:1.4.1")
-    implementation("androidx.camera:camera-view:1.4.1")
+    implementation("androidx.camera:camera-core:1.3.0")
+    implementation("androidx.camera:camera-camera2:1.3.0")
+    implementation("androidx.camera:camera-lifecycle:1.3.0")
+    implementation("androidx.camera:camera-view:1.3.0")
 
-
-    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
-    implementation("com.google.firebase:firebase-analytics")
     implementation ("androidx.compose.ui:ui:1.7.6" )
-    implementation ("androidx.compose.material3:material3:1.3.1")
-    implementation ("androidx.navigation:navigation-compose:2.8.5")
     implementation ("androidx.compose.foundation:foundation:1.7.6")
     implementation ("androidx.compose.runtime:runtime:1.7.6")
     implementation ("androidx.compose.ui:ui-tooling-preview:1.7.6") // This is required for @Preview to work
+
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
 }

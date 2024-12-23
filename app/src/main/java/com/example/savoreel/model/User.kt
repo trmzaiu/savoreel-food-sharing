@@ -1,10 +1,23 @@
 package com.example.savoreel.model
 
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-data class User(val userId: Int, val name: String, val email: String, val password: String)
+data class User(
+    val userId: String,
+    val name: String = "",
+    val email: String,
+    val avatarUri: String = "https://sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png"
+) {
+    constructor() : this(userId = "", name = "", email = "")
+}
 
 sealed class LoginState {
     object Idle : LoginState()
@@ -14,30 +27,227 @@ sealed class LoginState {
 }
 
 class UserViewModel : ViewModel() {
-    val users = listOf(
-        User(1, "Tra My Vu", "tmv@gmail.com", password = "12345678"),
-        User(2, "Giang Hoang", email = "gh@gmail.com", password = "87654321"),
-        User(3, "Chanh", email = "chanh@gmail.com", password = "password")
-    )
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    private val _user = MutableLiveData<User?>()
+    val user: LiveData<User?> get() = _user
+
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> get() = _error
 
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState: StateFlow<LoginState> get() = _loginState
 
-    fun validateUser(email: String, password: String): User? {
-        return users.find { it.email == email && it.password == password }
+    // Function to sign in a user
+    fun signIn(email: String, password: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Sign in successful
+                    val firebaseUser = auth.currentUser
+                    if (firebaseUser != null) {
+                        onSuccess(firebaseUser.uid)
+                    } else {
+                        onFailure("Failed to retrieve user ID after sign-in.")
+                    }
+                } else {
+                    // Sign in failed
+                    onFailure(task.exception?.localizedMessage ?: "Unknown error occurred")
+                }
+            }
     }
 
-    fun login(email: String, password: String) {
-        _loginState.value = LoginState.Loading
-        val user = validateUser(email, password)
-        _loginState.value = if (user != null) {
-            LoginState.Success(user)
-        } else {
-            LoginState.Error("Make sure you entered your email and password correctly and try again.")
+    // Funtion to validate password
+    fun validatePassword(userId: String, password: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        db.collection("users").document(userId).get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val email = task.result?.getString("email")
+                    // Check if the email exists and then proceed with password validation
+                    if (!email.isNullOrEmpty()) {
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { authTask ->
+                                if (authTask.isSuccessful) {
+                                    onSuccess()
+                                } else {
+                                    onFailure("Incorrect password. Please try again.")
+                                }
+                            }
+                    } else {
+                        onFailure("User email not found.")
+                    }
+                } else {
+                    onFailure("Failed to retrieve user information.")
+                }
+            }
+    }
+
+    // Function to create a new account
+    fun createAccount(email: String, password: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+        Log.d("CreateAccount", "Attempting to create account with email: $email")
+
+        auth.fetchSignInMethodsForEmail(email)
+            .addOnCompleteListener { checkTask ->
+                if (checkTask.isSuccessful) {
+                    val signInMethods = checkTask.result?.signInMethods
+                    if (!signInMethods.isNullOrEmpty()) {
+                        Log.e("CreateAccount", "Email is already in use.")
+                        onFailure("Email is already in use. Please log in or reset your password.")
+                    } else {
+                        // Email chưa được sử dụng, tiến hành tạo tài khoản
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Log.d("CreateAccount", "Account created successfully.")
+                                    val firebaseUser = auth.currentUser
+                                    if (firebaseUser != null) {
+                                        val userId = firebaseUser.uid
+                                        Log.d("CreateAccount", "User ID retrieved: $userId")
+                                        val newUser = User(userId = userId, email = email)
+                                        db.collection("users").document(userId).set(newUser)
+                                            .addOnSuccessListener {
+                                                Log.d("CreateAccount", "User data saved to Firestore successfully.")
+                                                onSuccess(userId)
+                                            }
+                                            .addOnFailureListener {
+                                                Log.e("CreateAccount", "Failed to save user data: ${it.localizedMessage}", it)
+                                                onFailure(it.localizedMessage ?: "Failed to save user data.")
+                                            }
+                                    } else {
+                                        Log.e("CreateAccount", "Failed to retrieve user ID after account creation.")
+                                        onFailure("Failed to retrieve user ID after account creation.")
+                                    }
+                                } else {
+                                    val exception = task.exception
+                                    if (exception is FirebaseAuthUserCollisionException) {
+                                        Log.e("CreateAccount", "Email is already in use by another account.")
+                                        onFailure("Email is already in use. Please log in or try another email.")
+                                    } else {
+                                        Log.e("CreateAccount", "Account creation failed: ${exception?.localizedMessage}", exception)
+                                        onFailure(exception?.localizedMessage ?: "Account creation failed.")
+                                    }
+                                }
+                            }
+                    }
+                } else {
+                    Log.e("CreateAccount", "Failed to check email existence: ${checkTask.exception?.localizedMessage}", checkTask.exception)
+                    onFailure(checkTask.exception?.localizedMessage ?: "Failed to check email existence.")
+                }
+            }
+    }
+
+    // Function to retrieve user details from Firestore
+    fun getUser(userId: String, onSuccess: (User?) -> Unit, onFailure: (String) -> Unit) {
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val userData = document.toObject(User::class.java)
+                    onSuccess(userData)
+                } else {
+                    onSuccess(null)
+                }
+            }
+            .addOnFailureListener {
+                onFailure("Failed to get user data.")
+            }
+    }
+
+    // Function to update the user's name in Firestore
+    fun updateUserName(userId: String, name: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        db.collection("users").document(userId)
+            .update("name", name)
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener {
+                onFailure(it.localizedMessage ?: "Error updating user name.")
+            }
+    }
+
+    fun updateUserEmail(userId: String, newEmail: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        db.collection("users").document(userId)
+            .update("email", newEmail)
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener {
+                onFailure(it.localizedMessage ?: "Failed to update email.")
+            }
+    }
+
+    fun updateUserPassword(userId: String, newPass: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val user = auth.currentUser
+        user?.updatePassword(newPass)?.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                db.collection("users").document(userId)
+                    .update("password", newPass)
+                    .addOnCompleteListener { firestoreTask ->
+                        if (firestoreTask.isSuccessful) {
+                            onSuccess()
+                        } else {
+                            onFailure("Failed to update password in the database.")
+                        }
+                    }
+            } else {
+                onFailure("Failed to update password in Firebase Authentication.")
+            }
         }
     }
 
-    fun findUserById(userId: Int): User? {
-        return users.find { it.userId == userId }
+    fun updateUserAvatar(userId: String, avatarUri: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        db.collection("users").document(userId)
+            .update("avatar", avatarUri)
+            .addOnSuccessListener {
+                _user.postValue(_user.value?.copy(avatarUri = avatarUri))
+                onSuccess()
+            }
+            .addOnFailureListener {
+                onFailure(it.localizedMessage ?: "Error updating avatar.")
+            }
     }
+
+    fun sendPasswordResetEmail(email: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("UserViewModel", "Password reset email sent successfully.")
+                    onSuccess()
+                } else {
+                    val errorMessage = task.exception?.localizedMessage ?: "Failed to send reset email."
+                    Log.e("UserViewModel", errorMessage, task.exception)
+                    onFailure(errorMessage)
+                }
+            }
+    }
+
+//    fun login(
+//        email: String,
+//        password: String,
+//        onSuccess: (User) -> Unit,
+//        onFailure: (String) -> Unit
+//    ) {
+//        auth.signInWithEmailAndPassword(email, password)
+//            .addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    val firebaseUser = auth.currentUser
+//                    if (firebaseUser != null) {
+//                        getUser(firebaseUser.uid, onSuccess = { user ->
+//                            if (user != null) {
+//                                onSuccess(user)
+//                            } else {
+//                                val newUser = User(userId = firebaseUser.uid, email = firebaseUser.email ?: "")
+//                                onSuccess(newUser)
+//                            }
+//                        }, onFailure = {
+//                            onFailure(it)
+//                        })
+//                    } else {
+//                        onFailure("User not found.")
+//                    }
+//                } else {
+//                    onFailure(task.exception?.localizedMessage ?: "Invalid email or password.")
+//                }
+//            }
+//    }
 }

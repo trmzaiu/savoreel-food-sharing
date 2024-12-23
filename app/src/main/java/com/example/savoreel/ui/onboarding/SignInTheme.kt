@@ -1,5 +1,6 @@
 package com.example.savoreel.ui.onboarding
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
-import com.example.savoreel.model.LoginState
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
@@ -49,8 +49,22 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
     val isFormValid = email.isNotEmpty() && password.isNotEmpty()
+
+    fun signIn() {
+        isLoading = true
+        userViewModel.signIn(email, password, onSuccess = { userId ->
+            isLoading = false
+            navController.navigate("takephoto_screen")
+        }, onFailure = { errorMsg ->
+            isLoading = false
+            errorMessage = errorMsg
+            showErrorDialog = true
+            Log.e("SignInScreen", errorMessage)
+        })
+    }
 
     Box(
         modifier = Modifier
@@ -127,7 +141,7 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) {
-                                navController.navigate("email_screen?isChangeEmail=false")
+                                navController.navigate("email_screen/0?isChangeEmail=false")
                             }
 
                     )
@@ -138,24 +152,9 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
 
             // Sign In Button
             CustomButton(
-                text = "Sign in",
+                text = if (isLoading) "Loading..." else "Sign in",
                 enabled = isFormValid,
-                onClick = {
-                    userViewModel.login(email, password)
-                    val loginState = userViewModel.loginState.value
-                    when (loginState) {
-                        is LoginState.Success -> {
-                            navController.navigate("settings_screen/${loginState.user.userId}")
-                        }
-                        is LoginState.Error -> {
-                            errorMessage = loginState.message
-                            showErrorDialog = true
-                        }
-                        else -> {
-                            // Idle or Loading, handle as needed
-                        }
-                    }
-                }
+                onClick = { signIn() }
             )
 
             Spacer(modifier = Modifier.height(70.dp))

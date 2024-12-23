@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.example.savoreel" />
-                  <option name="mobileSdkAppId" value="1:712995394518:android:51b29852bb6c394b56ca77" />
-                  <option name="projectId" value="savoreel-0001" />
-                  <option name="projectNumber" value="712995394518" />
+                  <option name="mobileSdkAppId" value="1:98860832757:android:d31bf1d3019550de9032bc" />
+                  <option name="projectId" value="savoreel-mobile-app-e69b7" />
+                  <option name="projectNumber" value="98860832757" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

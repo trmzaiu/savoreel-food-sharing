@@ -1,7 +1,5 @@
 package com.example.savoreel.ui.home
 
-
-
 import CameraFrame
 import RequestCameraPermission
 import android.util.Log
@@ -51,6 +49,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -59,7 +58,6 @@ import com.example.savoreel.R
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.secondaryDarkColor
 import kotlinx.coroutines.launch
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,11 +123,10 @@ fun PostTopBar(onNavigateTo: NavHostController) {
     )
 }
 
-
 @OptIn(ExperimentalGlideComposeApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun PostView(
-    navController : NavHostController,
+    navController : NavController,
     postViewModel: PostViewModel = viewModel(),
     onNavigateTo: NavHostController = rememberNavController()
 ) {

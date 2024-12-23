@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "712995394518",
-    "project_id": "savoreel-0001",
-    "storage_bucket": "savoreel-0001.firebasestorage.app"
+    "project_number": "98860832757",
+    "project_id": "savoreel-mobile-app-e69b7",
+    "storage_bucket": "savoreel-mobile-app-e69b7.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:712995394518:android:51b29852bb6c394b56ca77",
+        "mobilesdk_app_id": "1:98860832757:android:d31bf1d3019550de9032bc",
         "android_client_info": {
           "package_name": "com.example.savoreel"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDqCwkcktELmiRB0lfHEQRUVcnQC0jvQJU"
+          "current_key": "AIzaSyCeU3NDV22fRxwd1xhdwKMjhUyt0GP_Koc"
         }
       ],
       "services": {

@@ -11,14 +11,26 @@ import com.example.savoreel.ui.component.CommonForm
 import com.example.savoreel.ui.component.ErrorDialog
 
 @Composable
-fun PasswordTheme(navController: NavController, userViewModel: UserViewModel, userId: Int, onPasswordVerified: () -> Unit) {
-    val user = userViewModel.findUserById(userId)
+fun PasswordTheme(navController: NavController, userViewModel: UserViewModel, userId: String, isChangePassword: Boolean) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
 
-    fun validatePassword(password: String): Boolean {
-        return user?.password == password
+    fun validatePassword() {
+        userViewModel.validatePassword(userId, password, onSuccess = {
+            if (isChangePassword) {
+                navController.navigate("email_screen/${userId}?isChangeEmail=true") {
+                    popUpTo("password_screen") { inclusive = true }
+                }
+            } else {
+                navController.navigate("change_password_screen/${userId}?isChangeEmail=false") {
+                    popUpTo("password_screen") { inclusive = true }
+                }
+            }
+        }, onFailure = { error ->
+            errorMessage = error
+            showErrorDialog = true
+        })
     }
 
     CommonForm(
@@ -31,12 +43,7 @@ fun PasswordTheme(navController: NavController, userViewModel: UserViewModel, us
         isPasswordField = true,
         isButtonEnabled = password.isNotEmpty(),
         onClickButton = {
-            if (!validatePassword(password)) {
-                errorMessage = "Make sure you entered your password correctly and try again."
-                showErrorDialog = true
-            } else {
-                onPasswordVerified()
-            }
+            validatePassword()
         },
         additionalContent = {
             if (showErrorDialog) {

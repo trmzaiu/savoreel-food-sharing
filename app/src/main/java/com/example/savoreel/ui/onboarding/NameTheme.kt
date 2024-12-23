@@ -1,6 +1,8 @@
 package com.example.savoreel.ui.onboarding
 
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -13,27 +15,57 @@ import com.example.savoreel.ui.component.CommonForm
 fun NameTheme(
     navController: NavController,
     userViewModel: UserViewModel,
-    userId: Int,
+    userId: String,
     isChangeName: Boolean,
     onNameSubmitted: (String) -> Unit
 ) {
-    val user = userViewModel.findUserById(userId)
-    var name by remember { mutableStateOf(user?.name ?: "") }
+    var name by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+    var isError by remember { mutableStateOf(false) }
+
+    Log.d("NameScreen", "userId: $userId, isChangeName: $isChangeName")
+
+
+    LaunchedEffect(userId) {
+        userViewModel.getUser(userId, onSuccess = { user ->
+            user?.let {
+                name = it.name ?: ""
+            }
+        }, onFailure = { error ->
+            errorMessage = error
+            isError = true
+        })
+    }
+
+    if (isError) {
+        Log.e("NameTheme", errorMessage)
+    }
+
+    fun changeName() {
+        userViewModel.updateUserName(userId, name, onSuccess = {
+            onNameSubmitted(name)
+        }, onFailure = { error ->
+            Log.e("NameTheme", "Error updating name: $error")
+        })
+    }
 
     CommonForm(
         navController = navController,
-        title = if (isChangeName) "What's your name?" else "Change your name",
+        title = if (isChangeName) "Change your name" else "What's your name?",
         placeholder = "Name" ,
-        buttonText = if (isChangeName) "Continue" else "Save",
+        buttonText = if (isChangeName) "Save" else "Continue",
         value = name,
         onValueChange = { name = it },
         isPasswordField = false,
         isButtonEnabled = name.isNotEmpty(),
         onClickButton = {
-            onNameSubmitted(name)
+            if (name.isNotEmpty()) {
+                changeName()
+            }
         }
     )
 }
+
 
 //@Preview(showBackground = true)
 //@Composable

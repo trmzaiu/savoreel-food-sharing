@@ -51,7 +51,7 @@ fun NotificationSetting(navController: NavController) {
             ) {
                 BackArrow(
                     navController = navController,
-                    modifier = Modifier.align(Alignment.TopStart)
+                    modifier = Modifier.align(Alignment.TopStart).padding(start = 20.dp, top = 40.dp)
                 )
                 Text(
                     text = "Notification",
