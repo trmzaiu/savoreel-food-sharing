@@ -42,6 +42,8 @@ fun NameTheme(
         })
     }
 
+    Log.e("isChangeName", "$isChangeName")
+
     CommonForm(
         navController = navController,
         title = if (isChangeName) "Change your name" else "What's your name?",

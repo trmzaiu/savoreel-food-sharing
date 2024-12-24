@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
             SavoreelTheme(darkTheme = isDarkMode) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val navController = rememberNavController()
+                    themeViewModel.loadUserSettings()
                     AppNavigation(navController = navController, themeViewModel = themeViewModel, userViewModel = userViewModel)
                 }
             }

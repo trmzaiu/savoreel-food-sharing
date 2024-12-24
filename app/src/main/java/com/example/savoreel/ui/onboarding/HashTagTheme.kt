@@ -166,7 +166,7 @@ fun HashTagTheme(navController: NavController) {
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
                 ) {
-                    navController.navigate("takephoto_screen")
+                    navController.navigate("take_photo_screen")
                 }
             )
 

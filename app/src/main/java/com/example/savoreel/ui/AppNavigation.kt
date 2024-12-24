@@ -1,5 +1,6 @@
 package com.example.savoreel.ui
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeIn
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -36,16 +38,22 @@ import com.example.savoreel.ui.setting.SettingTheme
 import com.example.savoreel.ui.setting.TermsOfServiceScreen
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.ThemeViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel) {
     val isDarkModeEnabled by themeViewModel.isDarkModeEnabled
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
+    val startDestination = when {
+        currentUser != null -> "take_photo_screen"
+        else -> "onboarding"
+    }
 
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
         NavHost(
             navController = navController,
-//        startDestination = "sign_in_screen",
-            startDestination = "onboarding",
+            startDestination = startDestination,
         ) {
             composable("onboarding") {
                 OnboardingTheme(navController)
@@ -68,7 +76,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             }
 
             composable("name_screen?isChangeName={isChangeName}") { backStackEntry ->
-                val isChangeName = backStackEntry.arguments?.getBoolean("isChangeName") ?: false
+                val isChangeName = backStackEntry.arguments?.getString("isChangeName")?.toBoolean() ?: false
 
                 NameTheme(
                     navController, userViewModel, isChangeName,
@@ -83,13 +91,13 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             }
 
             composable("password_screen?isChangePassword={isChangePassword}") { backStackEntry ->
-                val isChangePassword = backStackEntry.arguments?.getBoolean("isChangePassword") ?: false
+                val isChangePassword = backStackEntry.arguments?.getString("isChangePassword")?.toBoolean() ?: false
 
                 PasswordTheme(navController, userViewModel, isChangePassword)
             }
 
             composable("email_screen?isChangeEmail={isChangeEmail}") { backStackEntry ->
-                val isChangeEmail = backStackEntry.arguments?.getBoolean("isChangeEmail") ?: false
+                val isChangeEmail = backStackEntry.arguments?.getString("isChangeEmail")?.toBoolean() ?: false
 
                 EmailTheme(navController, isChangeEmail, userViewModel)
             }

@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
@@ -40,11 +41,12 @@ import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
+import com.example.savoreel.ui.theme.ThemeViewModel
 import com.example.savoreel.ui.theme.domineFontFamily
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
-fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel) {
+fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel, themeViewModel: ThemeViewModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -57,6 +59,7 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
         isLoading = true
         userViewModel.signIn(email, password, onSuccess = { userId ->
             isLoading = false
+            themeViewModel.loadUserSettings()
             navController.navigate("take_photo_screen")
         }, onFailure = { errorMsg ->
             isLoading = false

@@ -165,6 +165,46 @@ fun ErrorDialog(
 }
 
 @Composable
+fun ConfirmDialog(
+    title: String,
+    message: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    Box(modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.scrim)){
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(title, fontFamily = nunitoFontFamily, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground) },
+            text = {
+                Text(
+                    message,
+                    style = TextStyle(
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    ),
+                )},
+            containerColor = MaterialTheme.colorScheme.secondary,
+
+            confirmButton = {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                        Text("Cancel", fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, color = MaterialTheme.colorScheme.onBackground)
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = onConfirm, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                        Text("Confirm", fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, color = MaterialTheme.colorScheme.onBackground)
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
 fun CustomTitle(
     text: String,
     modifier: Modifier = Modifier

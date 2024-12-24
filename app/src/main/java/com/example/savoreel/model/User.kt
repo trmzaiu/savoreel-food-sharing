@@ -12,11 +12,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+
 data class User(
     val userId: String,
     val name: String = "",
     val email: String,
-    val avatarUri: String = "https://sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png"
+    val avatarUri: String = "https://sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png",
+    val isDarkModeEnabled: Boolean = false
 ) {
     constructor() : this(userId = "", name = "", email = "")
 }
@@ -240,6 +242,7 @@ class UserViewModel : ViewModel() {
             }
     }
 
+    // Function to update the user's avatar
     fun updateUserAvatar(avatarUri: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser == null) {
@@ -259,6 +262,7 @@ class UserViewModel : ViewModel() {
             }
     }
 
+    // Function to send email to reset password
     fun sendPasswordResetEmail(email: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
@@ -272,6 +276,43 @@ class UserViewModel : ViewModel() {
                 }
             }
     }
+
+    // Function to delete account
+    fun deleteUserAndData(onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in.")
+            return
+        }
+        val userId = currentUser.uid
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users").document(userId)
+            .delete()
+            .addOnSuccessListener {
+                Log.d("FirebaseAuth", "User data deleted from Firestore.")
+
+                currentUser.delete()
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d("FirebaseAuth", "User account deleted from Firebase Authentication.")
+                            onSuccess()
+                        } else {
+                            Log.e("FirebaseAuth", "Failed to delete user account: ${task.exception?.message}")
+                            onFailure("Failed to delete user account.")
+                        }
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseAuth", "Failed to delete user data: ${e.message}")
+                onFailure("Failed to delete user data.")
+            }
+    }
+
+    fun signOut() {
+        FirebaseAuth.getInstance().signOut()
+        Log.d("FirebaseAuth", "User signed out successfully.")
+    }
+
 
 //    fun login(
 //        email: String,

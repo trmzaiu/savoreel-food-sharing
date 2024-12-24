@@ -48,6 +48,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.component.ConfirmDialog
 import com.example.savoreel.ui.component.CustomSwitch
 import com.example.savoreel.ui.component.ForwardArrow
 import com.example.savoreel.ui.component.IconTheme
@@ -60,18 +61,40 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 fun SettingTheme(navController: NavController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel) {
     var name by remember { mutableStateOf("") }
     var showModal by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var isSignOut by remember { mutableStateOf(false) }
     val isDarkModeEnabled by remember { themeViewModel.isDarkModeEnabled }
 
     LaunchedEffect(Unit) {
         userViewModel.getUser(onSuccess = { user ->
             if (user != null) {
-                name = user.name ?: ""
+                name = user.name
             } else {
                 Log.e("Setting", "User data not found")
             }
         }, onFailure = { error ->
             Log.e("NameTheme", "Error retrieving user: $error")
         })
+    }
+
+    fun deleteAccount() {
+        userViewModel.deleteUserAndData(
+            onSuccess = {
+                navController.navigate("onboarding")
+                themeViewModel.resetDarkMode()
+                Log.d("FirebaseAuth", "User account deleted successfully.")
+            },
+            onFailure = { error ->
+                Log.e("FirebaseAuth", error)
+            }
+        )
+    }
+
+    fun signOut() {
+        navController.navigate("sign_in_screen")
+        userViewModel.signOut()
+        themeViewModel.resetDarkMode()
     }
 
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
@@ -243,19 +266,43 @@ fun SettingTheme(navController: NavController, themeViewModel: ThemeViewModel, u
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(R.drawable.ic_delete),
                                  text = "Delete account",
-                                 navController = navController,
-                                 destination = "confirm_password",
+                                 onClick = {
+                                     errorMessage = "Are you want to delete your account? This action cannot be undone."
+                                     showErrorDialog = true
+                                     isSignOut = false
+                                 }
                              )
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(R.drawable.ic_logout),
                                  text = "Sign out",
-                                 navController = navController,
-                                 destination = "sign_out",
+                                 onClick = {
+                                     errorMessage = "Are you sure you want to sign out?"
+                                     showErrorDialog = true
+                                     isSignOut = true
+                                 }
                              )
                          }
                      }
                  }
              }
+         }
+         if (showErrorDialog) {
+             ConfirmDialog(
+                 title = if (isSignOut) "Confirm" else "We're sorry to see you go!",
+                 message = errorMessage,
+                 onDismiss = {
+                     showErrorDialog = false
+                 },
+                 onConfirm = {
+                     if (isSignOut) {
+                         showErrorDialog = false
+                         signOut()
+                     } else {
+                         showErrorDialog = false
+                         deleteAccount()
+                     }
+                 }
+             )
          }
     }
 }
@@ -307,7 +354,8 @@ fun SettingItemWithNavigation(
     destination: String? = null,
     changeMode: Boolean = false,
     isChecked: Boolean = false,
-    onCheckedChange: (Boolean) -> Unit = {}
+    onCheckedChange: (Boolean) -> Unit = {},
+    onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -317,8 +365,11 @@ fun SettingItemWithNavigation(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) {
-                destination?.let {
-                    navController?.navigate(it)
+                if(!changeMode){
+                    destination?.let {
+                        navController?.navigate(it)
+                    }
+                    onClick()
                 }
             },
         verticalAlignment = Alignment.CenterVertically
@@ -336,7 +387,7 @@ fun SettingItemWithNavigation(
             fontSize = 20.sp,
             fontFamily = nunitoFontFamily,
             fontWeight = FontWeight.Bold,
-            color = if (text == "Delete Account") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+            color = if (text == "Delete account") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
         )
 
         if(!changeMode) {
@@ -382,22 +433,22 @@ fun SheetContent(onOptionClick: (String) -> Unit) {
     }
 }
 
-// Hàm xử lý các tùy chọn từ Modal
 fun handleAvatarOption(option: String) {
     when (option) {
         "Upload Image" -> {
-            // Xử lý upload ảnh
+
         }
         "Take Photo" -> {
-            // Xử lý chụp ảnh
+
         }
         "Remove Avatar" -> {
-            // Xử lý xóa avatar
+
         }
         "Cancel" -> {
-            // Không làm gì cả
+
         }
     }
+
 }
 
 @Preview(showBackground = true)
