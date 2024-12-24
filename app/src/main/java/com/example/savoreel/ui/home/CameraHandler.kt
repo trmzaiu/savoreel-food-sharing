@@ -1,7 +1,14 @@
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -34,16 +41,21 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.Executors
 
 @Composable
 fun CameraFrame(
     modifier: Modifier = Modifier,
     isFrontCamera: Boolean,
-    onSwapCamera: () -> Unit,
     onCapturePhoto: (Uri) -> Unit,
-    isCaptureLocked: Boolean
+    onTakePhoto: (()-> Unit) -> Unit,
+    flashEnabled: Boolean,
+
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -56,6 +68,16 @@ fun CameraFrame(
     DisposableEffect(Unit) {
         onDispose { cameraExecutor.shutdown() }
     }
+
+    fun adjustScreenBrightness(context: Context, brightness: Float) {
+        (context as? Activity)?.runOnUiThread {
+            val window = context.window
+            window?.attributes = window?.attributes?.apply {
+                screenBrightness = brightness
+            }
+        }
+    }
+
 
     AndroidView(
         factory = { previewView },
@@ -73,6 +95,9 @@ fun CameraFrame(
                 }
 
             val imageCaptureUseCase = ImageCapture.Builder()
+                .setFlashMode(
+                    if (flashEnabled) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF
+                )
                 .setTargetRotation(preview.display.rotation)
                 .build()
 
@@ -86,37 +111,75 @@ fun CameraFrame(
                 )
 
                 previewView.tag = imageCaptureUseCase
-            } catch (e: Exception) {
-                Log.e("CameraFrame", "Failed to bind camera use cases", e)
-            }
-        }, ContextCompat.getMainExecutor(context))
 
-        // Capture logic with lock enforcement
-        previewView.setOnClickListener {
-            if (!isCaptureLocked) {
-                val imageCapture = previewView.tag as? ImageCapture
-                if (imageCapture != null) {
+                // Provide the takePhoto action
+                onTakePhoto {
+                    if (isFrontCamera && flashEnabled) {
+                        adjustScreenBrightness(context, 1.0f)
+                    }
+
                     val photoFile = File(outputDirectory, "${System.currentTimeMillis()}.jpg")
                     val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-                    imageCapture.takePicture(
+                    imageCaptureUseCase.takePicture(
                         outputOptions,
                         cameraExecutor,
                         object : ImageCapture.OnImageSavedCallback {
                             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                onCapturePhoto(Uri.fromFile(photoFile))
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    if (isFrontCamera) {
+                                        mirrorImage(photoFile)
+                                    }
+                                    onCapturePhoto(Uri.fromFile(photoFile))
+                                    adjustScreenBrightness(context, WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE)
+                                }
                             }
 
                             override fun onError(exception: ImageCaptureException) {
                                 Log.e("CameraFrame", "Photo capture failed: ${exception.message}", exception)
+                                adjustScreenBrightness(context, WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE)
+
                             }
                         }
                     )
                 }
-            } else {
-                Log.d("CameraFrame", "Capture is locked, please discard the current photo first.")
+            } catch (e: Exception) {
+                Log.e("CameraFrame", "Failed to bind camera use cases", e)
             }
+        }, ContextCompat.getMainExecutor(context))
+    }
+}
+
+fun mirrorImage(photoFile: File) {
+    try {
+        val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+        val exif = ExifInterface(photoFile.absolutePath)
+        val orientation = exif.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )
+
+        val matrix = Matrix()
+
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
         }
+
+        matrix.postScale(-1f, 1f)
+
+        val correctedBitmap = Bitmap.createBitmap(
+            bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+        )
+
+        FileOutputStream(photoFile).use { outputStream ->
+            correctedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+        }
+
+        Log.d("CameraFrame", "Front camera image corrected successfully")
+    } catch (e: Exception) {
+        Log.e("CameraFrame", "Failed to correct front camera image", e)
     }
 }
 
