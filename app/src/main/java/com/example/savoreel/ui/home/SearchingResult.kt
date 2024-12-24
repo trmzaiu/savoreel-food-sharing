@@ -68,15 +68,13 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
             Row(
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp, bottom = 20.dp),
             ) {
-                BackArrow(navController = navController, modifier = Modifier.padding(start = 20.dp, top = 40.dp))
+                BackArrow(navController = navController)
                 CustomInputField(
-                    value = searchQuery,
+                    value = "",
                     onValueChange = {},
                     placeholder = "Search...",
-                    modifier = Modifier
-                        .padding(top = 40.dp, start = 5.dp, end = 20.dp)
                 )
             }
 

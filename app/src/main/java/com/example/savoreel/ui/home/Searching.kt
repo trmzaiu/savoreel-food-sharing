@@ -38,24 +38,26 @@ import com.example.savoreel.ui.theme.SavoreelTheme
 
 @Composable
 fun Searching(navController: NavController) {
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            // Top bar with Back Arrow and Input Field
             Row(
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
-//                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp, bottom = 20.dp),
             ) {
                 BackArrow(navController = navController)
                 CustomInputField(
-                    value = "search",
+                    value = "",
                     onValueChange = {},
                     placeholder = "Search...",
-                    modifier = Modifier
-                        .padding(top = 40.dp, start = 5.dp, end = 20.dp)
                 )
             }
             Column (modifier = Modifier.padding(start = 20.dp, top = 10.dp)) {

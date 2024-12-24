@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -54,7 +56,6 @@ import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.PostTopBar
 import com.example.savoreel.ui.theme.secondaryDarkColor
 import kotlinx.coroutines.launch
-
 
 @OptIn(ExperimentalGlideComposeApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -218,24 +219,24 @@ fun PostView(
                     ) {
                         if (isPhotoTaken) {
                             // State after photo taken
-                            ImageButton(R.drawable.ic_discard, "Discard", 40.dp) {
+                            ImageButton(R.drawable.ic_discard, "Discard") {
                                 postViewModel.resetPhoto()
                             }
                             ImageButton(R.drawable.ic_send, "Post", 75.dp) {
 
                             }
-                            ImageButton(R.drawable.ic_edit, "Edit", 35.dp) {
+                            ImageButton(R.drawable.ic_edit, "Edit") {
                                 scope.launch { sheetState.show() }
                             }
                         } else {
                             // State before photo taken
-                            ImageButton(R.drawable.ic_upload, "Upload", 40.dp) {
+                            ImageButton(R.drawable.ic_upload, "Upload") {
                                 galleryLauncher.launch("image/*")
                             }
                             ImageButton(R.drawable.ic_camera, "Take Photo", 75.dp) {
                                 takePhotoAction?.invoke()
                             }
-                            ImageButton(R.drawable.ic_camflip, "Swap Camera", 35.dp) {
+                            ImageButton(R.drawable.ic_camflip, "Swap Camera") {
                                 isFrontCamera = !isFrontCamera
                             }
                         }
@@ -247,7 +248,15 @@ fun PostView(
     if (sheetState.isVisible) {
         ModalBottomSheet(
             onDismissRequest = { scope.launch { sheetState.hide() } },
-            sheetState = sheetState
+            sheetState = sheetState,
+            dragHandle = {
+                BottomSheetDefaults.DragHandle(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
+                )
+            },
+            containerColor = MaterialTheme.colorScheme.secondary,
+            scrimColor = MaterialTheme.colorScheme.scrim,
         ) {
             EditOptionsOverlay(
                 onDismiss = { scope.launch { sheetState.hide() } },
@@ -277,15 +286,15 @@ fun PostView(
             )
         }
     }
-    if (showLocationPicker) {
-        LocationPickerOverlay(
-            onLocationSelected = { selectedAddress ->
-                postViewModel.updateFieldValue("location", selectedAddress)
-                showLocationPicker = false
-            },
-            onDismiss = { showLocationPicker = false }
-        )
-    }
+//    if (showLocationPicker) {
+//        LocationPickerOverlay(
+//            onLocationSelected = { selectedAddress ->
+//                postViewModel.updateFieldValue("location", selectedAddress)
+//                showLocationPicker = false
+//            },
+//            onDismiss = { showLocationPicker = false }
+//        )
+//    }
     editingField?.let { field ->
 //        if (editingField == "location") {
 //            LocationPickerOverlay(
@@ -341,14 +350,22 @@ fun ImageButton(
     size : Dp = 40.dp,
     onClick: () -> Unit,
 ) {
-    Icon(
-        painter = painterResource(iconId),
-        contentDescription = description,
-        modifier = Modifier
-            .size(size)
-            .clickable { onClick() },
-        tint = MaterialTheme.colorScheme.onBackground
+    IconButton(
+        modifier = Modifier.size(size + 30.dp).clip(RoundedCornerShape(50)),
+        onClick = onClick,
+        content = {
+            Icon(
+                painter = painterResource(iconId),
+                contentDescription = description,
+                modifier = Modifier
+                    .size(size)
+                    .clickable { onClick() },
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+        }
     )
+
+
 }
 
 //@Preview(showBackground = true)

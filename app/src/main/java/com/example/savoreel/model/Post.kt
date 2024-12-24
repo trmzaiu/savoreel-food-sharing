@@ -8,15 +8,13 @@ import java.util.Date
 import java.util.Locale
 
 data class Post(
-    val postid: Int,
-    val userid: Int,
+    val postid: String,
+    val userid: String,
     val title: String,
     val imageRes: Int,
     val datetime: Date,
 )
 
-@SuppressLint("NewApi")
-val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 @SuppressLint("NewApi")
 val postss = List(200) { i ->
     val calendar = Calendar.getInstance().apply {
@@ -28,30 +26,34 @@ val postss = List(200) { i ->
         set(Calendar.SECOND, 0)
     }
     Post(
-        postid = i + 1,
-        userid = i + 1,
+        postid = "${i + 1}",
+        userid = "${i + 1}",
         title = "Post ${i + 1}",
         imageRes = R.drawable.food,
-        datetime = calendar.time // Sử dụng `Date` thay vì `LocalDateTime`
+        datetime = calendar.time
     )
 }
 
 val posts = groupPostsByMonth(postss)
 
 @SuppressLint("NewApi")
-fun groupPostsByMonth(posts: List<Post>): Map<Pair<Int, String>, List<Post>> {
+fun groupPostsByMonth(posts: List<Post>): Map<Pair<Int, Int>, List<Post>> {
+    val comparator = compareByDescending<Pair<Int, Int>> { it.first }
+        .thenByDescending { it.second }
+
     return posts.groupBy { post ->
         val calendar = Calendar.getInstance()
         calendar.time = post.datetime
-        Pair(calendar.get(Calendar.YEAR), getMonthName(calendar.get(Calendar.MONTH) + 1))
-    }
+        Pair(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1)
+    }.mapValues { entry ->
+        entry.value.sortedByDescending { it.datetime }
+    }.toSortedMap(comparator)
 }
 
-
 fun getMonthName(month: Int): String {
-    val dateFormat = SimpleDateFormat("MMMM", Locale.ENGLISH) // "MMMM" trả về tên đầy đủ của tháng
+    val dateFormat = SimpleDateFormat("MMMM", Locale.ENGLISH)
     val calendar = Calendar.getInstance().apply {
-        set(Calendar.MONTH, month - 1) // Calendar.MONTH bắt đầu từ 0
+        set(Calendar.MONTH, month - 1)
     }
     return dateFormat.format(calendar.time)
 }

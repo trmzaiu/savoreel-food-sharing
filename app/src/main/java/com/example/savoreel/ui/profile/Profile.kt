@@ -43,6 +43,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.model.Post
 import com.example.savoreel.model.UserViewModel
+import com.example.savoreel.model.getMonthName
 import com.example.savoreel.model.posts
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.navButton
@@ -66,24 +67,14 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
         }, onFailure = { error ->
             Log.e("NameTheme", "Error retrieving user: $error")
         })
-    }
-
-    LaunchedEffect(Unit) {
-        listState.scrollToItem(posts.size - 1)
+        listState.scrollToItem(0)
     }
 
     LaunchedEffect(listState) {
-        var previousIndex = -1
-        snapshotFlow {
-            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-        }.collect { index ->
-            if (index != null) {
-                val isAtEnd = index == posts.size - 1
-                val isScrollingDown = index > previousIndex
-                isRowVisible = isAtEnd && isScrollingDown
-                previousIndex = index
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collect { firstVisibleItemIndex ->
+                isRowVisible = firstVisibleItemIndex == 0
             }
-        }
     }
 
     Box(
@@ -212,13 +203,11 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
                 state = listState,
                 modifier = Modifier.fillMaxSize()
             ) {
-
-
                 posts.forEach { (key, groupedPosts) ->
                     item {
                         CalendarWithImages(
                             posts = groupedPosts,
-                            title = "${key.second}, ${key.first}"
+                            title = "${getMonthName(key.second)}, ${key.first}"
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                     }
@@ -283,10 +272,10 @@ fun CalendarWithImages(
 }
 
 
-//@Preview(showBackground = true)
-//@Composable
-//fun ProfilePreview() {
-//    SavoreelTheme(darkTheme = true) {
-//        ProfileScreen(rememberNavController(), UserViewModel(), userId = "7qu2YPf1ncZza45VHZnIiXzuOTy1")
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun ProfilePreview() {
+    SavoreelTheme(darkTheme = true) {
+        ProfileScreen(rememberNavController(), UserViewModel())
+    }
+}

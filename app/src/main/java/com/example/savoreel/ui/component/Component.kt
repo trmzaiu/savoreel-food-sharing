@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -277,7 +278,7 @@ fun navButton(
             navController.navigate(destination)
         },
         modifier = modifier
-            .size(48.dp)
+            .size(40.dp)
             .clip(RoundedCornerShape(50)),
         colors = IconButtonDefaults.filledIconButtonColors(
             containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f)
@@ -288,15 +289,15 @@ fun navButton(
                 painter = painter,
                 contentDescription = null,
                 modifier = modifier
-                    .size(40.dp)
+                    .size(32.dp)
                     .clip(RoundedCornerShape(50)),
             )
         } else {
             Icon(
                 painter = painter,
                 contentDescription = null,
-                modifier = modifier,
-                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f)
+                modifier = modifier.scale(0.8f),
+                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f),
             )
         }
     }
@@ -416,7 +417,7 @@ fun PostTopBar(navController: NavController) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)
+        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp, top = 40.dp).padding(horizontal = 20.dp)
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),

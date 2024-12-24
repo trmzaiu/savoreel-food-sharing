@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -47,12 +46,7 @@ fun Notifications(navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
                 content = {
-                    BackArrow(
-                        navController = navController,
-                        modifier = Modifier
-                            .padding(0.dp)
-                            .size(48.dp)
-                    )
+                    BackArrow(navController = navController,)
                     Text(
                         text = "Notifications",
                         color = MaterialTheme.colorScheme.onBackground,
@@ -120,13 +114,6 @@ fun NotificationItem(data: NotificationItemData) {
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(0.7f)
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = data.timestamp,
-            style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray)
         )
     }
 }
