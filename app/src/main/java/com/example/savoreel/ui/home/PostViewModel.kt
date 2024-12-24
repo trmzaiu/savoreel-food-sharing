@@ -1,9 +1,9 @@
 package com.example.savoreel.ui.home
 
-import androidx.lifecycle.ViewModel
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.State
 import android.net.Uri
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
 
 class PostViewModel : ViewModel() {
     private val _isCapturing = mutableStateOf(false)
@@ -14,10 +14,10 @@ class PostViewModel : ViewModel() {
 
     // Photo states
     private val _photoUri = mutableStateOf<Uri?>(null)
-    val photoUri: State<Uri?> = _photoUri
+    val photoUri: State<Uri?> get() = _photoUri
 
     private val _isPhotoTaken = mutableStateOf(false)
-    val isPhotoTaken: State<Boolean> = _isPhotoTaken
+    val isPhotoTaken: State<Boolean> get() = _isPhotoTaken
 
     // Fields
     private val _title = mutableStateOf("")
@@ -34,16 +34,16 @@ class PostViewModel : ViewModel() {
 
     fun setPhotoUri(uri: Uri?) {
         _photoUri.value = uri
-        _isPhotoTaken.value = uri != null
-        _isCaptureLocked.value = uri != null
+//        _isPhotoTaken.value = uri != null
+//        _isCaptureLocked.value = uri != null
     }
 
     fun setisPhotoTaken(value: Boolean) {
         _isPhotoTaken.value = value
     }
     
-    fun setisCapturing(value: Boolean) {
-        _isCapturing.value = value
+    fun setisCaptureLocked(value: Boolean) {
+        _isCaptureLocked.value = value
     }
     
     fun resetPhoto() {

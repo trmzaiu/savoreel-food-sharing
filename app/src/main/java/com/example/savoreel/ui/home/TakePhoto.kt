@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,20 +42,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.savoreel.R
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.PostTopBar
-import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.secondaryDarkColor
 import kotlinx.coroutines.launch
 
@@ -72,9 +68,11 @@ fun PostView(
     var isFrontCamera by remember { mutableStateOf(false) }
     var permissionGranted by remember { mutableStateOf(false) }
     var permissionDenied by remember { mutableStateOf(false) }
-    val isCaptureLocked by postViewModel.isCaptureLocked
+    var takePhotoAction: (() -> Unit)? by remember { mutableStateOf(null) }
     val context = LocalContext.current
     var name by remember { mutableStateOf("") }
+    var flashEnabled by remember { mutableStateOf(false) }
+    var showFlashOverlay by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -84,6 +82,7 @@ fun PostView(
     val location by postViewModel.location
     val hashtag by postViewModel.hashtag
     val editingField by postViewModel.editingField
+    var showLocationPicker by remember { mutableStateOf(false) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -143,22 +142,44 @@ fun PostView(
                                 .background(Color.Gray)
                         ) {
                             if (isPhotoTaken && photoUri != null) {
+                                Log.d("PostView", "isPhotoTaken: $isPhotoTaken, photoUri: $photoUri")
                                 GlideImage(
                                     model = photoUri,
                                     contentDescription = "Captured Photo",
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop
                                 )
+                                Log.d("PostView", "Photo displayed: $photoUri")
                             } else {
+                                Log.d("PostView", "Camera live view active")
                                 CameraFrame(
                                     modifier = Modifier.fillMaxSize(),
                                     isFrontCamera = isFrontCamera,
-                                    onSwapCamera = { isFrontCamera = !isFrontCamera },
                                     onCapturePhoto = { uri ->
+                                        Log.d("PostView", "Photo captured, updating state")
                                         postViewModel.setPhotoUri(uri)
+                                        postViewModel.setisPhotoTaken(true)
                                     },
-                                    isCaptureLocked = isCaptureLocked
+                                    onTakePhoto = { action -> takePhotoAction = action },
+                                    flashEnabled = flashEnabled,
                                 )
+
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp)
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .clickable { flashEnabled = !flashEnabled },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_flash),
+                                        contentDescription = "Toggle Flash",
+                                        tint = Color.White.copy(alpha = if (flashEnabled) 1f else 0.3f),
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
                             }
                         }
                         if (isPhotoTaken) {
@@ -166,15 +187,14 @@ fun PostView(
                                 label = "Add Title",
                                 value = title,
                                 onStartEdit = { postViewModel.startEditingField("title") },
+                                isTitle = true,
                             )
                             if (hashtag.isNotEmpty() || editingField == "Hashtag") {
                                 EditableField(
                                     label = "Add Hashtag",
                                     value = hashtag,
                                     onStartEdit = { postViewModel.startEditingField("hashtag") },
-                                    TextAlign.Justify,
-                                    FontWeight.Normal,
-                                    R.drawable.ic_hashtag
+                                    ic = R.drawable.ic_hashtag
                                 )
                             }
                             if (location.isNotEmpty() || editingField == "Location") {
@@ -182,9 +202,7 @@ fun PostView(
                                     label = "Add Location",
                                     value = location,
                                     onStartEdit = { postViewModel.startEditingField("location") },
-                                    TextAlign.Justify,
-                                    FontWeight.Normal,
-                                    R.drawable.ic_location
+                                    ic = R.drawable.ic_location
                                 )
                             }
                         }
@@ -215,9 +233,7 @@ fun PostView(
                                 galleryLauncher.launch("image/*")
                             }
                             ImageButton(R.drawable.ic_camera, "Take Photo", 75.dp) {
-                                postViewModel.setisPhotoTaken(true)
-                                postViewModel.setisCapturing(true)
-                                 Log.d("PostView", "Take Photo button clicked")
+                                takePhotoAction?.invoke()
                             }
                             ImageButton(R.drawable.ic_camflip, "Swap Camera", 35.dp) {
                                 isFrontCamera = !isFrontCamera
@@ -261,35 +277,58 @@ fun PostView(
             )
         }
     }
-
-    editingField?.let { field ->
-        BlurredInputOverlay(
-            label = "Enter ${field.capitalize()}",
-            initialValue = when (field) {
-                "title" -> title
-                "location" -> location
-                "hashtag" -> hashtag
-                else -> ""
+    if (showLocationPicker) {
+        LocationPickerOverlay(
+            onLocationSelected = { selectedAddress ->
+                postViewModel.updateFieldValue("location", selectedAddress)
+                showLocationPicker = false
             },
-            onValueChange = { newValue ->
-                if (field == "hashtag") {
-                    val filteredValue = newValue
-                        .split(" ")
-                        .filter { it.startsWith("#") }
-                        .joinToString(" ")
-                    postViewModel.updateFieldValue(field, filteredValue)
-                } else {
-                    postViewModel.updateFieldValue(field, newValue)
-                }
-            },
-            onDone = { postViewModel.stopEditingField() },
-            maxCharacters = when (field) {
-                "title" -> 28
-                "location" -> 60
-                "hashtag" -> 30
-                else -> 0
-            }
+            onDismiss = { showLocationPicker = false }
         )
+    }
+    editingField?.let { field ->
+//        if (editingField == "location") {
+//            LocationPickerOverlay(
+//                onLocationSelected = { selectedAddress ->
+//                    postViewModel.updateFieldValue("location", selectedAddress)
+//                    postViewModel.stopEditingField()
+//                },
+//                onDismiss = { postViewModel.stopEditingField() }
+//            )
+//        } else {
+            BlurredInputOverlay(
+                label = when (field) {
+                    "title" -> "Enter Title"
+                    "location" -> "Enter Location"
+                    "hashtag" -> "Add Hashtags (e.g., #Food)"
+                    else -> ""
+                },
+                initialValue = when (field) {
+                    "title" -> title
+                    "location" -> location
+                    "hashtag" -> hashtag
+                    else -> ""
+                },
+                onValueChange = { newValue ->
+                    if (field == "hashtag") {
+                        val filteredValue = newValue
+                            .split(" ")
+                            .filter { it.startsWith("#") }
+                            .joinToString(" ")
+                        postViewModel.updateFieldValue(field, filteredValue)
+                    } else {
+                        postViewModel.updateFieldValue(field, newValue)
+                    }
+                },
+                onDone = { postViewModel.stopEditingField() },
+                maxCharacters = when (field) {
+                    "title" -> 28
+                    "location" -> 60
+                    "hashtag" -> 30
+                    else -> 0
+                }
+            )
+//        }
     }
 }
 
