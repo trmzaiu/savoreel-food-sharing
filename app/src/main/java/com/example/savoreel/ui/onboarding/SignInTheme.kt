@@ -57,10 +57,10 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
         isLoading = true
         userViewModel.signIn(email, password, onSuccess = { userId ->
             isLoading = false
-            navController.navigate("takephoto_screen")
+            navController.navigate("take_photo_screen")
         }, onFailure = { errorMsg ->
             isLoading = false
-            errorMessage = errorMsg
+            errorMessage = "Make sure you entered your email and password correctly and try again."
             showErrorDialog = true
             Log.e("SignInScreen", errorMessage)
         })

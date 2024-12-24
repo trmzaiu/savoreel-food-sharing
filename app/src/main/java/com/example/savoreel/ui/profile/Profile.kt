@@ -1,5 +1,6 @@
 package com.example.savoreel.ui.profile
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,6 +42,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.model.Post
+import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.model.posts
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.navButton
@@ -48,9 +50,23 @@ import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
     val listState = rememberLazyListState()
     var isRowVisible by remember { mutableStateOf(true) }
+
+    var name by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        userViewModel.getUser(onSuccess = { user ->
+            if (user != null) {
+                name = user.name ?: ""
+            } else {
+                Log.e("NameTheme", "User data not found")
+            }
+        }, onFailure = { error ->
+            Log.e("NameTheme", "Error retrieving user: $error")
+        })
+    }
 
     LaunchedEffect(Unit) {
         listState.scrollToItem(posts.size - 1)
@@ -98,7 +114,7 @@ fun ProfileScreen(navController: NavController) {
                             isChecked = true
                         )
                         Text(
-                            text = "Giang Hoang",
+                            text = name,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 18.sp,
@@ -110,7 +126,7 @@ fun ProfileScreen(navController: NavController) {
                     navButton(
                         painter = painterResource(R.drawable.ic_setting),
                         navController = navController,
-                        destination = "setting",
+                        destination = "settings_screen",
                     )
                     BackArrow(
                         navController = navController,
@@ -140,7 +156,7 @@ fun ProfileScreen(navController: NavController) {
                                 .clip(RoundedCornerShape(50))
                         )
                         Text(
-                            text = "Tra Giang Hoang",
+                            text = name,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
@@ -267,12 +283,10 @@ fun CalendarWithImages(
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun ProfilePreview() {
-    SavoreelTheme(darkTheme = true) {
-        ProfileScreen(
-            navController = rememberNavController()
-        )
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ProfilePreview() {
+//    SavoreelTheme(darkTheme = true) {
+//        ProfileScreen(rememberNavController(), UserViewModel(), userId = "7qu2YPf1ncZza45VHZnIiXzuOTy1")
+//    }
+//}

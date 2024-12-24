@@ -1,8 +1,10 @@
 package com.example.savoreel.ui.setting
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -37,9 +40,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
@@ -52,18 +57,20 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel, userId: String) {
+fun SettingTheme(navController: NavController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel) {
     var name by remember { mutableStateOf("") }
     var showModal by remember { mutableStateOf(false) }
     val isDarkModeEnabled by remember { themeViewModel.isDarkModeEnabled }
 
-    LaunchedEffect(userId) {
-        userViewModel.getUser(userId, onSuccess = { user ->
-            user?.let {
-                name = it.name ?: ""
+    LaunchedEffect(Unit) {
+        userViewModel.getUser(onSuccess = { user ->
+            if (user != null) {
+                name = user.name ?: ""
+            } else {
+                Log.e("Setting", "User data not found")
             }
-        }, onFailure = {
-
+        }, onFailure = { error ->
+            Log.e("NameTheme", "Error retrieving user: $error")
         })
     }
 
@@ -93,7 +100,7 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
                          color = MaterialTheme.colorScheme.onBackground,
                          modifier = Modifier
                              .align(Alignment.Center)
-                             .padding(top = 40.dp)
+                             .padding(top = 40.dp, bottom = 10.dp)
                      )
                  }
 
@@ -101,7 +108,7 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
                      modifier = Modifier.padding(horizontal = 35.dp)
                  ) {
                      item {
-                         Spacer(modifier = Modifier.height(30.dp))
+                         Spacer(modifier = Modifier.height(20.dp))
 
                          Box(
                              contentAlignment = Alignment.Center,
@@ -110,7 +117,7 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
                                  .align(Alignment.CenterHorizontally)
                          ) {
                              Image(
-                                 painter = painterResource(id = R.drawable.default_avatar),
+                                 painter = painterResource(R.drawable.default_avatar),
                                  contentDescription = "User Avatar",
                                  modifier = Modifier
                                      .clip(CircleShape)
@@ -159,31 +166,31 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
                          // General Section
                          Spacer(modifier = Modifier.height(20.dp))
 
-                         SettingsSection(title = "General") {
+                         SettingsSection(title = "General", imageVector = ImageVector.vectorResource(R.drawable.ic_general)) {
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_name),
-                                 text = "Edit Name",
+                                 icon = ImageVector.vectorResource(R.drawable.ic_name),
+                                 text = "Edit name",
                                  navController = navController,
-                                 destination = "name_screen/${userId}?isCreateMode=false",
+                                 destination = "name_screen?isChangeName=true",
                              )
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_mail),
-                                 text = "Change Email",
+                                 icon = ImageVector.vectorResource(R.drawable.ic_mail),
+                                 text = "Change email",
                                  navController = navController,
-                                 destination = "password_screen/${userId}?actionType=change_email",
+                                 destination = "password_screen?isChangePassword=false",
                              )
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_key),
-                                 text = "Change Password",
+                                 icon = ImageVector.vectorResource(R.drawable.ic_key),
+                                 text = "Change password",
                                  navController = navController,
-                                 destination = "password_screen/${userId}?isChangePassword=true",
+                                 destination = "password_screen?isChangePassword=true",
                              )
                          }
 
                          // Support Section
-                         SettingsSection(title = "Support") {
+                         SettingsSection(title = "Support", imageVector = ImageVector.vectorResource(R.drawable.ic_support)) {
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_darkmode),
+                                 icon = ImageVector.vectorResource(R.drawable.ic_darkmode),
                                  text = "Dark Mode",
                                  changeMode = true,
                                  isChecked = isDarkModeEnabled,
@@ -191,19 +198,19 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
                              )
 
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_language),
+                                 icon = ImageVector.vectorResource(R.drawable.ic_language),
                                  text = "Language",
                                  navController = navController,
                                  destination = "language",
                              )
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_noti),
+                                 icon = ImageVector.vectorResource(R.drawable.ic_noti),
                                  text = "Notifications",
                                  navController = navController,
                                  destination = "notification_setting",
                              )
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_report),
+                                 icon = ImageVector.vectorResource(R.drawable.ic_report),
                                  text = "Report a problem",
                                  navController = navController,
                                  destination = "report_a_problem",
@@ -211,37 +218,37 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
                          }
 
                          // About Section
-                         SettingsSection(title = "About") {
+                         SettingsSection(title = "About", imageVector = ImageVector.vectorResource(R.drawable.ic_about)) {
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_share),
-                                 text = "Share Account",
+                                 icon = ImageVector.vectorResource(R.drawable.ic_share),
+                                 text = "Share account",
                                  navController = navController,
                                  destination = "share_account",
                              )
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_term),
-                                 text = "Terms of Service",
+                                 icon = ImageVector.vectorResource(R.drawable.ic_term),
+                                 text = "Terms of service",
                                  navController = navController,
                                  destination = "terms_of_service",
                              )
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
+                                 icon = ImageVector.vectorResource(R.drawable.ic_privacy),
                                  text = "Privacy",
                                  navController = navController,
                                  destination = "privacy",
                              )
                          }
 
-                         SettingsSection(title = "Danger Zone") {
+                         SettingsSection(title = "Danger Zone", imageVector = ImageVector.vectorResource(R.drawable.ic_danger)) {
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                 text = "Delete Account",
+                                 icon = ImageVector.vectorResource(R.drawable.ic_delete),
+                                 text = "Delete account",
                                  navController = navController,
                                  destination = "confirm_password",
                              )
                              SettingItemWithNavigation(
-                                 icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
-                                 text = "Sign Out",
+                                 icon = ImageVector.vectorResource(R.drawable.ic_logout),
+                                 text = "Sign out",
                                  navController = navController,
                                  destination = "sign_out",
                              )
@@ -254,20 +261,32 @@ fun SettingsScreen(navController: NavController, themeViewModel: ThemeViewModel,
 }
 
 @Composable
-fun SettingsSection(title: String, content: @Composable () -> Unit) {
+fun SettingsSection(title: String, imageVector: ImageVector? = null, content: @Composable () -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Text(
-            text = title,
-            fontFamily = nunitoFontFamily,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSecondary,
-            modifier = Modifier
-                .padding(bottom = 4.dp)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            if (imageVector != null) {
+                Icon(
+                    imageVector = imageVector,
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier
+                        .size(18.dp)
+                )
+            }
+            Text(
+                text = title,
+                fontFamily = nunitoFontFamily,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSecondary,
+            )
+        }
         Column(
             modifier = Modifier
                 .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(20.dp))
@@ -290,12 +309,14 @@ fun SettingItemWithNavigation(
     isChecked: Boolean = false,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(55.dp)
-            .clickable {
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
                 destination?.let {
                     navController?.navigate(it)
                 }
@@ -379,13 +400,13 @@ fun handleAvatarOption(option: String) {
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun SettingsScreenPreviewDark() {
-//    SavoreelTheme(darkTheme = true, dynamicColor = true) {
-//        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel(), userViewModel = UserViewModel(), userId = ) // Pass the navController as normal
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreviewDark() {
+    SavoreelTheme(darkTheme = true, dynamicColor = true) {
+        SettingTheme(rememberNavController(), ThemeViewModel(), UserViewModel()) // Pass the navController as normal
+    }
+}
 //
 //@Preview(showBackground = true)
 //@Composable

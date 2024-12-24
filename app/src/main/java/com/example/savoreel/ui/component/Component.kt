@@ -9,6 +9,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -370,7 +372,7 @@ fun CustomSwitch(
 }
 
 @Composable
-fun PostTopBar(onNavigateTo: NavController) {
+fun PostTopBar(navController: NavController) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -382,22 +384,22 @@ fun PostTopBar(onNavigateTo: NavController) {
         ) {
             navButton(
                 painter = painterResource(R.drawable.default_avatar),
-                navController = onNavigateTo,
-                destination = "",
+                navController = navController,
+                destination = "profile_screen",
                 isChecked = true
             )
         }
         Row {
             navButton(
                 painter = painterResource(id = R.drawable.ic_search),
-                navController = onNavigateTo,
-                destination = "",
+                navController = navController,
+                destination = "searching",
             )
             Spacer(modifier = Modifier.width(16.dp))
             navButton(
                 painter = painterResource(id = R.drawable.ic_noti),
-                navController = onNavigateTo,
-                destination = "",
+                navController = navController,
+                destination = "notification",
             )
         }
     }

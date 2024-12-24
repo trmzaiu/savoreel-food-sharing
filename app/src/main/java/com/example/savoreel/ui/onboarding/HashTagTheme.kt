@@ -144,7 +144,7 @@ fun HashTagTheme(navController: NavController) {
                 enabled = selectedTags.isNotEmpty(),
                 onClick = {
                     println("Selected hashtags: ${selectedTags.joinToString(", ")}")
-                    navController.navigate("takephoto_screen")
+                    navController.navigate("take_photo_screen")
                 },
                 modifier = Modifier
                     .width(240.dp)

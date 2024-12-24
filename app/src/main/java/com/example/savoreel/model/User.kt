@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.savoreel.model
 
 import android.util.Log
@@ -59,7 +61,14 @@ class UserViewModel : ViewModel() {
     }
 
     // Funtion to validate password
-    fun validatePassword(userId: String, password: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+    fun validatePassword(password: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in.")
+            return
+        }
+
+        val userId = currentUser.uid
         db.collection("users").document(userId).get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -137,8 +146,15 @@ class UserViewModel : ViewModel() {
             }
     }
 
-    // Function to retrieve user details from Firestore
-    fun getUser(userId: String, onSuccess: (User?) -> Unit, onFailure: (String) -> Unit) {
+    // Function to retrieve user details
+    fun getUser(onSuccess: (User?) -> Unit, onFailure: (String) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in.")
+            return
+        }
+
+        val userId = currentUser.uid
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
@@ -153,8 +169,15 @@ class UserViewModel : ViewModel() {
             }
     }
 
-    // Function to update the user's name in Firestore
-    fun updateUserName(userId: String, name: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+    // Function to update the user's name
+    fun updateUserName(name: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in.")
+            return
+        }
+
+        val userId = currentUser.uid
         db.collection("users").document(userId)
             .update("name", name)
             .addOnSuccessListener {
@@ -165,37 +188,66 @@ class UserViewModel : ViewModel() {
             }
     }
 
-    fun updateUserEmail(userId: String, newEmail: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-        db.collection("users").document(userId)
-            .update("email", newEmail)
-            .addOnSuccessListener {
-                onSuccess()
-            }
-            .addOnFailureListener {
-                onFailure(it.localizedMessage ?: "Failed to update email.")
-            }
-    }
-
-    fun updateUserPassword(userId: String, newPass: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-        val user = auth.currentUser
-        user?.updatePassword(newPass)?.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                db.collection("users").document(userId)
-                    .update("password", newPass)
-                    .addOnCompleteListener { firestoreTask ->
-                        if (firestoreTask.isSuccessful) {
-                            onSuccess()
-                        } else {
-                            onFailure("Failed to update password in the database.")
-                        }
-                    }
-            } else {
-                onFailure("Failed to update password in Firebase Authentication.")
-            }
+    // Function to update the user's email
+    fun updateUserEmail(newEmail: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in.")
+            return
         }
+
+        currentUser.updateEmail(newEmail)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userId = currentUser.uid
+                    db.collection("users").document(userId)
+                        .update("email", newEmail)
+                        .addOnSuccessListener {
+                            onSuccess()
+                        }
+                        .addOnFailureListener {
+                            onFailure(it.localizedMessage ?: "Failed to update email in database.")
+                        }
+                } else {
+                    onFailure(task.exception?.localizedMessage ?: "Failed to update email in Firebase.")
+                }
+            }
     }
 
-    fun updateUserAvatar(userId: String, avatarUri: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+    // Function to update the user's password
+    fun updateUserPassword(newPass: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in.")
+            return
+        }
+
+        currentUser.updatePassword(newPass)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userId = currentUser.uid
+                    db.collection("users").document(userId)
+                        .update("password", newPass)
+                        .addOnSuccessListener {
+                            onSuccess()
+                        }
+                        .addOnFailureListener {
+                            onFailure("Failed to update password in database.")
+                        }
+                } else {
+                    onFailure("Failed to update password in Firebase Authentication.")
+                }
+            }
+    }
+
+    fun updateUserAvatar(avatarUri: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in.")
+            return
+        }
+
+        val userId = currentUser.uid
         db.collection("users").document(userId)
             .update("avatar", avatarUri)
             .addOnSuccessListener {

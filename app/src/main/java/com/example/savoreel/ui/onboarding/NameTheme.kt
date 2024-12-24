@@ -15,34 +15,27 @@ import com.example.savoreel.ui.component.CommonForm
 fun NameTheme(
     navController: NavController,
     userViewModel: UserViewModel,
-    userId: String,
     isChangeName: Boolean,
     onNameSubmitted: (String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
-    var isError by remember { mutableStateOf(false) }
 
-    Log.d("NameScreen", "userId: $userId, isChangeName: $isChangeName")
-
-
-    LaunchedEffect(userId) {
-        userViewModel.getUser(userId, onSuccess = { user ->
-            user?.let {
-                name = it.name ?: ""
-            }
-        }, onFailure = { error ->
-            errorMessage = error
-            isError = true
-        })
-    }
-
-    if (isError) {
-        Log.e("NameTheme", errorMessage)
+    LaunchedEffect(Unit) {
+        if(isChangeName) {
+            userViewModel.getUser(onSuccess = { user ->
+                if (user != null) {
+                    name = user.name ?: ""
+                } else {
+                    Log.e("NameTheme", "User data not found")
+                }
+            }, onFailure = { error ->
+                Log.e("NameTheme", "Error retrieving user: $error")
+            })
+        }
     }
 
     fun changeName() {
-        userViewModel.updateUserName(userId, name, onSuccess = {
+        userViewModel.updateUserName(name, onSuccess = {
             onNameSubmitted(name)
         }, onFailure = { error ->
             Log.e("NameTheme", "Error updating name: $error")
@@ -55,7 +48,11 @@ fun NameTheme(
         placeholder = "Name" ,
         buttonText = if (isChangeName) "Save" else "Continue",
         value = name,
-        onValueChange = { name = it },
+        onValueChange = {
+            if (it.length <= 15) {
+                name = it
+            }
+        },
         isPasswordField = false,
         isButtonEnabled = name.isNotEmpty(),
         onClickButton = {
@@ -65,7 +62,6 @@ fun NameTheme(
         }
     )
 }
-
 
 //@Preview(showBackground = true)
 //@Composable

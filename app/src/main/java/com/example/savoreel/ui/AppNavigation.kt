@@ -32,7 +32,7 @@ import com.example.savoreel.ui.onboarding.SuccessTheme
 import com.example.savoreel.ui.profile.FollowScreen
 import com.example.savoreel.ui.profile.ProfileScreen
 import com.example.savoreel.ui.setting.NotificationSetting
-import com.example.savoreel.ui.setting.SettingsScreen
+import com.example.savoreel.ui.setting.SettingTheme
 import com.example.savoreel.ui.setting.TermsOfServiceScreen
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.ThemeViewModel
@@ -67,18 +67,11 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
                 HashTagTheme(navController)
             }
 
-            composable("settings_screen/{userId}") { backStackEntry ->
-                val userId = backStackEntry.arguments?.getString("userId")?.toString() ?: ""
-
-                SettingsScreen(navController, themeViewModel, userViewModel, userId)
-            }
-
-            composable("name_screen/{userId}?isChangeName={isChangeName}") { backStackEntry ->
-                val userId = backStackEntry.arguments?.getString("userId")?: ""
+            composable("name_screen?isChangeName={isChangeName}") { backStackEntry ->
                 val isChangeName = backStackEntry.arguments?.getBoolean("isChangeName") ?: false
 
                 NameTheme(
-                    navController, userViewModel, userId, isChangeName,
+                    navController, userViewModel, isChangeName,
                     onNameSubmitted = {
                         if (isChangeName) {
                             navController.popBackStack()
@@ -89,18 +82,16 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
                 )
             }
 
-            composable("password_screen/{userId}?isChangePassword={isChangePassword}") { backStackEntry ->
-                val userId = backStackEntry.arguments?.getString("userId")?: ""
+            composable("password_screen?isChangePassword={isChangePassword}") { backStackEntry ->
                 val isChangePassword = backStackEntry.arguments?.getBoolean("isChangePassword") ?: false
 
-                PasswordTheme(navController, userViewModel, userId, isChangePassword)
+                PasswordTheme(navController, userViewModel, isChangePassword)
             }
 
-            composable("email_screen/{userId}?isChangeEmail={isChangeEmail}") { backStackEntry ->
-                val userId = backStackEntry.arguments?.getString("userId")?: ""
+            composable("email_screen?isChangeEmail={isChangeEmail}") { backStackEntry ->
                 val isChangeEmail = backStackEntry.arguments?.getBoolean("isChangeEmail") ?: false
 
-                EmailTheme(navController, isChangeEmail, userViewModel, userId)
+                EmailTheme(navController, isChangeEmail, userViewModel)
             }
 
 //            composable("verify_code_screen/{email}") { backStackEntry ->
@@ -108,27 +99,28 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 //                VerifyCodeTheme(navController, userViewModel, email)
 //            }
 
-            composable("change_password_screen/{userId}") { backStackEntry ->
-                val userId = backStackEntry.arguments?.getString("userId")?: ""
-
-                ChangePasswordTheme(navController, userViewModel, userId)
+            composable("change_password_screen") {
+                ChangePasswordTheme(navController, userViewModel)
             }
 
-            composable("notification") {
-                Notifications(navController = navController)
+            composable("take_photo_screen") {
+                PostView(navController, userViewModel)
+            }
+
+            composable("profile_screen") {
+                ProfileScreen(navController, userViewModel)
+            }
+
+            composable("settings_screen") {
+                SettingTheme(navController, themeViewModel, userViewModel)
             }
 
             composable("searching") {
-                Searching(navController = navController)
+                Searching(navController)
             }
+
             composable("notification") {
-                Notifications(navController = navController)
-            }
-            composable("takephoto_screen") {
-                PostView(navController = navController)
-            }
-            composable("searching") {
-                Searching(navController = navController)
+                Notifications(navController)
             }
 
             composable(
@@ -151,9 +143,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
                 TermsOfServiceScreen(navController = navController)
             }
 
-            composable("profile_screen") {
-                ProfileScreen(navController = navController)
-            }
+
         }
     }
 }

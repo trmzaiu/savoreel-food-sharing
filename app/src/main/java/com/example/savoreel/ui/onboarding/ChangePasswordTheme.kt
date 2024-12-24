@@ -25,17 +25,30 @@ import com.example.savoreel.ui.component.CustomTitle
 import com.example.savoreel.ui.component.ErrorDialog
 
 @Composable
-fun ChangePasswordTheme(navController: NavController, userViewModel: UserViewModel, userId: Int) {
+fun ChangePasswordTheme(navController: NavController, userViewModel: UserViewModel) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
+    // Form validity check
     val isFormValid = password.isNotEmpty() && confirmPassword.isNotEmpty() && confirmPassword.length >= password.length
 
+    // Password validation function
     fun isPasswordValid(password: String, confirmPassword: String): Boolean {
         return password == confirmPassword
+    }
+
+    fun changePassword() {
+        userViewModel.updateUserPassword(password, onSuccess = {
+            navController.navigate("sign_in_screen")
+        },
+            onFailure = { error ->
+                errorMessage = error
+                showErrorDialog = true
+            }
+        )
     }
 
     Box(
@@ -46,7 +59,7 @@ fun ChangePasswordTheme(navController: NavController, userViewModel: UserViewMod
     ) {
         BackArrow(
             navController = navController,
-            modifier = Modifier.align(Alignment.TopStart)
+            modifier = Modifier.align(Alignment.TopStart).padding(start = 20.dp, top = 40.dp)
         )
 
         Column(
@@ -89,7 +102,6 @@ fun ChangePasswordTheme(navController: NavController, userViewModel: UserViewMod
                     } else {
                         errorMessage = "Change password successfully!"
                         showConfirmDialog = true
-                        println("Password: $password, $confirmPassword")
                     }
                 }
             )
@@ -98,40 +110,24 @@ fun ChangePasswordTheme(navController: NavController, userViewModel: UserViewMod
         }
     }
 
+    // Show error dialog if passwords don't match
     if (showErrorDialog) {
         ErrorDialog(
-            title = "Password mismatch",
+            title = "Error",
             message = errorMessage,
             onDismiss = { showErrorDialog = false }
         )
     }
 
+    // Show confirmation dialog after successful validation
     if (showConfirmDialog) {
         ErrorDialog(
             title = "Success",
             message = errorMessage,
             onDismiss = {
                 showConfirmDialog = false
-                navController.navigate("sign_in_screen") {
-                    popUpTo("sign_in_screen") { inclusive = true }
-                }
+                changePassword()
             }
         )
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun ResetPasswordDarkPreview() {
-//    SavoreelTheme(darkTheme = true) {
-//        ChangePasswordTheme(navController = rememberNavController())
-//    }
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun ResetPasswordLightPreview() {
-//    SavoreelTheme(darkTheme = false) {
-//        ChangePasswordTheme(navController = rememberNavController())
-//    }
-//}

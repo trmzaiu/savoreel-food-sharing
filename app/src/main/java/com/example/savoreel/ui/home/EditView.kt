@@ -52,10 +52,10 @@ fun EditOptionsOverlay(
     onSelect: (String) -> Unit
 ) {
     val options = listOf(
-        "Hashtag" to R.drawable.ic_avar,
-        "Location" to R.drawable.ic_edit,
-        "Download" to R.drawable.ic_noti,
-        "Share" to R.drawable.ic_send
+        "Hashtag" to R.drawable.ic_hashtag,
+        "Location" to R.drawable.ic_location,
+        "Download" to R.drawable.ic_download,
+        "Share" to R.drawable.ic_share2
     )
     Box(
         modifier = Modifier

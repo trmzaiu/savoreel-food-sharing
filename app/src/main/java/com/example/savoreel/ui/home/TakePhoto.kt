@@ -20,11 +20,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +53,7 @@ import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.savoreel.R
+import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.PostTopBar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.secondaryDarkColor
@@ -60,8 +64,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun PostView(
     navController : NavController,
+    userViewModel: UserViewModel,
     postViewModel: PostViewModel = viewModel(),
-    onNavigateTo: NavController = rememberNavController()
 ) {
     val photoUri by postViewModel.photoUri
     val isPhotoTaken by postViewModel.isPhotoTaken
@@ -70,6 +74,7 @@ fun PostView(
     var permissionDenied by remember { mutableStateOf(false) }
     val isCaptureLocked by postViewModel.isCaptureLocked
     val context = LocalContext.current
+    var name by remember { mutableStateOf("") }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -86,6 +91,18 @@ fun PostView(
         postViewModel.setPhotoUri(uri)
     }
 
+    LaunchedEffect(Unit) {
+        userViewModel.getUser(onSuccess = { user ->
+            if (user != null) {
+                name = user.name ?: ""
+            } else {
+                Log.e("NameTheme", "User data not found")
+            }
+        }, onFailure = { error ->
+            Log.e("NameTheme", "Error retrieving user: $error")
+        })
+    }
+
     if (!permissionGranted) {
         RequestCameraPermission(
             onPermissionGranted = { permissionGranted = true },
@@ -93,7 +110,7 @@ fun PostView(
         )
     } else {
         Scaffold(
-            topBar = { PostTopBar(onNavigateTo) },
+            topBar = { PostTopBar(navController) },
             content = { padding ->
                 Column(
                     modifier = Modifier
@@ -108,7 +125,7 @@ fun PostView(
                             .padding(top = 60.dp)
                     ) {
                         Text(
-                            text = "Name",
+                            text = name,
                             fontSize = 20.sp,
                             lineHeight = 10.sp,
                             fontWeight = FontWeight.Bold,
@@ -157,7 +174,7 @@ fun PostView(
                                     onStartEdit = { postViewModel.startEditingField("hashtag") },
                                     TextAlign.Justify,
                                     FontWeight.Normal,
-                                    R.drawable.ic_avar
+                                    R.drawable.ic_hashtag
                                 )
                             }
                             if (location.isNotEmpty() || editingField == "Location") {
@@ -167,7 +184,7 @@ fun PostView(
                                     onStartEdit = { postViewModel.startEditingField("location") },
                                     TextAlign.Justify,
                                     FontWeight.Normal,
-                                    R.drawable.ic_edit
+                                    R.drawable.ic_location
                                 )
                             }
                         }
@@ -285,18 +302,20 @@ fun ImageButton(
     size : Dp = 40.dp,
     onClick: () -> Unit,
 ) {
-    Image(
-        painter = painterResource(id = iconId),
+    Icon(
+        painter = painterResource(iconId),
         contentDescription = description,
         modifier = Modifier
             .size(size)
-            .clickable { onClick() }
+            .clickable { onClick() },
+        tint = MaterialTheme.colorScheme.onBackground
     )
 }
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SavoreelTheme() {
-        PostView(navController = rememberNavController())
-    }
-}
+
+//@Preview(showBackground = true)
+//@Composable
+//fun GreetingPreview() {
+//    SavoreelTheme() {
+//        PostView(rememberNavController(), UserViewModel(), userId = "7qu2YPf1ncZza45VHZnIiXzuOTy1")
+//    }
+//}

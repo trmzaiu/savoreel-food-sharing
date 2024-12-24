@@ -1,5 +1,6 @@
 package com.example.savoreel.ui.onboarding
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,25 +12,26 @@ import com.example.savoreel.ui.component.CommonForm
 import com.example.savoreel.ui.component.ErrorDialog
 
 @Composable
-fun PasswordTheme(navController: NavController, userViewModel: UserViewModel, userId: String, isChangePassword: Boolean) {
+fun PasswordTheme(navController: NavController, userViewModel: UserViewModel, isChangePassword: Boolean) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
 
     fun validatePassword() {
-        userViewModel.validatePassword(userId, password, onSuccess = {
+        userViewModel.validatePassword(password, onSuccess = {
             if (isChangePassword) {
-                navController.navigate("email_screen/${userId}?isChangeEmail=true") {
+                navController.navigate("email_screen?isChangeEmail=true") {
                     popUpTo("password_screen") { inclusive = true }
                 }
             } else {
-                navController.navigate("change_password_screen/${userId}?isChangeEmail=false") {
+                navController.navigate("change_password_screen?isChangeEmail=false") {
                     popUpTo("password_screen") { inclusive = true }
                 }
             }
         }, onFailure = { error ->
-            errorMessage = error
+            errorMessage = "Make sure you entered your password correctly and try again."
             showErrorDialog = true
+            Log.e("PasswordTheme", "Error validating password: $error")
         })
     }
 

@@ -51,7 +51,7 @@ import com.example.savoreel.ui.theme.SavoreelTheme
 
 @Composable
 fun SearchingResult(navController: NavController, searchQuery: String) {
-    var selectedTab by remember { mutableIntStateOf(2) }
+    var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("All", "People", "Post")
     val (users, setResultList) = remember { mutableStateOf(users) }
 

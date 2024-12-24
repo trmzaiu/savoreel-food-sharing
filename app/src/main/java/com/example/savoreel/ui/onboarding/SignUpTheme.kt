@@ -58,10 +58,10 @@ fun SignUpScreenTheme(navController: NavController, userViewModel: UserViewModel
     fun createAccount() {
         isLoading = true
         userViewModel.createAccount(email, password,
-            onSuccess = { userId ->
+            onSuccess = {
                 isLoading = false
-                Log.d("CreateAccount", "Success! User ID: $userId")
-                navController.navigate("name_screen/${userId}?isChangeName=false")
+                Log.d("CreateAccount", "Success! User ID")
+                navController.navigate("name_screen?isChangeName=false")
             },
             onFailure = { errorMsg ->
                 isLoading = false

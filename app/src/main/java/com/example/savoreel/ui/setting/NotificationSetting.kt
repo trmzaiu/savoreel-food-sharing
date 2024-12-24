@@ -62,11 +62,11 @@ fun NotificationSetting(navController: NavController) {
                     fontSize = 32.sp,
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .padding(top = 40.dp)
+                        .padding(top = 40.dp, bottom = 10.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             LazyColumn(modifier = Modifier.padding(horizontal = 35.dp)
             ) {

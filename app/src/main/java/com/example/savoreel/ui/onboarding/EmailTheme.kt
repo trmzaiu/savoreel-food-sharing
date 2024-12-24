@@ -1,5 +1,6 @@
 package com.example.savoreel.ui.onboarding
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -9,34 +10,26 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.CommonForm
-import com.example.savoreel.ui.component.ErrorDialog
 
 @Composable
 fun EmailTheme(
     navController: NavController,
     isChangeEmail: Boolean,
     userViewModel: UserViewModel,
-    userId: String
 ) {
     var email by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
-    var showErrorDialog by remember { mutableStateOf(false) }
-    var isError by remember { mutableStateOf(false) }
 
-    LaunchedEffect(userId, isChangeEmail) {
-        fun getUser(userId: String) {
-            userViewModel.getUser(userId, onSuccess = { user ->
-                user?.let {
-                    email = it.email ?: ""
+    LaunchedEffect(Unit, isChangeEmail) {
+        if (isChangeEmail) {
+            userViewModel.getUser(onSuccess = { user ->
+                if (user != null) {
+                    email = user.email ?: ""
+                } else {
+                    Log.e("EmailTheme", "User data not found")
                 }
             }, onFailure = { error ->
-                errorMessage = error
-                isError = true
+                Log.e("EmailTheme", "Error retrieving user: $error")
             })
-        }
-
-        if (isChangeEmail) {
-            getUser(userId)
         }
     }
 
@@ -46,24 +39,20 @@ fun EmailTheme(
     }
 
     fun changeEmail() {
-        userViewModel.updateUserEmail(userId, email, onSuccess = {
-            println("Email successfully updated to: $email")
+        userViewModel.updateUserEmail(email, onSuccess = {
             navController.popBackStack()
         },
             onFailure = { error ->
-                errorMessage = error
-                showErrorDialog = true
+                Log.e("EmailTheme", "Error updating user's email: $error")
             }
         )
     }
 
     fun resetPassword() {
         userViewModel.sendPasswordResetEmail(email, onSuccess = {
-            println("Password reset email sent to: $email")
             navController.navigate("sign_in_screen")
         }, onFailure = { error ->
-            errorMessage = error
-            showErrorDialog = true
+            Log.e("EmailTheme", "Error resetting user's password: $error")
         })
     }
 
@@ -83,15 +72,6 @@ fun EmailTheme(
                 resetPassword()
             }
         },
-        additionalContent = {
-            if (showErrorDialog) {
-                ErrorDialog(
-                    title = "Couldn't sign in",
-                    message = errorMessage,
-                    onDismiss = { showErrorDialog = false }
-                )
-            }
-        }
     )
 }
 
