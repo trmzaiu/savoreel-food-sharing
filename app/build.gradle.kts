@@ -101,6 +101,10 @@ dependencies {
     implementation("com.google.maps.android:maps-compose-utils:4.4.2")
     implementation("com.google.android.libraries.places:places:3.3.0")
 
+    implementation("androidx.emoji2:emoji2:1.3.0")
+    implementation("androidx.emoji2:emoji2-views:1.3.0")
+    implementation("androidx.emoji2:emoji2-views-helper:1.3.0")
+
     implementation ("androidx.compose.ui:ui:1.7.6" )
     implementation ("androidx.compose.foundation:foundation:1.7.6")
     implementation ("androidx.compose.runtime:runtime:1.7.6")

@@ -44,21 +44,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.savoreel.R
 import com.example.savoreel.ui.theme.SavoreelTheme
 import kotlinx.coroutines.launch
 
 @Composable
 fun EditOptionsOverlay(
     onDismiss: () -> Unit,
+    options: List<Pair<String, Int>>,
     onSelect: (String) -> Unit
 ) {
-    val options = listOf(
-        "Hashtag" to R.drawable.ic_hashtag,
-        "Location" to R.drawable.ic_location,
-        "Download" to R.drawable.ic_download,
-        "Share" to R.drawable.ic_share2
-    )
+//    val options = listOf(
+//        "Hashtag" to R.drawable.ic_hashtag,
+//        "Location" to R.drawable.ic_location,
+//        "Download" to R.drawable.ic_download,
+//        "Share" to R.drawable.ic_share2
+//    )
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.secondary),
@@ -354,10 +354,10 @@ fun EditPreview() {
             onDismissRequest = { scope.launch { sheetState.hide() } },
             sheetState = sheetState
         ) {
-            EditOptionsOverlay(
-                onDismiss = { scope.launch { sheetState.hide() } },
-                onSelect = {}
-            )
+//            EditOptionsOverlay(
+//                onDismiss = { scope.launch { sheetState.hide() } },
+//                onSelect = {}
+//            )
         }
     }
 }

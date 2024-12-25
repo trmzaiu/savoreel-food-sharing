@@ -6,6 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 
 class PostViewModel : ViewModel() {
+    private val _currentState = mutableStateOf(PhotoState.TakePhoto)
+    val currentState : State<PhotoState> = _currentState
+
     private val _isCapturing = mutableStateOf(false)
     val isCapturing: State<Boolean> = _isCapturing
 
@@ -19,7 +22,6 @@ class PostViewModel : ViewModel() {
     private val _isPhotoTaken = mutableStateOf(false)
     val isPhotoTaken: State<Boolean> get() = _isPhotoTaken
 
-    // Fields
     private val _title = mutableStateOf("")
     val title: State<String> = _title
 
@@ -32,14 +34,37 @@ class PostViewModel : ViewModel() {
     private val _editingField = mutableStateOf<String?>(null) // Which field is being edited
     val editingField: State<String?> = _editingField
 
+    private val _isFrontCamera = mutableStateOf(false)
+    val isFrontCamera: State<Boolean> = _isFrontCamera
+
+    private val _flashEnabled = mutableStateOf(false)
+    val flashEnabled: State<Boolean> = _flashEnabled
+
+    private val _option = mutableStateOf<List<Pair<String, Int>>>(emptyList())
+    val option: State<List<Pair<String, Int>>> = _option
+
+    fun navigateToState(state: PhotoState) {
+        _currentState.value = state
+    }
+
+    fun setOption(option: List<Pair<String, Int>>) {
+        _option.value = option
+    }
+
     fun setPhotoUri(uri: Uri?) {
         _photoUri.value = uri
-//        _isPhotoTaken.value = uri != null
-//        _isCaptureLocked.value = uri != null
     }
 
     fun setisPhotoTaken(value: Boolean) {
         _isPhotoTaken.value = value
+    }
+
+    fun setisFrontCamera(value: Boolean) {
+        _isFrontCamera.value = value
+    }
+
+    fun setisFlashEnabled(value: Boolean) {
+        _flashEnabled.value = value
     }
     
     fun setisCaptureLocked(value: Boolean) {

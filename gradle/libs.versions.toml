@@ -29,6 +29,7 @@ firebaseFunctionsKtx = "21.1.0"
 firebaseAuthKtx = "23.1.0"
 firebaseFirestoreKtx = "25.1.1"
 runtimeLivedata = "1.7.6"
+emoji2 = "1.5.0"
 
 [libraries]
 accompanist-coil = { module = "com.google.accompanist:accompanist-coil", version.ref = "accompanistCoil" }
@@ -67,6 +68,7 @@ firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-funct
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "emoji2" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
