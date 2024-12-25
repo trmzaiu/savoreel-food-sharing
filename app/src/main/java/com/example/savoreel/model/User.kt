@@ -9,8 +9,6 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 
 data class User(
@@ -23,13 +21,6 @@ data class User(
     constructor() : this(userId = "", name = "", email = "")
 }
 
-sealed class LoginState {
-    object Idle : LoginState()
-    object Loading : LoginState()
-    data class Success(val user: User) : LoginState()
-    data class Error(val message: String) : LoginState()
-}
-
 class UserViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -39,9 +30,6 @@ class UserViewModel : ViewModel() {
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> get() = _error
-
-    private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
-    val loginState: StateFlow<LoginState> get() = _loginState
 
     // Function to sign in a user
     fun signIn(email: String, password: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
@@ -307,12 +295,6 @@ class UserViewModel : ViewModel() {
                 onFailure("Failed to delete user data.")
             }
     }
-
-    fun signOut() {
-        FirebaseAuth.getInstance().signOut()
-        Log.d("FirebaseAuth", "User signed out successfully.")
-    }
-
 
 //    fun login(
 //        email: String,

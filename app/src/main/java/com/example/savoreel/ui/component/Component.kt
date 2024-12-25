@@ -266,7 +266,7 @@ fun ForwardArrow(
 }
 
 @Composable
-fun navButton(
+fun NavButton(
     painter: Painter,
     navController: NavController,
     destination: String,
@@ -423,7 +423,7 @@ fun PostTopBar(navController: NavController) {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            navButton(
+            NavButton(
                 painter = painterResource(R.drawable.default_avatar),
                 navController = navController,
                 destination = "profile_screen",
@@ -431,13 +431,13 @@ fun PostTopBar(navController: NavController) {
             )
         }
         Row {
-            navButton(
+            NavButton(
                 painter = painterResource(id = R.drawable.ic_search),
                 navController = navController,
                 destination = "searching",
             )
             Spacer(modifier = Modifier.width(16.dp))
-            navButton(
+            NavButton(
                 painter = painterResource(id = R.drawable.ic_noti),
                 navController = navController,
                 destination = "notification",

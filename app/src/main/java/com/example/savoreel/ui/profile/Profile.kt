@@ -46,7 +46,7 @@ import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.model.getMonthName
 import com.example.savoreel.model.posts
 import com.example.savoreel.ui.component.BackArrow
-import com.example.savoreel.ui.component.navButton
+import com.example.savoreel.ui.component.NavButton
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
@@ -60,7 +60,7 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
     LaunchedEffect(Unit) {
         userViewModel.getUser(onSuccess = { user ->
             if (user != null) {
-                name = user.name ?: ""
+                name = user.name
             } else {
                 Log.e("NameTheme", "User data not found")
             }
@@ -98,7 +98,7 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (!isRowVisible) {
-                        navButton(
+                        NavButton(
                             painter = painterResource(R.drawable.default_avatar),
                             destination = "",
                             navController = navController,
@@ -114,7 +114,7 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
                     }
                 }
                 Row {
-                    navButton(
+                    NavButton(
                         painter = painterResource(R.drawable.ic_setting),
                         navController = navController,
                         destination = "settings_screen",

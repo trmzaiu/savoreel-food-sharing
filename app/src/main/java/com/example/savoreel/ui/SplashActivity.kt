@@ -3,6 +3,7 @@ package com.example.savoreel.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -37,6 +38,31 @@ class SplashActivity : ComponentActivity() {
                 }
             }
         }
+        Log.d("SplashActivity", "onCreate called")
+    }
+    override fun onStart() {
+        super.onStart()
+        Log.d("SplashActivity", "onStart called")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("SplashActivity", "onResume called")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("SplashActivity", "onPause called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("SplashActivity", "onStop called")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("SplashActivity", "onDestroy called")
     }
 }
 

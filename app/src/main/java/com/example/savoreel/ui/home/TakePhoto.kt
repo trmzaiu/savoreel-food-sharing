@@ -52,6 +52,7 @@ import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.savoreel.R
+import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.PostTopBar
 import com.example.savoreel.ui.theme.secondaryDarkColor
@@ -62,7 +63,8 @@ import kotlinx.coroutines.launch
 fun PostView(
     navController : NavController,
     userViewModel: UserViewModel,
-    postViewModel: PostViewModel = viewModel(),
+    themeViewModel: ThemeViewModel = viewModel(),
+    postViewModel: PostViewModel = viewModel()
 ) {
     val photoUri by postViewModel.photoUri
     val isPhotoTaken by postViewModel.isPhotoTaken
@@ -95,6 +97,7 @@ fun PostView(
         userViewModel.getUser(onSuccess = { user ->
             if (user != null) {
                 name = user.name ?: ""
+                Log.d("SignInScreen", "Dark mode is ${themeViewModel.isDarkModeEnabled.value}")
             } else {
                 Log.e("NameTheme", "User data not found")
             }

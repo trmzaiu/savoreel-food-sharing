@@ -1,22 +1,15 @@
 package com.example.savoreel.ui
 
-import android.content.Context
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.home.Notifications
 import com.example.savoreel.ui.home.PostView
@@ -37,13 +30,18 @@ import com.example.savoreel.ui.setting.NotificationSetting
 import com.example.savoreel.ui.setting.SettingTheme
 import com.example.savoreel.ui.setting.TermsOfServiceScreen
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.ThemeViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel) {
-    val isDarkModeEnabled by themeViewModel.isDarkModeEnabled
+    val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
     val currentUser = FirebaseAuth.getInstance().currentUser
+
+    LaunchedEffect(currentUser) {
+        if (currentUser != null) {
+            themeViewModel.loadUserSettings()
+        }
+    }
 
     val startDestination = when {
         currentUser != null -> "take_photo_screen"
@@ -59,7 +57,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
                 OnboardingTheme(navController)
             }
 
-            composable("sign_in_screen") { backStackEntry ->
+            composable("sign_in_screen") {
                 SignInScreenTheme(navController, userViewModel)
             }
 
@@ -101,11 +99,6 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
                 EmailTheme(navController, isChangeEmail, userViewModel)
             }
-
-//            composable("verify_code_screen/{email}") { backStackEntry ->
-//                val email = backStackEntry.arguments?.getString("email")?.toString() ?: ""
-//                VerifyCodeTheme(navController, userViewModel, email)
-//            }
 
             composable("change_password_screen") {
                 ChangePasswordTheme(navController, userViewModel)
@@ -153,26 +146,6 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
 
 
         }
-    }
-}
-
-@Composable
-fun ScreenTransition(navController: NavHostController, destination: String) {
-    val transition = remember { MutableTransitionState(false) }
-
-    // Cập nhật trạng thái khi màn hình thay đổi
-    LaunchedEffect(destination) {
-        transition.targetState = true
-    }
-
-    // Thêm hiệu ứng hoạt ảnh khi chuyển giữa các màn hình
-    AnimatedVisibility(
-        visibleState = transition,
-        enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }),
-        exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it })
-    ) {
-        // Điều hướng đến màn hình đích
-        navController.navigate(destination)
     }
 }
 

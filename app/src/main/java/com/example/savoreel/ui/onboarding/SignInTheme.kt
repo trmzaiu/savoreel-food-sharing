@@ -36,12 +36,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.ErrorDialog
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.ThemeViewModel
 import com.example.savoreel.ui.theme.domineFontFamily
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
@@ -57,11 +57,11 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
 
     fun signIn() {
         isLoading = true
-        userViewModel.signIn(email, password, onSuccess = { userId ->
+        userViewModel.signIn(email, password, onSuccess = {
             isLoading = false
             themeViewModel.loadUserSettings()
             navController.navigate("take_photo_screen")
-        }, onFailure = { errorMsg ->
+        }, onFailure = {
             isLoading = false
             errorMessage = "Make sure you entered your email and password correctly and try again."
             showErrorDialog = true
@@ -157,7 +157,10 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
             CustomButton(
                 text = if (isLoading) "Loading..." else "Sign in",
                 enabled = isFormValid,
-                onClick = { signIn() }
+                onClick = {
+                    signIn()
+                    themeViewModel.loadUserSettings()
+                }
             )
 
             Spacer(modifier = Modifier.height(70.dp))
@@ -218,7 +221,7 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
 
             Spacer(modifier = Modifier.height(42.dp))
 
-            Row(){
+            Row {
                 Text(
                     text = "Don't have an account? ",
                     style = TextStyle(

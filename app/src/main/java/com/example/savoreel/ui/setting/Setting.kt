@@ -28,6 +28,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,12 +41,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.ConfirmDialog
@@ -53,8 +53,8 @@ import com.example.savoreel.ui.component.CustomSwitch
 import com.example.savoreel.ui.component.ForwardArrow
 import com.example.savoreel.ui.component.IconTheme
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.ThemeViewModel
 import com.example.savoreel.ui.theme.nunitoFontFamily
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +64,7 @@ fun SettingTheme(navController: NavController, themeViewModel: ThemeViewModel, u
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var isSignOut by remember { mutableStateOf(false) }
-    val isDarkModeEnabled by remember { themeViewModel.isDarkModeEnabled }
+    val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
 
     LaunchedEffect(Unit) {
         userViewModel.getUser(onSuccess = { user ->
@@ -81,8 +81,8 @@ fun SettingTheme(navController: NavController, themeViewModel: ThemeViewModel, u
     fun deleteAccount() {
         userViewModel.deleteUserAndData(
             onSuccess = {
-                navController.navigate("onboarding")
                 themeViewModel.resetDarkMode()
+                navController.navigate("onboarding")
                 Log.d("FirebaseAuth", "User account deleted successfully.")
             },
             onFailure = { error ->
@@ -92,9 +92,9 @@ fun SettingTheme(navController: NavController, themeViewModel: ThemeViewModel, u
     }
 
     fun signOut() {
-        navController.navigate("sign_in_screen")
-        userViewModel.signOut()
+        FirebaseAuth.getInstance().signOut()
         themeViewModel.resetDarkMode()
+        navController.navigate("onboarding")
     }
 
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
@@ -214,7 +214,7 @@ fun SettingTheme(navController: NavController, themeViewModel: ThemeViewModel, u
                          SettingsSection(title = "Support", imageVector = ImageVector.vectorResource(R.drawable.ic_support)) {
                              SettingItemWithNavigation(
                                  icon = ImageVector.vectorResource(R.drawable.ic_darkmode),
-                                 text = "Dark Mode",
+                                 text = "Dark mode",
                                  changeMode = true,
                                  isChecked = isDarkModeEnabled,
                                  onCheckedChange = { themeViewModel.toggleDarkMode() }
@@ -357,23 +357,29 @@ fun SettingItemWithNavigation(
     onCheckedChange: (Boolean) -> Unit = {},
     onClick: () -> Unit = {}
 ) {
-    Row(
-        modifier = Modifier
+    val modifier = if (!changeMode) {
+        Modifier
             .fillMaxWidth()
             .height(55.dp)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) {
-                if(!changeMode){
-                    destination?.let {
-                        navController?.navigate(it)
-                    }
-                    onClick()
+                destination?.let {
+                    navController?.navigate(it)
                 }
-            },
+                onClick()
+            }
+    } else {
+        Modifier
+            .fillMaxWidth()
+            .height(55.dp)
+    }
+
+    Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
-    ) {
+    ){
         if (icon != null) {
             IconTheme(
                 imageVector = icon,
@@ -390,18 +396,15 @@ fun SettingItemWithNavigation(
             color = if (text == "Delete account") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
         )
 
-        if(!changeMode) {
-            if (navController != null && destination != null) {
-                ForwardArrow(
-                    navController = navController,
-                    destination = destination,
-                )
-            }
-        } else {
+        if (changeMode) {
             CustomSwitch(
                 checked = isChecked,
                 onCheckedChange = onCheckedChange
             )
+        } else {
+            if (navController != null && destination != null) {
+                ForwardArrow(navController = navController, destination = destination)
+            }
         }
     }
 }
@@ -450,19 +453,3 @@ fun handleAvatarOption(option: String) {
     }
 
 }
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreviewDark() {
-    SavoreelTheme(darkTheme = true, dynamicColor = true) {
-        SettingTheme(rememberNavController(), ThemeViewModel(), UserViewModel()) // Pass the navController as normal
-    }
-}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun SettingsScreenPreview() {
-//    SavoreelTheme(darkTheme = false, dynamicColor = false) {
-//        SettingsScreen(navController = rememberNavController(), themeViewModel = ThemeViewModel()) // Pass the navController as normal
-//    }
-//}
