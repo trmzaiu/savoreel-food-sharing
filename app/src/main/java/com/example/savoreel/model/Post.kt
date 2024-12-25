@@ -8,8 +8,8 @@ import java.util.Date
 import java.util.Locale
 
 data class Post(
-    val postid: String,
-    val userid: String,
+    val postId: String,
+    val userId: String,
     val title: String,
     val imageRes: Int,
     val datetime: Date,
@@ -26,8 +26,8 @@ val postss = List(200) { i ->
         set(Calendar.SECOND, 0)
     }
     Post(
-        postid = "${i + 1}",
-        userid = "${i + 1}",
+        postId = "${i + 1}",
+        userId = "${i + 1}",
         title = "Post ${i + 1}",
         imageRes = R.drawable.food,
         datetime = calendar.time

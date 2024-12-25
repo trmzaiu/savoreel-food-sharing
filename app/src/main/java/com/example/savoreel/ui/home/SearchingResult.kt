@@ -46,7 +46,6 @@ import com.example.savoreel.R
 import com.example.savoreel.model.postss
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.CustomInputField
-import com.example.savoreel.ui.component.GridImage
 import com.example.savoreel.ui.theme.SavoreelTheme
 
 @Composable
@@ -64,7 +63,6 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Top bar with Back Arrow and Input Field
             Row(
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
@@ -108,7 +106,6 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
                             SearchResultItem(
                                 result = person,
                                 onFollowClick = { updatedItem ->
-                                    // Cập nhật danh sách bằng cách tạo danh sách mới với các thay đổi cần thiết
                                     setResultList(
                                         users.map { user ->
                                             if (user.userID == updatedItem.userID) {

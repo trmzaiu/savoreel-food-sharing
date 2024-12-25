@@ -1,17 +1,29 @@
 package com.example.savoreel.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.savoreel.model.ThemeViewModel
+import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.UserViewModel
-import com.example.savoreel.ui.home.Notifications
+import com.example.savoreel.ui.home.GridPost
+import com.example.savoreel.ui.home.NotificationTheme
 import com.example.savoreel.ui.home.PostView
 import com.example.savoreel.ui.home.Searching
 import com.example.savoreel.ui.home.SearchingResult
@@ -33,19 +45,22 @@ import com.example.savoreel.ui.theme.SavoreelTheme
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel) {
+fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewModel, userViewModel: UserViewModel, notificationViewModel: NotificationViewModel = viewModel()) {
     val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
     val currentUser = FirebaseAuth.getInstance().currentUser
+    var currentUserId by remember { mutableStateOf("") }
+    var startDestination by remember { mutableStateOf("") }
 
     LaunchedEffect(currentUser) {
         if (currentUser != null) {
             themeViewModel.loadUserSettings()
         }
     }
-
-    val startDestination = when {
-        currentUser != null -> "take_photo_screen"
-        else -> "onboarding"
+    if (currentUser != null){
+        startDestination = "take_photo_screen"
+        currentUserId = currentUser.uid
+    } else {
+        startDestination = "onboarding"
     }
 
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
@@ -121,7 +136,7 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
             }
 
             composable("notification") {
-                Notifications(navController)
+                NotificationTheme(navController, notificationViewModel, userViewModel)
             }
 
             composable(
@@ -144,7 +159,9 @@ fun AppNavigation(navController: NavHostController, themeViewModel: ThemeViewMod
                 TermsOfServiceScreen(navController = navController)
             }
 
-
+            composable("grid_post"){
+                GridPost(currentUserId, navController, userViewModel)
+            }
         }
     }
 }

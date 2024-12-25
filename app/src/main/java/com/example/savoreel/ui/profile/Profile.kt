@@ -71,11 +71,12 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
     }
 
     LaunchedEffect(listState) {
-        snapshotFlow { listState.firstVisibleItemIndex }
-            .collect { firstVisibleItemIndex ->
-                isRowVisible = firstVisibleItemIndex == 0
+        snapshotFlow { listState.firstVisibleItemScrollOffset }
+            .collect { scrollOffset ->
+                isRowVisible = scrollOffset < 200
             }
     }
+
 
     Box(
         modifier = Modifier
@@ -92,7 +93,6 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)
             ) {
-                // Header navigation
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -100,7 +100,7 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
                     if (!isRowVisible) {
                         NavButton(
                             painter = painterResource(R.drawable.default_avatar),
-                            destination = "",
+                            destination = "grid_post",
                             navController = navController,
                             isChecked = true
                         )
@@ -128,10 +128,9 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
                     )
                 }
             }
-
             if (isRowVisible) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).padding(horizontal = 20.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -263,7 +262,7 @@ fun CalendarWithImages(
                         .aspectRatio(1f)
                         .clip(RoundedCornerShape(15))
                         .clickable {
-                            println("Clicked on post ID: ${post.postid}")
+                            println("Clicked on post ID: ${post.postId}")
                         }
                 )
             }

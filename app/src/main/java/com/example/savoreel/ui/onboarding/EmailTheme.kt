@@ -23,7 +23,7 @@ fun EmailTheme(
         if (isChangeEmail) {
             userViewModel.getUser(onSuccess = { user ->
                 if (user != null) {
-                    email = user.email ?: ""
+                    email = user.email
                 } else {
                     Log.e("EmailTheme", "User data not found")
                 }

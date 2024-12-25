@@ -12,14 +12,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 
 data class User(
-    val userId: String,
+    val userId: String = "",
     val name: String = "",
-    val email: String,
+    val email: String = "",
     val avatarUri: String = "https://sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png",
-    val isDarkModeEnabled: Boolean = false
-) {
-    constructor() : this(userId = "", name = "", email = "")
-}
+    val isDarkModeEnabled: Boolean = false,
+    val following: List<String> = emptyList(),
+    val followers: List<String> = emptyList()
+)
 
 class UserViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
@@ -94,7 +94,6 @@ class UserViewModel : ViewModel() {
                         Log.e("CreateAccount", "Email is already in use.")
                         onFailure("Email is already in use. Please log in or reset your password.")
                     } else {
-                        // Email chưa được sử dụng, tiến hành tạo tài khoản
                         auth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
@@ -145,6 +144,25 @@ class UserViewModel : ViewModel() {
         }
 
         val userId = currentUser.uid
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val userData = document.toObject(User::class.java)
+                    onSuccess(userData)
+                } else {
+                    onSuccess(null)
+                }
+            }
+            .addOnFailureListener {
+                onFailure("Failed to get user data.")
+            }
+    }
+
+    fun getUserById(
+        userId: String,
+        onSuccess: (User?) -> Unit,
+        onFailure: (String) -> Unit
+    ){
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {

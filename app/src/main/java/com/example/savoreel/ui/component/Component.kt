@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -19,9 +18,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -55,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.savoreel.R
-import com.example.savoreel.model.Post
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 @Composable
@@ -346,23 +341,6 @@ fun ImageCustom(
     }
 }
 
-@Composable
-fun GridImage(posts: List<Post>, onClick: (Post) -> Unit, modifier: Modifier = Modifier){
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 100.dp),
-        contentPadding = PaddingValues(5.dp),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        verticalArrangement = Arrangement.spacedBy(5.dp),
-        modifier = modifier
-    ) {
-        items(posts) { post ->
-            ImageCustom(
-                painter = painterResource(post.imageRes),
-                onClick = {}
-            )
-        }
-    }
-}
 
 @Composable
 fun CustomSwitch(
@@ -445,3 +423,4 @@ fun PostTopBar(navController: NavController) {
         }
     }
 }
+
