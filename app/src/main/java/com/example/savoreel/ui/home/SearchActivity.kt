@@ -1,5 +1,9 @@
 package com.example.savoreel.ui.home
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,23 +25,41 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
+import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.theme.SavoreelTheme
 
+class SearchActivity: ComponentActivity() {
+    private val themeViewModel: ThemeViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        themeViewModel.loadUserSettings()
+
+        setContent {
+            val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+
+            SavoreelTheme(darkTheme = isDarkMode) {
+                SearchScreen()
+            }
+        }
+    }
+}
+
 @Composable
-fun Searching(navController: NavController) {
+fun SearchScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -74,7 +96,6 @@ fun Searching(navController: NavController) {
                         "seafood"
                     ),
                     isSuggestion = false,
-                    navController
                 )
 
                 SearchCategory(
@@ -90,7 +111,7 @@ fun Searching(navController: NavController) {
                         "seafood"
                     ),
                     isSuggestion = true,
-                    navController
+
                 )
             }
         }
@@ -99,7 +120,7 @@ fun Searching(navController: NavController) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SearchCategory(title: String, items: List<String>, isSuggestion: Boolean, navController: NavController) {
+fun SearchCategory(title: String, items: List<String>, isSuggestion: Boolean) {
     Column {
         Text(
             text = title,
@@ -115,9 +136,9 @@ fun SearchCategory(title: String, items: List<String>, isSuggestion: Boolean, na
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.SpaceBetween,
 
-        ) {
+            ) {
             items.forEach { item ->
-                SearchItemCard(item = item, isSuggestion = isSuggestion, navController = navController)
+                SearchItemCard(item = item, isSuggestion = isSuggestion)
             }
         }
 
@@ -125,11 +146,11 @@ fun SearchCategory(title: String, items: List<String>, isSuggestion: Boolean, na
 }
 
 @Composable
-fun SearchItemCard(item: String, isSuggestion: Boolean, navController: NavController) {
+fun SearchItemCard(item: String, isSuggestion: Boolean) {
     Box(
         modifier = Modifier.height(40.dp)
             .clickable {
-                navController.navigate("searching_result/Candy")
+//                navController.navigate("searching_result/Candy")
             }
     ) {
         Row(
@@ -156,21 +177,5 @@ fun SearchItemCard(item: String, isSuggestion: Boolean, navController: NavContro
                 overflow = TextOverflow.Ellipsis
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SearchScreenPreview() {
-    SavoreelTheme(darkTheme = true) {
-        Searching(navController = rememberNavController())
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SearchScreenPreview1() {
-    SavoreelTheme(darkTheme = false) {
-        Searching(navController = rememberNavController())
     }
 }

@@ -9,36 +9,24 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.savoreel.R
@@ -75,7 +63,7 @@ fun NotificationTheme(navController: NavController, notificationViewModel: Notif
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                BackArrow(navController = navController)
+                BackArrow()
                 Text(
                     text = "Notifications",
                     color = MaterialTheme.colorScheme.onBackground,
@@ -112,74 +100,6 @@ fun NotificationTheme(navController: NavController, notificationViewModel: Notif
                 }
             }
         }
-    }
-}
-
-
-@Composable
-fun NotificationItem(data: Notification, userViewModel: UserViewModel) {
-    var name by remember { mutableStateOf("") }
-    var imgRes by remember { mutableStateOf("") }
-    val user = userViewModel.getUserById(
-        data.recipientId,
-        onSuccess = {user ->
-            if (user!=null) {
-                name = user.name
-                imgRes = user.avatarUri
-            }
-        },
-        onFailure = TODO(),
-    )
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        ImageFromUrl(
-            url = imgRes,
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Text(
-            buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        fontFamily = MaterialTheme.typography.titleSmall.fontFamily,
-                        fontWeight = MaterialTheme.typography.titleSmall.fontWeight
-                    )
-                ) {
-                    append(name) // Replace with actual user name lookup
-                }
-                withStyle(
-                    style = SpanStyle(
-                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                        fontWeight = MaterialTheme.typography.bodyMedium.fontWeight
-                    )
-                ) {
-                    append(" ${data.description}")
-                }
-
-                withStyle(
-                    style = SpanStyle(
-                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                        fontWeight = MaterialTheme.typography.bodyMedium.fontWeight
-                    )
-                ) {
-                    append(" ${data.date}")
-                }
-            },
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
-        )
-
     }
 }
 

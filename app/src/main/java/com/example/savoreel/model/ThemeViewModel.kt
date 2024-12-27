@@ -8,53 +8,71 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class ThemeViewModel : ViewModel() {
     private val _isDarkModeEnabled = MutableLiveData(false)
     val isDarkModeEnabled: LiveData<Boolean> get() = _isDarkModeEnabled
 
+    /**
+     * Load user settings from Firestore
+     */
     fun loadUserSettings() {
-        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            Log.w("ThemeViewModel", "No user logged in")
+            _isDarkModeEnabled.value = false
+            return
+        }
+
         val userId = currentUser.uid
         val db = FirebaseFirestore.getInstance()
 
         viewModelScope.launch {
-            db.collection("users").document(userId).get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val darkMode = document.getBoolean("isDarkModeEnabled") ?: false
-                        _isDarkModeEnabled.value = darkMode
-                        Log.e("DarkMode", "Dark mode setting: $darkMode")
-                    } else {
-                        _isDarkModeEnabled.value = false
-                    }
-                }
-                .addOnFailureListener { e ->
-                    _isDarkModeEnabled.value = false
-                    Log.e("ThemeViewModel", "Error loading user settings", e)
-                }
+            try {
+                val document = db.collection("users").document(userId).get().await()
+                val darkMode = document.getBoolean("darkModeEnabled") ?: false
+                _isDarkModeEnabled.value = darkMode
+                Log.d("ThemeViewModel", "Dark mode loaded: $darkMode")
+            } catch (e: Exception) {
+                _isDarkModeEnabled.value = false
+                Log.e("ThemeViewModel", "Error loading user settings", e)
+            }
         }
     }
 
-    fun resetDarkMode() {
-        _isDarkModeEnabled.value = false
-    }
-
+    /**
+     * Toggle dark mode setting and save to Firestore
+     */
     fun toggleDarkMode() {
-        _isDarkModeEnabled.value = !_isDarkModeEnabled.value!!
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            Log.w("ThemeViewModel", "No user logged in")
+            return
+        }
 
-        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
         val userId = currentUser.uid
-
         val db = FirebaseFirestore.getInstance()
 
-        db.collection("users").document(userId)
-            .update("isDarkModeEnabled", _isDarkModeEnabled.value)
-            .addOnSuccessListener {
-                Log.d("ThemeViewModel", "Dark mode setting saved to Firestore")
+        viewModelScope.launch {
+            val newMode = _isDarkModeEnabled.value?.not() ?: false
+            _isDarkModeEnabled.value = newMode
+
+            try {
+                db.collection("users").document(userId)
+                    .update("darkModeEnabled", newMode)
+                    .await()
+                Log.d("ThemeViewModel", "Dark mode updated: $newMode")
+            } catch (e: Exception) {
+                Log.e("ThemeViewModel", "Error saving dark mode setting", e)
             }
-            .addOnFailureListener { e ->
-                Log.e("ThemeViewModel", "Error saving dark mode setting: ${e.message}")
-            }
+        }
+    }
+
+    /**
+     * Reset dark mode to default (false)
+     */
+    fun resetDarkMode() {
+        _isDarkModeEnabled.value = false
     }
 }

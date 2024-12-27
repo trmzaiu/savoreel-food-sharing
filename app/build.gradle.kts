@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.firebase.auth)
 
     // Correct dependencies for UI testing
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
@@ -112,4 +113,6 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.android.gms:play-services-auth:20.3.0")
+    implementation("com.facebook.android:facebook-login:12.3.0")
 }

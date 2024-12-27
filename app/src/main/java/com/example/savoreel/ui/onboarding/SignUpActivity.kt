@@ -1,11 +1,11 @@
-@file:Suppress("DEPRECATION")
-
 package com.example.savoreel.ui.onboarding
 
-import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.util.Patterns
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,94 +36,71 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.example.savoreel.R
-import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.ErrorDialog
+import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.domineFontFamily
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import kotlinx.coroutines.launch
+
+class SignUpActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            SavoreelTheme(darkTheme = false) {
+                SignUpScreen(
+                    onSignInSuccess = {
+                        val intent = Intent(this, NameActivity::class.java).apply {
+                            putExtra("isChangeName", false)
+                        }
+                        startActivity(intent)
+                        finish()
+                    },
+                    navigateToSignIn = {
+                        val intent = Intent(this, SignInActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
+                )
+            }
+        }
+    }
+}
 
 @Composable
-fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel, themeViewModel: ThemeViewModel = viewModel()) {
+fun SignUpScreen(onSignInSuccess: () -> Unit, navigateToSignIn: () -> Unit) {
+    val userViewModel: UserViewModel = viewModel()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-//    val context = ApplicationProvider.getApplicationContext<Context>()
-//
-//    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//        .requestIdToken("98860832757-kr9irk7q2et536qccn4iqulr5th1bnih.apps.googleusercontent.com")
-//        .requestEmail()
-//        .build()
-//
-//    val mGoogleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(context, gso)
 
     val isFormValid = email.isNotEmpty() && password.isNotEmpty()
 
-    fun signIn() {
+    fun isEmailValid(email: String): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    fun createAccount() {
         isLoading = true
-        userViewModel.viewModelScope.launch {
-            try {
-                userViewModel.signIn(email, password, onSuccess = {
-                    isLoading = false
-                    themeViewModel.loadUserSettings()
-                    navController.navigate("take_photo_screen")
-                }, onFailure = {
-                    isLoading = false
-                    errorMessage = "Make sure you entered your email and password correctly and try again."
-                    showErrorDialog = true
-                    Log.e("SignInScreen", errorMessage)
-                })
-            } catch (e: Exception) {
-                // Handle any other exceptions that might occur
+        userViewModel.createAccount(email, password,
+            onSuccess = {
                 isLoading = false
-                errorMessage = "An unexpected error occurred: ${e.message}"
+                Log.d("CreateAccount", "Success! User ID")
+                onSignInSuccess()
+            },
+            onFailure = { errorMsg ->
+                isLoading = false
+                errorMessage = errorMsg
                 showErrorDialog = true
-                Log.e("SignInScreen", "Error during sign-in", e)
+                Log.e("CreateAccount", "Error: $errorMsg")
             }
-        }
-    }
-    fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        FirebaseAuth.getInstance().signInWithCredential(credential)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val user = FirebaseAuth.getInstance().currentUser
-                    navController.navigate("take_photo_screen")
-                } else {
-                    errorMessage = "Google login failed: ${task.exception?.message}"
-                    showErrorDialog = true
-                }
-            }
-    }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                firebaseAuthWithGoogle(account.idToken!!)
-            } catch (e: ApiException) {
-                Log.w("SignIn", "Google sign in failed", e)
-            }
-        }
-    }
-
-    fun signInWithGoogle() {
-//        val signInIntent = mGoogleSignInClient.signInIntent
-//        launcher.launch(signInIntent)
+        )
     }
 
     Box(
@@ -134,7 +111,7 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
             Spacer(modifier = Modifier.height(60.dp))
 
@@ -165,7 +142,7 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Email Input
+                //Email Input
                 CustomInputField(
                     value = email,
                     onValueChange = { email = it },
@@ -181,104 +158,96 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                     isPasswordField = true
                 )
 
-                // Forgot Password
+                // Noti
                 Box(
                     modifier = Modifier
-                        .padding(end = 20.dp)
+                        .padding(start = 20.dp)
                         .fillMaxWidth(),
-                    contentAlignment = Alignment.CenterEnd
+                    contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
-                        text = "Forgot Password",
+                        text = "Password must at least 8 characters",
                         style = TextStyle(
                             fontSize = 14.sp,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSecondary,
-                        ),
-                        modifier = Modifier
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                navController.navigate("email_screen/0?isChangeEmail=false")
-                            }
-
+                        )
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Sign In Button
+            // Sign Up Button
             CustomButton(
-                text = if (isLoading) "Loading..." else "Sign in",
+                text = if (isLoading) "Loading..." else "Create account",
                 enabled = isFormValid,
                 onClick = {
-                    signIn()
+                    if (!isEmailValid(email)) {
+                        errorMessage = "Make sure you entered email format correctly and try again."
+                        showErrorDialog = true
+                    } else if (password.length < 8) {
+                        errorMessage = "Password must at least 8 characters."
+                        showErrorDialog = true
+                    } else {
+                        createAccount()
+                    }
                 }
             )
 
-            Spacer(modifier = Modifier.height(70.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             Column(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Or connect with",
+                    text = "By continuing you agree to our ",
                     fontSize = 16.sp,
-                    fontFamily = nunitoFontFamily,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Medium,
                     lineHeight = 20.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center,
                 )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
                 Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
+                    modifier = Modifier.wrapContentWidth(),
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    // Google Icon
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_google),
-                        contentDescription = "Google Icon",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                signInWithGoogle()
-                            }
+                    Text(
+                        text = "Terms of Service",
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.clickable { println("Move to read Terms of Service") }
                     )
-
-                    Spacer(modifier = Modifier.width(16.dp))
-//
-                    // Facebook Icon
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_facebook),
-                        contentDescription = "Facebook Icon",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                println("Sign in with facebook")
-                            }
+                    Text(
+                        text = " and ",
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        text = "Privacy Policy",
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.clickable { println("Move to read Privacy Policy") }
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(42.dp))
+            Spacer(modifier = Modifier.height(111.dp))
 
-            Row {
+            Row(){
                 Text(
-                    text = "Don't have an account? ",
+                    text = "Have an account? ",
                     style = TextStyle(
                         fontSize = 15.sp,
                         lineHeight = 20.sp,
@@ -291,7 +260,7 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                 )
 
                 Text(
-                    text = "Sign Up",
+                    text = "Sign In",
                     style = TextStyle(
                         fontSize = 15.sp,
                         lineHeight = 20.sp,
@@ -303,8 +272,9 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                     modifier = Modifier
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
-                            indication = null) {
-                            navController.navigate("sign_up_screen")
+                            indication = null
+                        ) {
+                            navigateToSignIn()
                         }
                 )
             }
@@ -312,10 +282,9 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
     }
     if (showErrorDialog) {
         ErrorDialog(
-            title = "Couldn't sign in",
+            title = "Couldn't sign up",
             message = errorMessage,
             onDismiss = { showErrorDialog = false }
         )
     }
 }
-

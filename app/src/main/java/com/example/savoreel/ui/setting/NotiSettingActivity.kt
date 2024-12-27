@@ -1,5 +1,8 @@
 package com.example.savoreel.ui.setting
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -20,17 +24,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
-@Composable
-fun NotificationSetting(navController: NavController) {
+class NotiSettingActivity: ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            val themeViewModel: ThemeViewModel = viewModel()
+            val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+            SavoreelTheme(darkTheme = isDarkMode) {
+                NotiSettingScreen()
+            }
+        }
+    }
+}
 
+@Composable
+fun NotiSettingScreen() {
     var isDisturb by rememberSaveable { mutableStateOf(false) }
     var isNewActivities by rememberSaveable { mutableStateOf(false) }
     var isSuggested by rememberSaveable { mutableStateOf(false) }
@@ -38,7 +54,7 @@ fun NotificationSetting(navController: NavController) {
     var isMemories by rememberSaveable { mutableStateOf(false) }
     var isShowPreviews by rememberSaveable { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)){
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -46,11 +62,9 @@ fun NotificationSetting(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(color = MaterialTheme.colorScheme.background)
-//                        .shadow(elevation = 4.dp, spotColor = Color(0x80000000), ambientColor = Color(0x40000000))
             ) {
                 BackArrow(
-                    modifier = Modifier.align(Alignment.TopStart)
-                        .padding(start = 20.dp, top = 40.dp)
+                    modifier = Modifier.align(Alignment.TopStart).padding(start = 20.dp, top = 40.dp)
                 )
                 Text(
                     text = "Notification",
@@ -67,8 +81,7 @@ fun NotificationSetting(navController: NavController) {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            LazyColumn(
-                modifier = Modifier.padding(horizontal = 35.dp)
+            LazyColumn(modifier = Modifier.padding(horizontal = 35.dp)
             ) {
                 item {
                     SettingsSection(title = "") {
@@ -122,10 +135,4 @@ fun NotificationSetting(navController: NavController) {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun NotificationSettingPreview() {
-    NotificationSetting(navController = rememberNavController())
 }

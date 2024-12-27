@@ -1,5 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.savoreel.ui.component
 
+import android.app.Activity
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -40,6 +43,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -219,12 +223,14 @@ fun CustomTitle(
 
 @Composable
 fun BackArrow(
-    navController: NavController,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+
     IconButton(
         onClick = {
-            navController.popBackStack()
+            val activity = context as? Activity
+            activity?.onBackPressed()
         },
         modifier = modifier.size(48.dp),
         content = {
@@ -257,6 +263,20 @@ fun ForwardArrow(
                 tint = MaterialTheme.colorScheme.onBackground,
             )
         },
+    )
+}
+
+@Composable
+fun ForwardArrow(
+    modifier: Modifier = Modifier,
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.chevron_left),
+        contentDescription = "Back arrow",
+        tint = MaterialTheme.colorScheme.onBackground,
+        modifier = modifier
+            .rotate(180F)
+            .size(18.dp),
     )
 }
 
@@ -419,6 +439,74 @@ fun PostTopBar(navController: NavController) {
                 painter = painterResource(id = R.drawable.ic_noti),
                 navController = navController,
                 destination = "notification",
+            )
+        }
+    }
+}
+
+@Composable
+fun NavButton(
+    painter: Painter,
+    onClickAction: () -> Unit,
+    modifier: Modifier = Modifier,
+    isChecked: Boolean = false
+) {
+    IconButton(
+        onClick = {
+            onClickAction()
+        },
+        modifier = modifier
+            .size(40.dp)
+            .clip(RoundedCornerShape(50)),
+        colors = IconButtonDefaults.filledIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f)
+        )
+    ) {
+        if (isChecked){
+            Image(
+                painter = painter,
+                contentDescription = null,
+                modifier = modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(50)),
+            )
+        } else {
+            Icon(
+                painter = painter,
+                contentDescription = null,
+                modifier = modifier.scale(0.8f),
+                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f),
+            )
+        }
+    }
+}
+
+@Composable
+fun PostTopBar(navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navigateToNoti: () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp, top = 40.dp).padding(horizontal = 20.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NavButton(
+                painter = painterResource(R.drawable.default_avatar),
+                onClickAction = { navigateToProfile() },
+                isChecked = true
+            )
+        }
+        Row {
+            NavButton(
+                painter = painterResource(id = R.drawable.ic_search),
+                onClickAction = { navigateToSearch() }
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            NavButton(
+                painter = painterResource(id = R.drawable.ic_noti),
+                onClickAction = { navigateToNoti() }
             )
         }
     }

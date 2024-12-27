@@ -12,7 +12,20 @@
           "package_name": "com.example.savoreel"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "98860832757-bp1je1achuvus565adggh7a39hv7d0ki.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.savoreel",
+            "certificate_hash": "aa716b22c1b6bce82b5ba19a32b1b50d4b0d08fc"
+          }
+        },
+        {
+          "client_id": "98860832757-kr9irk7q2et536qccn4iqulr5th1bnih.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCeU3NDV22fRxwd1xhdwKMjhUyt0GP_Koc"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "98860832757-kr9irk7q2et536qccn4iqulr5th1bnih.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

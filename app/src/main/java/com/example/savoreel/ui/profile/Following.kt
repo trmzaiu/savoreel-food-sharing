@@ -64,7 +64,6 @@ fun FollowScreen(navController: NavController) {
                         .background(color = MaterialTheme.colorScheme.background)
                 ) {
                     BackArrow(
-                        navController = navController,
                         modifier = Modifier.align(Alignment.TopStart)
                     )
 

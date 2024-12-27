@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,9 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -69,7 +66,7 @@ fun SettingTheme(navController: NavController, themeViewModel: ThemeViewModel, u
     LaunchedEffect(Unit) {
         userViewModel.getUser(onSuccess = { user ->
             if (user != null) {
-                name = user.name
+                name = user.name.toString()
             } else {
                 Log.e("Setting", "User data not found")
             }
@@ -110,7 +107,6 @@ fun SettingTheme(navController: NavController, themeViewModel: ThemeViewModel, u
                          .background(color = MaterialTheme.colorScheme.background)
                  ) {
                      BackArrow(
-                         navController = navController,
                          modifier = Modifier.align(Alignment.TopStart).padding(start = 20.dp, top = 40.dp)
                      )
 
@@ -308,45 +304,6 @@ fun SettingTheme(navController: NavController, themeViewModel: ThemeViewModel, u
 }
 
 @Composable
-fun SettingsSection(title: String, imageVector: ImageVector? = null, content: @Composable () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            if (imageVector != null) {
-                Icon(
-                    imageVector = imageVector,
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier
-                        .size(18.dp)
-                )
-            }
-            Text(
-                text = title,
-                fontFamily = nunitoFontFamily,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSecondary,
-            )
-        }
-        Column(
-            modifier = Modifier
-                .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(20.dp))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            content()
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-    }
-}
-
-@Composable
 fun SettingItemWithNavigation(
     icon: ImageVector? = null,
     text: String,
@@ -409,47 +366,5 @@ fun SettingItemWithNavigation(
     }
 }
 
-@Composable
-fun SheetContent(onOptionClick: (String) -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 20.dp)
-    ) {
-        val options = listOf("Upload Image", "Take Photo", "Remove Avatar", "Cancel")
 
-        options.forEach { option ->
-            Text(
-                text = option,
-                fontSize = 24.sp,
-                fontFamily = nunitoFontFamily,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onOptionClick(option) }
-                    .padding(vertical = 8.dp),
-                textAlign = TextAlign.Center,
-                color = if (option == "Remove Avatar") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
 
-                )
-        }
-    }
-}
-
-fun handleAvatarOption(option: String) {
-    when (option) {
-        "Upload Image" -> {
-
-        }
-        "Take Photo" -> {
-
-        }
-        "Remove Avatar" -> {
-
-        }
-        "Cancel" -> {
-
-        }
-    }
-
-}

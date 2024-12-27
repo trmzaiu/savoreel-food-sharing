@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,45 +32,23 @@ class SplashActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SavoreelTheme {
-                SplashScreen {
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    SplashScreen {
+                        val intent = Intent(this, MainActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
                 }
             }
         }
         Log.d("SplashActivity", "onCreate called")
-    }
-    override fun onStart() {
-        super.onStart()
-        Log.d("SplashActivity", "onStart called")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d("SplashActivity", "onResume called")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d("SplashActivity", "onPause called")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d("SplashActivity", "onStop called")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("SplashActivity", "onDestroy called")
     }
 }
 
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
     LaunchedEffect(Unit) {
-        delay(800)
+        delay(1000)
         onTimeout()
     }
 

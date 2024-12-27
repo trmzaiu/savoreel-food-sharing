@@ -68,7 +68,7 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 40.dp, bottom = 20.dp),
             ) {
-                BackArrow(navController = navController)
+                BackArrow()
                 CustomInputField(
                     value = "",
                     onValueChange = {},
@@ -190,7 +190,7 @@ fun SearchingResult(navController: NavController, searchQuery: String) {
 }
 
 @Composable
-fun SearchResultItem(result: User, onFollowClick: (User) -> Unit) {
+fun SearchResultItem(result: Users, onFollowClick: (Users) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth().padding(vertical = 8.dp),
@@ -248,7 +248,7 @@ fun SearchingResultPreview1() {
 
 
 
-data class User(
+data class Users(
     val userID: Int,
     val name: String,
     val avatar: Int,
@@ -256,5 +256,5 @@ data class User(
 )
 
 var users = List(12) { i ->
-    User(i + 1, "Person ${i + 1}", R.drawable.food)
+    Users(i + 1, "Person ${i + 1}", R.drawable.food)
 }

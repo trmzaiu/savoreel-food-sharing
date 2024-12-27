@@ -17,12 +17,13 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -33,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.savoreel.ui.component.CustomButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -88,7 +89,7 @@ fun CameraFrame(
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
             val previewUseCase = Preview.Builder()
-                .setTargetRotation(preview.display.rotation)
+//                .setTargetRotation(preview.display.rotation)
                 .build()
                 .also {
                     it.setSurfaceProvider(preview.surfaceProvider)
@@ -98,7 +99,7 @@ fun CameraFrame(
                 .setFlashMode(
                     if (flashEnabled) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF
                 )
-                .setTargetRotation(preview.display.rotation)
+//                .setTargetRotation(preview.display.rotation)
                 .build()
 
             try {
@@ -210,7 +211,8 @@ fun RequestCameraPermission(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
 
@@ -218,16 +220,17 @@ fun RequestCameraPermission(
         Text(
             text = "Camera permission is required to use this feature.",
             textAlign = TextAlign.Center,
-            color = Color.Red,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 15.sp,
             lineHeight = 20.sp,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         )
-        Button(onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }) {
-            Text(text = "Grant Permission")
-
-        }
+        CustomButton(
+            text = "Grant Permission",
+            enabled = true,
+            onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }
+        )
     }
 }

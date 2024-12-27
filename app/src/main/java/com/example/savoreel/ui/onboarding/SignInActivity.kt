@@ -1,10 +1,11 @@
-@file:Suppress("DEPRECATION")
-
 package com.example.savoreel.ui.onboarding
 
 import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,94 +37,160 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.example.savoreel.R
-import com.example.savoreel.model.ThemeViewModel
-import com.example.savoreel.model.UserViewModel
+import com.example.savoreel.model.User
 import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.ErrorDialog
+import com.example.savoreel.ui.home.TakePhotoActivity
+import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.domineFontFamily
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import kotlinx.coroutines.launch
+import com.google.firebase.firestore.FirebaseFirestore
+
+@Suppress("DEPRECATION")
+class SignInActivity : ComponentActivity() {
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    private val firebaseFirestore = FirebaseFirestore.getInstance()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+        setContent {
+            SavoreelTheme(darkTheme = false) {
+                SignInScreen(
+                    onSignInSuccess = {
+                        val intent = Intent(this, TakePhotoActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    },
+                    onForgotPassword = {
+                        val intent = Intent(this, EmailActivity::class.java).apply {
+                            putExtra("isChangeEmail", false)
+                        }
+                        startActivity(intent)
+                    },
+                    onGoogleSignIn = { signInWithGoogle() },
+                    onFacebookSignIn = {},
+                    navigateToSignUp = {
+                        val intent = Intent(this, SignUpActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
+                )
+            }
+        }
+    }
+
+    private val googleSignInLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                try {
+                    val account = task.getResult(ApiException::class.java)
+                    firebaseAuthWithGoogle(account.idToken!!)
+                } catch (e: ApiException) {
+                    Log.w("SignInActivity", "Google sign-in failed", e)
+                }
+            }
+        }
+
+    private fun signInWithGoogle() {
+        val signInIntent = googleSignInClient.signInIntent
+        googleSignInLauncher.launch(signInIntent)
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+
+        firebaseAuth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val user = firebaseAuth.currentUser
+                    if (user != null) {
+                        val userId = user.uid
+                        Log.d("CreateAccount", "User ID retrieved: $userId")
+                        val userDocRef = firebaseFirestore.collection("users").document(userId)
+                        userDocRef.get().addOnSuccessListener { document ->
+                            if (!document.exists()) {
+                                val name = user.displayName
+                                val email = user.email
+                                val avatarUri = user.photoUrl?.toString()
+
+                                val newUser = User(
+                                    userId = userId,
+                                    name = name,
+                                    email = email,
+                                    avatarUri = avatarUri,
+                                    darkModeEnabled = false,
+                                    following = emptyList(),
+                                    followers = emptyList()
+                                )
+
+                                userDocRef.set(newUser)
+                                    .addOnSuccessListener {
+                                        Log.d("CreateAccount", "User data saved to Firestore successfully.")
+                                        startActivity(Intent(this, TakePhotoActivity::class.java))
+                                        finish()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("CreateAccount", "Failed to save user data: ${e.localizedMessage}", e)
+                                    }
+                            } else {
+                                Log.d("CreateAccount", "User data already exists in Firestore.")
+                                startActivity(Intent(this, TakePhotoActivity::class.java))
+                                finish()
+                            }
+                        }
+                    }
+                } else {
+                    Log.w("SignInActivity", "Google sign-in failed", task.exception)
+                }
+            }
+    }
+}
 
 @Composable
-fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel, themeViewModel: ThemeViewModel = viewModel()) {
+fun SignInScreen(
+    onSignInSuccess: () -> Unit,
+    onForgotPassword: () -> Unit,
+    onGoogleSignIn: () -> Unit,
+    onFacebookSignIn: () -> Unit,
+    navigateToSignUp: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-//    val context = ApplicationProvider.getApplicationContext<Context>()
-//
-//    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//        .requestIdToken("98860832757-kr9irk7q2et536qccn4iqulr5th1bnih.apps.googleusercontent.com")
-//        .requestEmail()
-//        .build()
-//
-//    val mGoogleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(context, gso)
 
     val isFormValid = email.isNotEmpty() && password.isNotEmpty()
 
     fun signIn() {
         isLoading = true
-        userViewModel.viewModelScope.launch {
-            try {
-                userViewModel.signIn(email, password, onSuccess = {
-                    isLoading = false
-                    themeViewModel.loadUserSettings()
-                    navController.navigate("take_photo_screen")
-                }, onFailure = {
-                    isLoading = false
-                    errorMessage = "Make sure you entered your email and password correctly and try again."
-                    showErrorDialog = true
-                    Log.e("SignInScreen", errorMessage)
-                })
-            } catch (e: Exception) {
-                // Handle any other exceptions that might occur
-                isLoading = false
-                errorMessage = "An unexpected error occurred: ${e.message}"
-                showErrorDialog = true
-                Log.e("SignInScreen", "Error during sign-in", e)
-            }
-        }
-    }
-    fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        FirebaseAuth.getInstance().signInWithCredential(credential)
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
+                isLoading = false
                 if (task.isSuccessful) {
-                    val user = FirebaseAuth.getInstance().currentUser
-                    navController.navigate("take_photo_screen")
+                    onSignInSuccess()
                 } else {
-                    errorMessage = "Google login failed: ${task.exception?.message}"
+                    errorMessage = "Make sure you entered your email and password correctly and try again."
                     showErrorDialog = true
                 }
             }
-    }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                firebaseAuthWithGoogle(account.idToken!!)
-            } catch (e: ApiException) {
-                Log.w("SignIn", "Google sign in failed", e)
-            }
-        }
-    }
-
-    fun signInWithGoogle() {
-//        val signInIntent = mGoogleSignInClient.signInIntent
-//        launcher.launch(signInIntent)
     }
 
     Box(
@@ -159,13 +226,11 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
 
             Spacer(modifier = Modifier.height(100.dp))
 
-            // Email and Password Section
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Email Input
                 CustomInputField(
                     value = email,
                     onValueChange = { email = it },
@@ -173,7 +238,6 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                     isPasswordField = false
                 )
 
-                // Password Input
                 CustomInputField(
                     value = password,
                     onValueChange = { password = it },
@@ -181,7 +245,6 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                     isPasswordField = true
                 )
 
-                // Forgot Password
                 Box(
                     modifier = Modifier
                         .padding(end = 20.dp)
@@ -201,7 +264,7 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) {
-                                navController.navigate("email_screen/0?isChangeEmail=false")
+                                onForgotPassword()
                             }
 
                     )
@@ -210,13 +273,10 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Sign In Button
             CustomButton(
                 text = if (isLoading) "Loading..." else "Sign in",
                 enabled = isFormValid,
-                onClick = {
-                    signIn()
-                }
+                onClick = { signIn() }
             )
 
             Spacer(modifier = Modifier.height(70.dp))
@@ -242,7 +302,6 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp)
                 ) {
-                    // Google Icon
                     Image(
                         painter = painterResource(id = R.drawable.ic_google),
                         contentDescription = "Google Icon",
@@ -252,7 +311,7 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) {
-                                signInWithGoogle()
+                                onGoogleSignIn()
                             }
                     )
 
@@ -268,7 +327,7 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) {
-                                println("Sign in with facebook")
+                                onFacebookSignIn()
                             }
                     )
                 }
@@ -301,15 +360,17 @@ fun SignInScreenTheme(navController: NavController, userViewModel: UserViewModel
                         textAlign = TextAlign.Center,
                     ),
                     modifier = Modifier
-                        .clickable(
+                        .clickable (
                             interactionSource = remember { MutableInteractionSource() },
-                            indication = null) {
-                            navController.navigate("sign_up_screen")
+                            indication = null
+                        ) {
+                            navigateToSignUp()
                         }
                 )
             }
         }
     }
+
     if (showErrorDialog) {
         ErrorDialog(
             title = "Couldn't sign in",

@@ -60,7 +60,7 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
     LaunchedEffect(Unit) {
         userViewModel.getUser(onSuccess = { user ->
             if (user != null) {
-                name = user.name
+                name = user.name.toString()
             } else {
                 Log.e("NameTheme", "User data not found")
             }
@@ -120,7 +120,6 @@ fun ProfileScreen(navController: NavController, userViewModel: UserViewModel) {
                         destination = "settings_screen",
                     )
                     BackArrow(
-                        navController = navController,
                         modifier = Modifier
                             .padding(0.dp)
                             .size(48.dp)

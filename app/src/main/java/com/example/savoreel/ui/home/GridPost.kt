@@ -62,8 +62,8 @@ fun GridPost(userID: String, navController: NavController, userViewModel: UserVi
             userId = userID,
             onSuccess = { user ->
                 if (user != null) {
-                    name = user.name
-                    avatarUrl = user.avatarUri
+                    name = user.name.toString()
+                    avatarUrl = user.avatarUri.toString()
                     numberOfFolower = user.followers.size
                     numberOfFollowing = user.following.size
                 } else {

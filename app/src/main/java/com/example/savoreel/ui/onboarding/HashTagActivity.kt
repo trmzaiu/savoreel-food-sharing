@@ -1,5 +1,9 @@
 package com.example.savoreel.ui.onboarding
 
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,15 +38,34 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.component.CustomButton
+import com.example.savoreel.ui.home.TakePhotoActivity
+import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
+import com.example.savoreel.ui.theme.textButtonColor
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.delay
 
+class HashTagActivity: ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            SavoreelTheme(darkTheme = false) {
+                HashTagScreen(
+                    navigateToTakePhoto = {
+                        val intent = Intent(this, TakePhotoActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
+                )
+            }
+        }
+    }
+}
+
 @Composable
-fun HashTagTheme(navController: NavController) {
+fun HashTagScreen(navigateToTakePhoto: () -> Unit) {
     var selectedTags by remember { mutableStateOf<MutableSet<String>>(mutableSetOf()) }
     var visibleHashtags by remember { mutableStateOf<List<String>>(emptyList()) }
     val allHashtags = listOf(
@@ -140,7 +163,7 @@ fun HashTagTheme(navController: NavController) {
                 enabled = selectedTags.isNotEmpty(),
                 onClick = {
                     println("Selected hashtags: ${selectedTags.joinToString(", ")}")
-                    navController.navigate("take_photo_screen")
+                    navigateToTakePhoto()
                 },
                 modifier = Modifier
                     .width(240.dp)
@@ -162,7 +185,7 @@ fun HashTagTheme(navController: NavController) {
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
                 ) {
-                    navController.navigate("take_photo_screen")
+                    navigateToTakePhoto()
                 }
             )
 
@@ -170,11 +193,33 @@ fun HashTagTheme(navController: NavController) {
     }
 }
 
-
-//@Preview(showBackground = true)
-//@Composable
-//fun HashTagPreview() {
-//    SavoreelTheme() {
-//        HashTagTheme(navController = rememberNavController())
-//    }
-//}
+@Composable
+fun HashtagItem(
+    text: String,
+    isSelected: Boolean,
+    onClick: (String) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .shadow(elevation = 4.dp, spotColor = Color(0x80000000), ambientColor = Color(0x40000000), shape = RoundedCornerShape(size = 8.dp))
+            .background(
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                shape = RoundedCornerShape(size = 8.dp)
+            )
+            .clickable {
+                onClick(text)
+            }
+            .padding(horizontal = 12.dp, vertical = 5.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontFamily = nunitoFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                color = if (isSelected) textButtonColor else MaterialTheme.colorScheme.onBackground
+            )
+        )
+    }
+}
