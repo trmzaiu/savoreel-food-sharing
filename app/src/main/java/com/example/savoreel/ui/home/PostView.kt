@@ -79,7 +79,7 @@ fun PostView(
         )
     } else {
         Scaffold(
-            topBar = { PostTopBar(navController) },
+            topBar = { PostTopBar() },
             content = { padding ->
                 Column(
                     modifier = Modifier

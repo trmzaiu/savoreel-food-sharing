@@ -75,6 +75,10 @@
             android:exported="true"
             android:theme="@style/Theme.Savoreel">
         </activity>
+        <activity android:name=".ui.profile.FollowActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Savoreel">
+        </activity>
 
         <activity android:name=".ui.setting.SettingActivity"
             android:exported="true"
@@ -102,6 +106,10 @@
             android:theme="@style/Theme.Savoreel">
         </activity>
         <activity android:name=".ui.home.NotificationActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Savoreel">
+        </activity>
+        <activity android:name=".ui.home.GridPostActivity"
             android:exported="true"
             android:theme="@style/Theme.Savoreel">
         </activity>

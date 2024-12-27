@@ -3,6 +3,8 @@
 package com.example.savoreel.ui.component
 
 import android.app.Activity
+import android.content.Intent
+import android.graphics.BitmapFactory
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -41,6 +43,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -53,9 +57,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.savoreel.R
+import com.example.savoreel.ui.home.NotificationActivity
+import com.example.savoreel.ui.home.SearchActivity
+import com.example.savoreel.ui.profile.ProfileActivity
 import com.example.savoreel.ui.theme.nunitoFontFamily
+import java.io.InputStream
+import java.net.URL
 
 @Composable
 fun CustomInputField(
@@ -258,44 +266,6 @@ fun ForwardArrow(
 }
 
 @Composable
-fun NavButton(
-    painter: Painter,
-    navController: NavController,
-    destination: String,
-    modifier: Modifier = Modifier,
-    isChecked: Boolean = false
-) {
-    IconButton(
-        onClick = {
-            navController.navigate(destination)
-        },
-        modifier = modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(50)),
-        colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f)
-        )
-    ) {
-        if (isChecked){
-            Image(
-                painter = painter,
-                contentDescription = null,
-                modifier = modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(50)),
-            )
-        } else {
-            Icon(
-                painter = painter,
-                contentDescription = null,
-                modifier = modifier.scale(0.8f),
-                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f),
-            )
-        }
-    }
-}
-
-@Composable
 fun IconTheme(
     imageVector: ImageVector,
     modifier: Modifier = Modifier,
@@ -388,40 +358,6 @@ fun CustomSwitch(
 }
 
 @Composable
-fun PostTopBar(navController: NavController) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp, top = 40.dp).padding(horizontal = 20.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NavButton(
-                painter = painterResource(R.drawable.default_avatar),
-                navController = navController,
-                destination = "profile_screen",
-                isChecked = true
-            )
-        }
-        Row {
-            NavButton(
-                painter = painterResource(id = R.drawable.ic_search),
-                navController = navController,
-                destination = "searching",
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            NavButton(
-                painter = painterResource(id = R.drawable.ic_noti),
-                navController = navController,
-                destination = "notification",
-            )
-        }
-    }
-}
-
-@Composable
 fun NavButton(
     painter: Painter,
     onClickAction: () -> Unit,
@@ -459,7 +395,20 @@ fun NavButton(
 }
 
 @Composable
-fun PostTopBar(navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navigateToNoti: () -> Unit) {
+fun PostTopBar() {
+    val context = LocalContext.current
+    val navigateToProfile = {
+        val intent = Intent(context, ProfileActivity::class.java)
+        context.startActivity(intent)
+    }
+    val navigateToSearch = {
+        val intent = Intent(context, SearchActivity::class.java)
+        context.startActivity(intent)
+    }
+    val navigateToNoti = {
+        val intent = Intent(context, NotificationActivity::class.java)
+        context.startActivity(intent)
+    }
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -489,3 +438,32 @@ fun PostTopBar(navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navi
     }
 }
 
+@Composable
+fun ImageFromUrl(url: String, modifier: Modifier = Modifier) {
+    val imageBitmap: ImageBitmap? = loadImageBitmapFromUrl(url)
+
+    if (imageBitmap != null) {
+        Image(
+            bitmap = imageBitmap,
+            contentDescription = null,
+            modifier = modifier.fillMaxSize()
+        )
+    } else {
+        // Handle fallback if necessary
+        Image(
+            painter = painterResource(id = R.drawable.default_avatar),
+            contentDescription = null,
+            modifier = modifier.fillMaxSize()
+        )
+    }
+}
+
+fun loadImageBitmapFromUrl(url: String): ImageBitmap? {
+    return try {
+        val inputStream: InputStream = URL(url).openStream()
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        bitmap.asImageBitmap()
+    } catch (e: Exception) {
+        null
+    }
+}

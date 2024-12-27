@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,6 +54,7 @@ import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.model.getMonthName
 import com.example.savoreel.model.posts
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.component.ImageFromUrl
 import com.example.savoreel.ui.component.NavButton
 import com.example.savoreel.ui.setting.SettingActivity
 import com.example.savoreel.ui.theme.SavoreelTheme
@@ -76,6 +79,12 @@ class ProfileActivity : ComponentActivity() {
                     navigateToSetting = {
                         val intent = Intent(this, SettingActivity::class.java)
                         startActivity(intent)
+                    },
+                    navigateToFollow = { tab, userId ->
+                        val intent = Intent(this, FollowActivity::class.java)
+                        intent.putExtra("TAB", tab)
+                        intent.putExtra("USER_ID", userId)
+                        startActivity(intent)
                     }
                 )
             }
@@ -84,17 +93,25 @@ class ProfileActivity : ComponentActivity() {
 }
 
 @Composable
-fun ProfileScreen(navigateToSetting: () -> Unit) {
+fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, String) -> Unit) {
+    val userViewModel: UserViewModel = viewModel()
     val listState = rememberLazyListState()
     var isRowVisible by remember { mutableStateOf(true) }
-    val userViewModel: UserViewModel = viewModel()
+    var numberOfFolower by remember { mutableIntStateOf(0) }
+    var numberOfFollowing by remember { mutableIntStateOf(0) }
     var name by remember { mutableStateOf("") }
+    var imgUrl by remember { mutableStateOf("") }
+    var uid by remember {mutableStateOf("")}
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         userViewModel.getUser(onSuccess = { user ->
             if (user != null) {
+                uid = user.userId.toString()
                 name = user.name.toString()
+                imgUrl = user.avatarUrl.toString()
+                numberOfFolower = user.followers.size
+                numberOfFollowing = user.following.size
             } else {
                 Log.e("ProfileScreen", "User data not found")
             }
@@ -179,9 +196,8 @@ fun ProfileScreen(navigateToSetting: () -> Unit) {
                             horizontalAlignment = Alignment.CenterHorizontally
 
                         ) {
-                            Image(
-                                painter = painterResource(R.drawable.default_avatar),
-                                contentDescription = "User Avatar",
+                            ImageFromUrl(
+                                url = imgUrl,
                                 modifier = Modifier
                                     .size(100.dp)
                                     .clip(RoundedCornerShape(50))
@@ -199,12 +215,16 @@ fun ProfileScreen(navigateToSetting: () -> Unit) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .weight(1f)
-                                .clickable {
-                                    // move to following
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+//                                    navController.navigate("follow/following/$uid")
+                                    navigateToFollow("following", uid)
                                 }
                         ) {
                             Text(
-                                text = "100",
+                                text = numberOfFollowing.toString(),
                                 fontFamily = nunitoFontFamily,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 20.sp,
@@ -220,12 +240,16 @@ fun ProfileScreen(navigateToSetting: () -> Unit) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .weight(1f)
-                                .clickable {
-                                    // move to followers
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+//                                    navController.navigate("follow/follower/$uid")
+                                    navigateToFollow("follower", uid)
                                 }
                         ) {
                             Text(
-                                text = "100",
+                                text = numberOfFolower.toString(),
                                 fontFamily = nunitoFontFamily,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 20.sp,
@@ -290,7 +314,6 @@ fun CalendarWithImages(
         FlowRow(
             modifier = Modifier
                 .padding(5.dp, 10.dp),
-//                overflow = FlowRowOverflow.Clip,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -304,6 +327,7 @@ fun CalendarWithImages(
                         .clip(RoundedCornerShape(15))
                         .clickable {
                             println("Clicked on post ID: ${post.postId}")
+                            //chanh à nếu m làm tới đây bạn sẽ thấy tôi đợi bạn
                         }
                 )
             }

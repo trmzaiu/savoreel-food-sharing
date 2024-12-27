@@ -50,6 +50,7 @@ import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.component.ImageFromUrl
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.google.firebase.auth.FirebaseAuth
 import java.io.InputStream
@@ -81,14 +82,23 @@ fun NotificationScreen() {
 
     val (notifications, setNotifications) = remember { mutableStateOf<List<Notification>>(emptyList()) }
     val (error, setError) = remember { mutableStateOf<String?>(null) }
+    val (loading, setLoading) = remember { mutableStateOf(true) }
 
     LaunchedEffect(currentUser) {
         currentUser?.uid?.let { recipientId ->
-            notificationViewModel.getNotificationsForRecipient(
-                recipientId = recipientId,
-                onSuccess = { setNotifications(it) },
-                onFail = { setError(it) }
+            notificationViewModel.getNotifications(
+                onSuccess = {
+                    setNotifications(it)
+                    setLoading(false)
+                },
+                onFailure = {
+                    setError(it)
+                    setLoading(false)
+                }
             )
+        } ?: run {
+            setError("Not logged in")
+            setLoading(false)
         }
     }
 
@@ -107,11 +117,6 @@ fun NotificationScreen() {
                 )
             }
 
-            ImageFromUrl(
-                url = "https://sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png",
-            )
-
-            // Xử lý trạng thái lỗi
             error?.let {
                 Text(
                     text = "Error: $it",
@@ -120,7 +125,15 @@ fun NotificationScreen() {
                 return@Column
             }
 
-            if (notifications.isEmpty()) {
+            if (loading) {
+                // Show loading indicator while data is being fetched
+                Text(
+                    text = "Loading notifications...",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else if (notifications.isEmpty()) {
                 Text(
                     text = "No notifications available.",
                     color = MaterialTheme.colorScheme.onBackground,
@@ -131,7 +144,7 @@ fun NotificationScreen() {
                 LazyColumn {
                     items(count = notifications.size) { index ->
                         val notification = notifications[index]
-                        NotificationItem(data = notification, userViewModel)
+                        NotificationItem(data = notification, userViewModel = userViewModel)
                     }
                 }
             }
@@ -143,16 +156,20 @@ fun NotificationScreen() {
 fun NotificationItem(data: Notification, userViewModel: UserViewModel) {
     var name by remember { mutableStateOf("") }
     var imgRes by remember { mutableStateOf("") }
-    val user = userViewModel.getUserById(
-        data.recipientId,
-        onSuccess = {user ->
-            if (user!=null) {
-                name = user.name.toString()
-                imgRes = user.avatarUri.toString()
-            }
-        },
-        onFailure = TODO(),
-    )
+
+    LaunchedEffect(data.recipientId) {
+        userViewModel.getUserById(
+            data.recipientId,
+            onSuccess = { user ->
+                if (user != null) {
+                    name = user.name.toString()
+                    imgRes = user.avatarUrl.toString()
+                }
+            },
+            onFailure = { /* Handle failure appropriately */ }
+        )
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -176,7 +193,7 @@ fun NotificationItem(data: Notification, userViewModel: UserViewModel) {
                         fontWeight = MaterialTheme.typography.titleSmall.fontWeight
                     )
                 ) {
-                    append(name) // Replace with actual user name lookup
+                    append(name)
                 }
                 withStyle(
                     style = SpanStyle(
@@ -202,7 +219,6 @@ fun NotificationItem(data: Notification, userViewModel: UserViewModel) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
-
     }
 }
 

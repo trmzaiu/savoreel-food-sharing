@@ -43,6 +43,7 @@ class PostViewModel : ViewModel() {
     private val _option = mutableStateOf<List<Pair<String, Int>>>(emptyList())
     val option: State<List<Pair<String, Int>>> = _option
 
+
     fun navigateToState(state: PhotoState) {
         _currentState.value = state
     }
