@@ -63,7 +63,7 @@ fun GridPost(userID: String, navController: NavController, userViewModel: UserVi
             onSuccess = { user ->
                 if (user != null) {
                     name = user.name.toString()
-                    avatarUrl = user.avatarUri.toString()
+                    avatarUrl = user.avatarUrl.toString()
                     numberOfFolower = user.followers.size
                     numberOfFollowing = user.following.size
                 } else {
@@ -85,7 +85,7 @@ fun GridPost(userID: String, navController: NavController, userViewModel: UserVi
 
             if (isRowVisible) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).padding(horizontal = 20.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -114,7 +114,7 @@ fun GridPost(userID: String, navController: NavController, userViewModel: UserVi
                         modifier = Modifier
                             .weight(1f)
                             .clickable {
-                                // move to following
+                                navController.navigate("follow/following/$userID")
                             }
                     ) {
                         Text(
@@ -135,7 +135,7 @@ fun GridPost(userID: String, navController: NavController, userViewModel: UserVi
                         modifier = Modifier
                             .weight(1f)
                             .clickable {
-                                // move to followers
+                                navController.navigate("follow/follower/$userID")
                             }
                     ) {
                         Text(

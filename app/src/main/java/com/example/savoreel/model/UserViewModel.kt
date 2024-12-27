@@ -4,9 +4,16 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import java.util.Date
 
 @Suppress("DEPRECATION")
 class UserViewModel : ViewModel() {
@@ -105,7 +112,7 @@ class UserViewModel : ViewModel() {
                                             userId = userId,
                                             name = null,
                                             email = email,
-                                            avatarUri = null,
+                                            avatarUrl = null,
                                             darkModeEnabled = false,
                                             following = emptyList(),
                                             followers = emptyList()
@@ -151,25 +158,6 @@ class UserViewModel : ViewModel() {
         }
 
         val userId = currentUser.uid
-        db.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val userData = document.toObject(User::class.java)
-                    onSuccess(userData)
-                } else {
-                    onSuccess(null)
-                }
-            }
-            .addOnFailureListener {
-                onFailure("Failed to get user data.")
-            }
-    }
-
-    fun getUserById(
-        userId: String,
-        onSuccess: (User?) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
@@ -253,7 +241,7 @@ class UserViewModel : ViewModel() {
     }
 
     // Function to update the user's avatar
-    fun updateUserAvatar(avatarUri: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+    fun updateUserAvatar(avatarUrl: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser == null) {
             onFailure("User not logged in.")
@@ -262,9 +250,9 @@ class UserViewModel : ViewModel() {
 
         val userId = currentUser.uid
         db.collection("users").document(userId)
-            .update("avatar", avatarUri)
+            .update("avatar", avatarUrl)
             .addOnSuccessListener {
-                _user.postValue(_user.value?.copy(avatarUri = avatarUri))
+                _user.postValue(_user.value?.copy(avatarUrl = avatarUrl))
                 onSuccess()
             }
             .addOnFailureListener {
@@ -322,6 +310,181 @@ class UserViewModel : ViewModel() {
             .addOnFailureListener { e ->
                 Log.e("FirebaseAuth", "Failed to delete user data: ${e.message}")
                 onFailure("Failed to delete user data.")
+            }
+    }
+    fun createFollowNotification(
+        recipientId: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUser = auth.currentUser ?: run {
+            onFailure("User not logged in")
+            return
+        }
+
+        val notification = Notification(
+            notificationId = db.collection("notifications").document().id,
+            recipientId = recipientId,
+            type = "follow",
+            senderId = currentUser.uid,
+            date = Date(),
+            description = "started following you"
+        )
+
+        db.collection("notifications").document(notification.notificationId)
+            .set(notification)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it.message ?: "Failed to create notification") }
+    }
+
+    // Update toggleFollowStatus to include notification
+    fun toggleFollowStatus(
+        userId: String,
+        onSuccess: (Boolean) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUser = auth.currentUser ?: run {
+            onFailure("User not logged in")
+            return
+        }
+
+        val currentUserId = currentUser.uid
+        val currentUserRef = db.collection("users").document(currentUserId)
+        val targetUserRef = db.collection("users").document(userId)
+        var currentFollowingList: List<String> = emptyList()
+
+        db.runTransaction { transaction ->
+            val currentUserSnapshot = transaction.get(currentUserRef)
+            val targetUserSnapshot = transaction.get(targetUserRef)
+
+            currentFollowingList = currentUserSnapshot.get("following") as? List<String> ?: emptyList()
+            val isNowFollowing = !currentFollowingList.contains(userId)
+
+            if (isNowFollowing) {
+                transaction.update(currentUserRef, "following", FieldValue.arrayUnion(userId))
+                transaction.update(targetUserRef, "followers", FieldValue.arrayUnion(currentUserId))
+            } else {
+                transaction.update(currentUserRef, "following", FieldValue.arrayRemove(userId))
+                transaction.update(targetUserRef, "followers", FieldValue.arrayRemove(currentUserId))
+            }
+            isNowFollowing
+        }.addOnSuccessListener { isFollowing ->
+            if (isFollowing) {
+                createFollowNotification(userId, {}, { error -> Log.e("Notification", error) })
+            }
+            val updatedFollowingList = if (isFollowing) currentFollowingList + userId else currentFollowingList - userId
+            _user.postValue(_user.value?.copy(following = updatedFollowingList))
+            onSuccess(isFollowing)
+        }.addOnFailureListener { exception ->
+            onFailure("Failed to toggle follow status: ${exception.localizedMessage}")
+        }
+    }
+
+
+    fun isFollowing(userId: String, onSuccess: (Boolean) -> Unit, onFailure: (String) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in.")
+            return
+        }
+
+        val currentUserId = currentUser.uid
+        db.collection("users").document(currentUserId).get()
+            .addOnSuccessListener { document ->
+                val userData = document.toObject(User::class.java)
+                val isFollowing = userData?.following?.contains(userId) ?: false
+                onSuccess(isFollowing)
+            }
+            .addOnFailureListener { exception ->
+                onFailure("Failed to check following status: ${exception.localizedMessage}")
+            }
+    }
+
+    fun getUserById(
+        userId: String,
+        onSuccess: (User?) -> Unit,
+        onFailure: (String) -> Unit
+    ){
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val userData = document.toObject(User::class.java)
+                    onSuccess(userData)
+                } else {
+                    onSuccess(null)
+                }
+            }
+            .addOnFailureListener {
+                onFailure("Failed to get user data.")
+            }
+    }
+
+    suspend fun getUserByID(userId: String): User? {
+        return try {
+            val document = db.collection("users").document(userId).get().await() // Use 'await' to make it suspending
+            if (document.exists()) {
+                document.toObject(User::class.java)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun getUsersByIds(userIds: List<String>, onSuccess: (List<User>) -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val usersDeferred = userIds.map { userId ->
+                    async {
+                        getUserByID(userId)
+                    }
+                }
+
+                val users = usersDeferred.awaitAll().filterNotNull()
+
+                onSuccess(users)
+            } catch (e: Exception) {
+                onFailure("Error loading users: ${e.message}")
+            }
+        }
+    }
+
+    fun getAllUsersByNameKeyword(
+        keyword: String,
+        onSuccess: (List<User>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserId == null) {
+            onFailure("User not logged in.")
+            return
+        }
+
+        val lowerCaseKeyword = keyword.toLowerCase()
+
+        db.collection("users")
+            .orderBy("name")
+            .startAt(lowerCaseKeyword)
+            .endAt(lowerCaseKeyword + "\uf8ff")
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    onFailure("No users found for the given keyword.")
+                } else {
+                    val users = documents.mapNotNull { doc ->
+                        val user = doc.toObject(User::class.java)
+                        if (doc.id != currentUserId) user else null // Exclude current user
+                    }
+                    if (users.isEmpty()) {
+                        onFailure("No users found for the given keyword, excluding current user.")
+                    } else {
+                        onSuccess(users)
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                onFailure("Failed to get users: ${exception.localizedMessage}")
             }
     }
 }

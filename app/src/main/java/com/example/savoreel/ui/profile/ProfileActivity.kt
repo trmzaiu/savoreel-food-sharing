@@ -9,11 +9,15 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,11 +48,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.R
+import com.example.savoreel.model.Post
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.model.getMonthName
 import com.example.savoreel.model.posts
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.component.ImageFromUrl
 import com.example.savoreel.ui.component.NavButton
 import com.example.savoreel.ui.setting.SettingActivity
 import com.example.savoreel.ui.theme.SavoreelTheme
@@ -81,16 +88,24 @@ class ProfileActivity : ComponentActivity() {
 
 @Composable
 fun ProfileScreen(navigateToSetting: () -> Unit) {
+    val userViewModel: UserViewModel = viewModel()
     val listState = rememberLazyListState()
     var isRowVisible by remember { mutableStateOf(true) }
-    val userViewModel: UserViewModel = viewModel()
+    var numberOfFolower by remember { mutableIntStateOf(0) }
+    var numberOfFollowing by remember { mutableIntStateOf(0) }
     var name by remember { mutableStateOf("") }
+    var imgUrl by remember { mutableStateOf("") }
+    var uid by remember {mutableStateOf("")}
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         userViewModel.getUser(onSuccess = { user ->
             if (user != null) {
+                uid = user.userId.toString()
                 name = user.name.toString()
+                imgUrl = user.avatarUrl.toString()
+                numberOfFolower = user.followers.size
+                numberOfFollowing = user.following.size
             } else {
                 Log.e("ProfileScreen", "User data not found")
             }
@@ -175,9 +190,8 @@ fun ProfileScreen(navigateToSetting: () -> Unit) {
                             horizontalAlignment = Alignment.CenterHorizontally
 
                         ) {
-                            Image(
-                                painter = painterResource(R.drawable.default_avatar),
-                                contentDescription = "User Avatar",
+                            ImageFromUrl(
+                                url = imgUrl,
                                 modifier = Modifier
                                     .size(100.dp)
                                     .clip(RoundedCornerShape(50))
@@ -195,12 +209,15 @@ fun ProfileScreen(navigateToSetting: () -> Unit) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .weight(1f)
-                                .clickable {
-                                    // move to following
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+//                                    navController.navigate("follow/following/$uid")
                                 }
                         ) {
                             Text(
-                                text = "100",
+                                text = numberOfFollowing.toString(),
                                 fontFamily = nunitoFontFamily,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 20.sp,
@@ -216,12 +233,15 @@ fun ProfileScreen(navigateToSetting: () -> Unit) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .weight(1f)
-                                .clickable {
-                                    // move to followers
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+//                                    navController.navigate("follow/follower/$uid")
                                 }
                         ) {
                             Text(
-                                text = "100",
+                                text = numberOfFolower.toString(),
                                 fontFamily = nunitoFontFamily,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 20.sp,
@@ -249,6 +269,59 @@ fun ProfileScreen(navigateToSetting: () -> Unit) {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun CalendarWithImages(
+    posts: List<Post>,
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.secondary)
+            .clip(MaterialTheme.shapes.medium)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.tertiary)
+                .height(50.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 10.dp),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+        FlowRow(
+            modifier = Modifier
+                .padding(5.dp, 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            posts.forEach { post ->
+                Image(
+                    painter = painterResource(id = post.imageRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(15))
+                        .clickable {
+                            println("Clicked on post ID: ${post.postId}")
+                            //chanh à nếu m làm tới đây bạn sẽ thấy tôi đợi bạn
+                        }
+                )
             }
         }
     }

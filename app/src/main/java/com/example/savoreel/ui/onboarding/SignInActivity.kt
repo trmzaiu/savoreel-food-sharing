@@ -128,13 +128,13 @@ class SignInActivity : ComponentActivity() {
                             if (!document.exists()) {
                                 val name = user.displayName
                                 val email = user.email
-                                val avatarUri = user.photoUrl?.toString()
+                                val avatarUrl = user.photoUrl?.toString()
 
                                 val newUser = User(
                                     userId = userId,
                                     name = name,
                                     email = email,
-                                    avatarUri = avatarUri,
+                                    avatarUrl = avatarUrl,
                                     darkModeEnabled = false,
                                     following = emptyList(),
                                     followers = emptyList()

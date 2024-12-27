@@ -3,6 +3,7 @@
 package com.example.savoreel.ui.component
 
 import android.app.Activity
+import android.graphics.BitmapFactory
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -41,6 +42,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -56,6 +59,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.savoreel.R
 import com.example.savoreel.ui.theme.nunitoFontFamily
+import java.io.InputStream
+import java.net.URL
 
 @Composable
 fun CustomInputField(
@@ -218,6 +223,26 @@ fun CustomTitle(
         color = MaterialTheme.colorScheme.onBackground,
         textAlign = TextAlign.Center,
         modifier = modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun BackArrow(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+) {
+    IconButton(
+        onClick = {
+            navController.popBackStack()
+        },
+        modifier = modifier.size(48.dp),
+        content = {
+            Icon(
+                painter = painterResource(id = R.drawable.chevron_left),
+                contentDescription = "Back arrow",
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+        },
     )
 }
 
@@ -432,7 +457,7 @@ fun PostTopBar(navController: NavController) {
             NavButton(
                 painter = painterResource(id = R.drawable.ic_search),
                 navController = navController,
-                destination = "searching",
+                destination = "search_result/",
             )
             Spacer(modifier = Modifier.width(16.dp))
             NavButton(
@@ -512,3 +537,32 @@ fun PostTopBar(navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navi
     }
 }
 
+@Composable
+fun ImageFromUrl(url: String, modifier: Modifier = Modifier) {
+    val imageBitmap: ImageBitmap? = loadImageBitmapFromUrl(url)
+
+    if (imageBitmap != null) {
+        Image(
+            bitmap = imageBitmap,
+            contentDescription = null,
+            modifier = modifier.fillMaxSize()
+        )
+    } else {
+        // Handle fallback if necessary
+        Image(
+            painter = painterResource(id = R.drawable.default_avatar),
+            contentDescription = null,
+            modifier = modifier.fillMaxSize()
+        )
+    }
+}
+
+fun loadImageBitmapFromUrl(url: String): ImageBitmap? {
+    return try {
+        val inputStream: InputStream = URL(url).openStream()
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        bitmap.asImageBitmap()
+    } catch (e: Exception) {
+        null
+    }
+}
