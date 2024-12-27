@@ -245,29 +245,6 @@ fun BackArrow(
 
 @Composable
 fun ForwardArrow(
-    navController: NavController,
-    modifier: Modifier = Modifier,
-    destination: String
-) {
-    IconButton(
-        onClick = {
-            navController.navigate(destination)
-        },
-        modifier = modifier
-            .rotate(180F)
-            .size(18.dp),
-        content = {
-            Icon(
-                painter = painterResource(id = R.drawable.chevron_left),
-                contentDescription = "Back arrow",
-                tint = MaterialTheme.colorScheme.onBackground,
-            )
-        },
-    )
-}
-
-@Composable
-fun ForwardArrow(
     modifier: Modifier = Modifier,
 ) {
     Icon(

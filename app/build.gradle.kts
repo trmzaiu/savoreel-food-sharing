@@ -109,10 +109,13 @@ dependencies {
     implementation ("androidx.compose.ui:ui:1.7.6" )
     implementation ("androidx.compose.foundation:foundation:1.7.6")
     implementation ("androidx.compose.runtime:runtime:1.7.6")
-    implementation ("androidx.compose.ui:ui-tooling-preview:1.7.6") // This is required for @Preview to work
+    implementation ("androidx.compose.ui:ui-tooling-preview:1.7.6")
 
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.android.gms:play-services-auth:20.3.0")
     implementation("com.facebook.android:facebook-login:12.3.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation("org.jsoup:jsoup:1.14.3")
+
 }

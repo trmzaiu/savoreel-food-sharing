@@ -12,8 +12,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.R
+import com.example.savoreel.model.Post
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.model.getMonthName
@@ -249,6 +253,59 @@ fun ProfileScreen(navigateToSetting: () -> Unit) {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun CalendarWithImages(
+    posts: List<Post>,
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.secondary)
+            .clip(MaterialTheme.shapes.medium)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.tertiary)
+                .height(50.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 10.dp),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+        FlowRow(
+            modifier = Modifier
+                .padding(5.dp, 10.dp),
+//                overflow = FlowRowOverflow.Clip,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            posts.forEach { post ->
+                Image(
+                    painter = painterResource(id = post.imageRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(15))
+                        .clickable {
+                            println("Clicked on post ID: ${post.postId}")
+                        }
+                )
             }
         }
     }

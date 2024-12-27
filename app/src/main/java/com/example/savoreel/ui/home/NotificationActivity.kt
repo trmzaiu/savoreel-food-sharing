@@ -2,16 +2,19 @@
 
 package com.example.savoreel.ui.home
 
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,6 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +44,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.savoreel.R
 import com.example.savoreel.model.Notification
 import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.ThemeViewModel
@@ -45,6 +52,8 @@ import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.google.firebase.auth.FirebaseAuth
+import java.io.InputStream
+import java.net.URL
 
 class NotificationActivity: ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
@@ -194,5 +203,35 @@ fun NotificationItem(data: Notification, userViewModel: UserViewModel) {
             modifier = Modifier.weight(1f)
         )
 
+    }
+}
+
+@Composable
+fun ImageFromUrl(url: String, modifier: Modifier = Modifier) {
+    val imageBitmap: ImageBitmap? = loadImageBitmapFromUrl(url)
+
+    if (imageBitmap != null) {
+        Image(
+            bitmap = imageBitmap,
+            contentDescription = null,
+            modifier = modifier.fillMaxSize()
+        )
+    } else {
+        // Handle fallback if necessary
+        Image(
+            painter = painterResource(id = R.drawable.default_avatar),
+            contentDescription = null,
+            modifier = modifier.fillMaxSize()
+        )
+    }
+}
+
+private fun loadImageBitmapFromUrl(url: String): ImageBitmap? {
+    return try {
+        val inputStream: InputStream = URL(url).openStream()
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        bitmap.asImageBitmap()
+    } catch (e: Exception) {
+        null
     }
 }

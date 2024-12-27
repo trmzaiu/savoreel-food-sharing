@@ -1,11 +1,15 @@
 package com.example.savoreel.ui.setting
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,27 +36,36 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
 class TermsActivity: ComponentActivity() {
+    private val themeViewModel: ThemeViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        themeViewModel.loadUserSettings()
+
         setContent {
-            val themeViewModel: ThemeViewModel = viewModel()
             val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+
             SavoreelTheme(darkTheme = isDarkMode) {
-                TermsScreen()
+                TermsScreen(
+                    onAccept = {
+                        val activity = this as? Activity
+                        activity?.onBackPressed()
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun TermsScreen() {
+fun TermsScreen(onAccept: () -> Unit) {
     var isAccepted by remember { mutableStateOf(false) }
 
     Box(
@@ -149,32 +163,36 @@ fun TermsScreen() {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Acknowledge Button
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = isAccepted,
+                            onCheckedChange = { isAccepted = it }
+                        )
+                        Text(
+                            text = "I accept the terms of service.",
+                            fontSize = 14.sp,
+                            fontFamily = nunitoFontFamily,
+                            fontWeight = FontWeight.Normal,
+                            )
+                    }
+
                     Button(
-                        onClick = { isAccepted = true },
+                        onClick = { onAccept() },
+                        enabled = isAccepted,
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .fillMaxWidth()
                     ) {
-                        Text("I Agree", fontSize = 18.sp)
-                    }
-
-                    if (isAccepted) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "You have accepted the Terms of Service.",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center
-                        )
+                        Text("Continue")
                     }
                 }
             }
         }
     }
 }
-
-
 
 // Helper function to append bold text
 fun AnnotatedString.Builder.appendBold(text: String) {

@@ -10,58 +10,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7a71b3a1-a878-45c1-82e3-69796ac7ec8b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/model/UserViewModel.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/NotificationActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/SearchActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/TakePhotoActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/ChangePasswordActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/EmailActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/HashTagActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/NameActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/OnboardingActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/PasswordActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignInActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignUpActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SuccessActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/ProfileActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/NotiSettingActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/SettingActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/TermsActivity.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/anim/slide_in_left.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/anim/slide_in_right.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/anim/slide_out_left.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/anim/slide_out_right.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/PolicyActivity.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/google-services.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/google-services.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/MainActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/model/ThemeViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/model/ThemeViewModel.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/model/User.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/model/User.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/SplashActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/SplashActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/model/UserViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/model/UserViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/AppNavigation.kt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/component/Component.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/component/Component.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/component/FormScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/component/FormScreen.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/CameraHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/CameraHandler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/GridPost.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/GridPost.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/NotificationTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/NotificationTheme.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/Searching.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/Searching.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/SearchingResult.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/SearchingResult.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/ChangePasswordTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/ChangePasswordTheme.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/EmailTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/EmailTheme.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/HashTagTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/HashTagTheme.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignInTheme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignInTheme.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Following.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Following.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Profile.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Profile.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/NotificationSetting.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/NotificationSetting.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Setting.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Setting.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Term of service.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Term of service.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/theme/Theme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/theme/Theme.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/themes.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/NotificationActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/NotificationActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/NotificationTheme.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/PostView.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/PostView.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/Searching.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/home/SearchingResult.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/ChangePasswordTheme.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/EmailTheme.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/HashTagTheme.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/NameTheme.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/PasswordTheme.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignInActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignInActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignInTheme.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SignUpTheme.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/onboarding/SuccessTheme.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/Profile.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/ProfileActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/profile/ProfileActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/NotificationSetting.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Setting.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/Term of service.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/TermsActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/savoreel/ui/setting/TermsActivity.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +46,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\Fpt\.android\avd\Resizable_Experimental_API_34.avd)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=Default, isTemplate=false, identifier=serial=emulator-5554;connection=861384f4)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -119,9 +94,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="resourceFile" />
-        <option value="Kotlin Class" />
         <option value="Kotlin File" />
         <option value="Class" />
+        <option value="Kotlin Class" />
       </list>
     </option>
   </component>
@@ -157,45 +132,46 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Android App.MainActivity.executor&quot;: &quot;Run&quot;,
-    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.ChangeEmailLightPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.EmailDarkPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.EmailLightPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.FollowScreenPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.GreetingPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.GridPostScreenPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.HashTagPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.PasswordDarkPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.PasswordLightPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.ProfilePreview.executor&quot;: &quot;Debug&quot;,
-    &quot;Compose Preview.SearchingResultPreview.executor&quot;: &quot;Debug&quot;,
-    &quot;Compose Preview.SettingsScreenPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.SettingsScreenPreviewDark.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.SignInLightPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.UpdateNameDarkPreview.executor&quot;: &quot;Run&quot;,
-    &quot;Compose Preview.VerifyCodeDarkPreview.executor&quot;: &quot;Run&quot;,
-    &quot;ResourceManagerPrefKey.ResourceType&quot;: &quot;DRAWABLE&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Study/Mobile Application Development/Project/Woof&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.completion&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Android App.MainActivity.executor": "Run",
+    "Android App.app.executor": "Run",
+    "Compose Preview.ChangeEmailLightPreview.executor": "Run",
+    "Compose Preview.EmailDarkPreview.executor": "Run",
+    "Compose Preview.EmailLightPreview.executor": "Run",
+    "Compose Preview.FollowScreenPreview.executor": "Run",
+    "Compose Preview.GreetingPreview.executor": "Run",
+    "Compose Preview.GridPostScreenPreview.executor": "Run",
+    "Compose Preview.HashTagPreview.executor": "Run",
+    "Compose Preview.PasswordDarkPreview.executor": "Run",
+    "Compose Preview.PasswordLightPreview.executor": "Run",
+    "Compose Preview.PolicyPreview.executor": "Run",
+    "Compose Preview.ProfilePreview.executor": "Debug",
+    "Compose Preview.SearchingResultPreview.executor": "Debug",
+    "Compose Preview.SettingsScreenPreview.executor": "Run",
+    "Compose Preview.SettingsScreenPreviewDark.executor": "Run",
+    "Compose Preview.SignInLightPreview.executor": "Run",
+    "Compose Preview.UpdateNameDarkPreview.executor": "Run",
+    "Compose Preview.VerifyCodeDarkPreview.executor": "Run",
+    "ResourceManagerPrefKey.ResourceType": "DRAWABLE",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Study/Mobile Application Development/Project/Woof",
+    "settings.editor.selected.configurable": "editor.preferences.completion"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;kotlin-gradle-user-dirs&quot;: [
-      &quot;C:\\Users\\Fpt\\.gradle&quot;
+  "keyToStringList": {
+    "kotlin-gradle-user-dirs": [
+      "C:\\Users\\Fpt\\.gradle"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Study\Mobile Application Development\Project\Savoreel\mad-project-savoreel\app\src\main\res\layout" />
@@ -205,7 +181,7 @@
       <recent name="com.example.savoreel.ui" />
     </key>
   </component>
-  <component name="RunManager" selected="Android App.app">
+  <component name="RunManager" selected="Android App.PolicyActivity">
     <configuration name="MainActivity" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false" temporary="true">
       <module name="Savoreel.app.main" />
       <option name="DEPLOY" value="true" />
@@ -266,6 +242,72 @@
       </Profilers>
       <option name="DEEP_LINK" value="" />
       <option name="ACTIVITY_CLASS" value="com.example.savoreel.MainActivity" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PolicyActivity" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false" temporary="true">
+      <module name="Savoreel.app.main" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="CLEAR_APP_STORAGE" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="specific_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Hybrid>
+      <Java>
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Java>
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="com.example.savoreel.ui.setting.PolicyActivity" />
       <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
       <method v="2">
@@ -336,73 +378,6 @@
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
       <method v="2" />
     </configuration>
-    <configuration name="ChangeEmailLightPreview" type="ComposePreviewRunConfiguration" temporary="true">
-      <module name="Savoreel.app" />
-      <option name="DEPLOY" value="true" />
-      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
-      <option name="DEPLOY_AS_INSTANT" value="false" />
-      <option name="ARTIFACT_NAME" value="" />
-      <option name="PM_INSTALL_OPTIONS" value="" />
-      <option name="ALL_USERS" value="false" />
-      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
-      <option name="CLEAR_APP_STORAGE" value="false" />
-      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
-      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.onboarding.EmailThemeKt.ChangeEmailLightPreview" />
-      <option name="MODE" value="specific_activity" />
-      <option name="CLEAR_LOGCAT" value="false" />
-      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
-      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
-      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
-      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
-      <option name="DEBUGGER_TYPE" value="Auto" />
-      <Auto>
-        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
-        <option name="SHOW_STATIC_VARS" value="true" />
-        <option name="WORKING_DIR" value="" />
-        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
-        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
-        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
-        <option name="DEBUG_SANDBOX_SDK" value="false" />
-      </Auto>
-      <Hybrid>
-        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
-        <option name="SHOW_STATIC_VARS" value="true" />
-        <option name="WORKING_DIR" value="" />
-        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
-        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
-        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
-        <option name="DEBUG_SANDBOX_SDK" value="false" />
-      </Hybrid>
-      <Java>
-        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
-        <option name="DEBUG_SANDBOX_SDK" value="false" />
-      </Java>
-      <Native>
-        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
-        <option name="SHOW_STATIC_VARS" value="true" />
-        <option name="WORKING_DIR" value="" />
-        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
-        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
-        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
-        <option name="DEBUG_SANDBOX_SDK" value="false" />
-      </Native>
-      <Profilers>
-        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
-        <option name="STARTUP_PROFILING_ENABLED" value="false" />
-        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
-        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
-        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
-        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
-      </Profilers>
-      <option name="DEEP_LINK" value="" />
-      <option name="ACTIVITY_CLASS" value="androidx.compose.ui.tooling.PreviewActivity" />
-      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="true" />
-      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
-      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.onboarding.EmailThemeKt.ChangeEmailLightPreview" />
-      <method v="2">
-        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="GridPostScreenPreview" type="ComposePreviewRunConfiguration" temporary="true">
       <module name="Savoreel.app" />
       <option name="DEPLOY" value="true" />
@@ -470,7 +445,7 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ProfilePreview" type="ComposePreviewRunConfiguration" temporary="true">
+    <configuration name="PolicyPreview" type="ComposePreviewRunConfiguration" temporary="true">
       <module name="Savoreel.app" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
@@ -481,7 +456,7 @@
       <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
       <option name="CLEAR_APP_STORAGE" value="false" />
       <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
-      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.profile.ProfileKt.ProfilePreview" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="--es composable com.example.savoreel.ui.setting.PolicyActivityKt.PolicyPreview" />
       <option name="MODE" value="specific_activity" />
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
@@ -532,7 +507,7 @@
       <option name="ACTIVITY_CLASS" value="androidx.compose.ui.tooling.PreviewActivity" />
       <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="true" />
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
-      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.profile.ProfileKt.ProfilePreview" />
+      <compose-preview-run-configuration composable-fqn="com.example.savoreel.ui.setting.PolicyActivityKt.PolicyPreview" />
       <method v="2">
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
@@ -606,19 +581,19 @@
     </configuration>
     <list>
       <item itemvalue="Android App.app" />
+      <item itemvalue="Android App.PolicyActivity" />
       <item itemvalue="Android App.MainActivity" />
-      <item itemvalue="Compose Preview.ChangeEmailLightPreview" />
+      <item itemvalue="Compose Preview.PolicyPreview" />
       <item itemvalue="Compose Preview.GridPostScreenPreview" />
-      <item itemvalue="Compose Preview.ProfilePreview" />
       <item itemvalue="Compose Preview.SearchingResultPreview" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Android App.PolicyActivity" />
+        <item itemvalue="Compose Preview.PolicyPreview" />
         <item itemvalue="Android App.MainActivity" />
         <item itemvalue="Compose Preview.SearchingResultPreview" />
         <item itemvalue="Compose Preview.GridPostScreenPreview" />
-        <item itemvalue="Compose Preview.ProfilePreview" />
-        <item itemvalue="Compose Preview.ChangeEmailLightPreview" />
       </list>
     </recent_temporary>
   </component>
