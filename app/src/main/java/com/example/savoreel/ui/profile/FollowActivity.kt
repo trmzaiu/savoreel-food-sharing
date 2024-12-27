@@ -1,6 +1,11 @@
 package com.example.savoreel.ui.profile
 
+import android.content.Intent
+import android.os.Bundle
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -24,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,17 +43,47 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.User
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
+import com.example.savoreel.ui.home.GridPostActivity
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
+class FollowActivity: ComponentActivity() {
+    private val themeViewModel: ThemeViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        themeViewModel.loadUserSettings()
+
+        val initialTab = intent.getStringExtra("TAB") ?: "following"
+        val userId = intent.getStringExtra("USER_ID")
+
+        setContent {
+            val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+
+            SavoreelTheme(darkTheme = isDarkMode) {
+                FollowScreen(initialTab = initialTab, userId = userId) { userId ->
+                    val intent = Intent(this, GridPostActivity::class.java).apply {
+                        putExtra("USER_ID", userId)
+                    }
+                    startActivity(intent)
+                }
+
+            }
+        }
+    }
+}
+
 @Composable
-fun FollowScreen(navController: NavController, userViewModel: UserViewModel, query: String, userid: String) {
-    // Make sure selectedTab state is mutable and is being properly updated
-    var selectedTab by remember { mutableStateOf(if (query == "following") 0 else 1) }
+fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> Unit)  {
+    val userViewModel: UserViewModel = viewModel()
+
+    var selectedTab by remember { mutableIntStateOf(if (initialTab == "following") 0 else 1) }
     val followingList = remember { mutableListOf<String>() }
     val followerList = remember { mutableListOf<String>() }
     val isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }
@@ -61,28 +98,52 @@ fun FollowScreen(navController: NavController, userViewModel: UserViewModel, que
     LaunchedEffect(selectedTab) {
         if (selectedTab == 0) {
             // Load following list
-            userViewModel.getUserById(
-                userid,
-                onSuccess = { user ->
-                    if (user != null) {
-                        followingList.clear()
-                        followingList.addAll(user.following)
-                        isDataLoaded = true // Mark data as loaded
+            if (userId != null) {
+                userViewModel.getUserById(
+                    userId,
+                    onSuccess = { user ->
+                        if (user != null) {
+                            followingList.clear()
+                            followingList.addAll(user.following)
+                            isDataLoaded = true // Mark data as loaded
+                        }
+                    },
+                    onFailure = { error ->
+                        Log.e("FollowScreen", "Error retrieving user: $error")
                     }
-                },
-                onFailure = { error ->
-                    Log.e("FollowScreen", "Error retrieving user: $error")
-                }
-            )
+                )
+            }
         } else {
             // Load follower list
+            if (userId != null) {
+                userViewModel.getUserById(
+                    userId,
+                    onSuccess = { user ->
+                        if (user != null) {
+                            followerList.clear()
+                            followerList.addAll(user.followers)
+                            isDataLoaded = true // Mark data as loaded
+                        }
+                    },
+                    onFailure = { error ->
+                        Log.e("FollowScreen", "Error retrieving user: $error")
+                    }
+                )
+            }
+        }
+    }
+
+    // Fetch user information once
+    LaunchedEffect(Unit) {
+        if (userId != null) {
             userViewModel.getUserById(
-                userid,
+                userId,
                 onSuccess = { user ->
                     if (user != null) {
-                        followerList.clear()
-                        followerList.addAll(user.followers)
-                        isDataLoaded = true // Mark data as loaded
+                        name = user.name.toString()
+                        imgUrl = user.avatarUrl.toString()
+                    } else {
+                        Log.e("FollowScreen", "User data not found")
                     }
                 },
                 onFailure = { error ->
@@ -90,24 +151,6 @@ fun FollowScreen(navController: NavController, userViewModel: UserViewModel, que
                 }
             )
         }
-    }
-
-    // Fetch user information once
-    LaunchedEffect(Unit) {
-        userViewModel.getUserById(
-            userid,
-            onSuccess = { user ->
-                if (user != null) {
-                    name = user.name.toString()
-                    imgUrl = user.avatarUrl.toString()
-                } else {
-                    Log.e("FollowScreen", "User data not found")
-                }
-            },
-            onFailure = { error ->
-                Log.e("FollowScreen", "Error retrieving user: $error")
-            }
-        )
     }
 
     SavoreelTheme(darkTheme = isDarkModeEnabled) {
@@ -126,9 +169,7 @@ fun FollowScreen(navController: NavController, userViewModel: UserViewModel, que
                         .background(color = MaterialTheme.colorScheme.background),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    BackArrow(
-                        navController = navController,
-                    )
+                    BackArrow()
                     Text(
                         text = name,
                         fontFamily = nunitoFontFamily,
@@ -154,7 +195,7 @@ fun FollowScreen(navController: NavController, userViewModel: UserViewModel, que
                                 selected = selectedTab == index,
                                 onClick = { selectedTab = index },
                                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
-                                                    .height(50.dp)
+                                    .height(50.dp)
                             ) {
                                 Text(
                                     text = title,
@@ -170,12 +211,11 @@ fun FollowScreen(navController: NavController, userViewModel: UserViewModel, que
                     }
                 }
 
-                // Display appropriate user list based on selected tab
                 if (!isDataLoaded) {
                     Text("Loading...")
                 } else {
                     val users = if (selectedTab == 0) followingList else followerList
-                    UserList(users = users, userViewModel = userViewModel, navController = navController, selectedTab = selectedTab)
+                    UserList(users = users, selectedTab = selectedTab, onUserClick = onUserClick)
                 }
             }
         }
@@ -183,20 +223,10 @@ fun FollowScreen(navController: NavController, userViewModel: UserViewModel, que
 }
 
 @Composable
-fun UserList(users: List<String>, userViewModel: UserViewModel, navController: NavController, selectedTab: Int) {
+fun UserList(users: List<String>, selectedTab: Int, onUserClick: (String) -> Unit) {
+    val userViewModel: UserViewModel = viewModel()
     val persons = remember { mutableStateListOf<User>() }
-    var name by remember {mutableStateOf("")}
-    LaunchedEffect(Unit) {
-        userViewModel.getUser(onSuccess = { user ->
-            if (user != null) {
-                name = user.name.toString()
-            } else {
-                Log.e("Following", "User data not found")
-            }
-        }, onFailure = { error ->
-            Log.e("Following", "Error retrieving user: $error")
-        })
-    }
+
     LaunchedEffect(users) {
         persons.clear()
         userViewModel.getUsersByIds(users,
@@ -211,9 +241,9 @@ fun UserList(users: List<String>, userViewModel: UserViewModel, navController: N
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (!persons.isEmpty()) {
+        if (persons.isNotEmpty()) {
             items(persons.size) { index ->
-                UserItem(persons[index], navController)
+                UserItem(user = persons[index], onUserClick = onUserClick)
             }
         } else {
             item {
@@ -222,8 +252,7 @@ fun UserList(users: List<String>, userViewModel: UserViewModel, navController: N
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (selectedTab == 0) "$name's not following anyone yet"
-                        else "No followers yet",
+                        text = if (selectedTab == 0) "No following yet" else "No followers yet",
                         fontSize = 16.sp,
                         fontFamily = nunitoFontFamily,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -236,8 +265,7 @@ fun UserList(users: List<String>, userViewModel: UserViewModel, navController: N
 }
 
 @Composable
-fun UserItem(user: User, navController: NavController) {
-    val userid = user.userId
+fun UserItem(user: User, onUserClick: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -245,7 +273,8 @@ fun UserItem(user: User, navController: NavController) {
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) {
-                navController.navigate("grid_post/$userid")
+                onUserClick(user.userId.toString())
+                Log.d("UserItem", user.userId.toString())
             }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically

@@ -2,6 +2,7 @@ package com.example.savoreel.ui.home
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -93,14 +94,19 @@ class SearchActivity: ComponentActivity() {
                             }
                             startActivity(intent)
                         }
-                })
+                }){ userId ->
+                    val intent = Intent(this, GridPostActivity::class.java).apply {
+                        putExtra("USER_ID", userId)
+                    }
+                    startActivity(intent)
+                }
             }
         }
     }
 }
 
 @Composable
-fun SearchScreen(initialQuery: String, searchResult: () -> Unit) {
+fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (String) -> Unit) {
     val userViewModel: UserViewModel = viewModel()
 
     var searchQuery by remember { mutableStateOf(initialQuery) }
@@ -265,7 +271,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit) {
                                     }
                                 )
                                 SearchResultItem(
-                                    result = user,
+                                    user = user,
                                     onFollowClick = { person ->
                                         userViewModel.toggleFollowStatus(
                                             userId = user.userId.toString(),
@@ -277,6 +283,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit) {
                                             }
                                         )
                                     },
+                                    onUserClick = onUserClick
                                 )
                             }
 
@@ -310,7 +317,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit) {
                                     }
                                 )
                                 SearchResultItem(
-                                    result = user,
+                                    user = user,
                                     onFollowClick = { person ->
                                         userViewModel.toggleFollowStatus(
                                             userId = user.userId.toString(),
@@ -321,7 +328,8 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit) {
                                                 // Handle failure
                                             }
                                         )
-                                    }
+                                    },
+                                    onUserClick = onUserClick
                                 )
                             }
 
@@ -366,14 +374,13 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit) {
 }
 
 @Composable
-fun SearchResultItem(result: User, onFollowClick: (User) -> Unit){
+fun SearchResultItem(user: User, onFollowClick: (User) -> Unit, onUserClick: (String) -> Unit){
     val userViewModel: UserViewModel = viewModel()
 
     var isFollowed by remember { mutableStateOf(false) }
 
-    // Load the initial following status
-    LaunchedEffect(result.userId) {
-        userViewModel.isFollowing(result.userId.toString(),
+    LaunchedEffect(user.userId) {
+        userViewModel.isFollowing(user.userId.toString(),
             onSuccess = { isFollowing ->
                 isFollowed = isFollowing
             },
@@ -387,28 +394,32 @@ fun SearchResultItem(result: User, onFollowClick: (User) -> Unit){
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable {
-//                navController.navigate("grid_post/${result.userId}")
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                onUserClick(user.userId.toString())
+                Log.d("UserItem", user.userId.toString())
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ImageFromUrl(
-            url = result.avatarUrl.toString(),
+            url = user.avatarUrl.toString(),
             modifier = Modifier
                 .size(40.dp)
                 .clip(MaterialTheme.shapes.extraLarge)
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = result.name.toString(),
+            text = user.name.toString(),
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyMedium
         )
         Button(
             onClick = {
-                onFollowClick(result)
+                onFollowClick(user)
                 userViewModel.toggleFollowStatus(
-                    userId = result.userId.toString(),
+                    userId = user.userId.toString(),
                     onSuccess = { isFollowing ->
                         isFollowed = isFollowing
                     },
@@ -439,7 +450,7 @@ fun SearchCategory(
     title: String,
     items: List<String>,
     isSuggestion: Boolean,
-    onItemClick: (String) -> Unit // Callback khi một item được nhấn
+    onItemClick: (String) -> Unit
 ) {
     Column {
         Text(

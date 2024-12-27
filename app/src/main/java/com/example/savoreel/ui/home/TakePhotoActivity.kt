@@ -1,7 +1,6 @@
 package com.example.savoreel.ui.home
 
 import RequestCameraPermission
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -33,7 +32,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.PostTopBar
-import com.example.savoreel.ui.profile.ProfileActivity
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.secondaryDarkColor
 
@@ -49,20 +47,7 @@ class TakePhotoActivity : ComponentActivity() {
             val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
 
             SavoreelTheme(darkTheme = isDarkMode) {
-                TakePhotoScreen(
-                    navigateToProfile = {
-                        val intent = Intent(this, ProfileActivity::class.java)
-                        startActivity(intent)
-                    },
-                    navigateToSearch = {
-                        val intent = Intent(this, SearchActivity::class.java)
-                        startActivity(intent)
-                    },
-                    navigateToNoti = {
-                        val intent = Intent(this, NotificationActivity::class.java)
-                        startActivity(intent)
-                    }
-                )
+                TakePhotoScreen()
             }
         }
     }
@@ -70,7 +55,7 @@ class TakePhotoActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TakePhotoScreen(navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navigateToNoti: () -> Unit) {
+fun TakePhotoScreen() {
     val userViewModel: UserViewModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
 
@@ -110,7 +95,7 @@ fun TakePhotoScreen(navigateToProfile: () -> Unit, navigateToSearch: () -> Unit,
         )
     } else {
         Scaffold(
-            topBar = { PostTopBar(navigateToProfile, navigateToSearch, navigateToNoti) },
+            topBar = { PostTopBar() },
             content = { padding ->
                 Column(
                     modifier = Modifier

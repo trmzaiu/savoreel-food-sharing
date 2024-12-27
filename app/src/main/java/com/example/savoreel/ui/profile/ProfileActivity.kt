@@ -79,6 +79,12 @@ class ProfileActivity : ComponentActivity() {
                     navigateToSetting = {
                         val intent = Intent(this, SettingActivity::class.java)
                         startActivity(intent)
+                    },
+                    navigateToFollow = { tab, userId ->
+                        val intent = Intent(this, FollowActivity::class.java)
+                        intent.putExtra("TAB", tab)
+                        intent.putExtra("USER_ID", userId)
+                        startActivity(intent)
                     }
                 )
             }
@@ -87,7 +93,7 @@ class ProfileActivity : ComponentActivity() {
 }
 
 @Composable
-fun ProfileScreen(navigateToSetting: () -> Unit) {
+fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, String) -> Unit) {
     val userViewModel: UserViewModel = viewModel()
     val listState = rememberLazyListState()
     var isRowVisible by remember { mutableStateOf(true) }
@@ -214,6 +220,7 @@ fun ProfileScreen(navigateToSetting: () -> Unit) {
                                     indication = null
                                 ) {
 //                                    navController.navigate("follow/following/$uid")
+                                    navigateToFollow("following", uid)
                                 }
                         ) {
                             Text(
@@ -238,6 +245,7 @@ fun ProfileScreen(navigateToSetting: () -> Unit) {
                                     indication = null
                                 ) {
 //                                    navController.navigate("follow/follower/$uid")
+                                    navigateToFollow("follower", uid)
                                 }
                         ) {
                             Text(
