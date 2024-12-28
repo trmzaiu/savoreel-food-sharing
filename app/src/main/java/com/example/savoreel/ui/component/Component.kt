@@ -240,7 +240,7 @@ fun BackArrow(
             val activity = context as? Activity
             activity?.onBackPressed()
         },
-        modifier = modifier.size(48.dp),
+        modifier = modifier.size(50.dp),
         content = {
             Icon(
                 painter = painterResource(id = R.drawable.chevron_left),
@@ -387,7 +387,7 @@ fun NavButton(
             Icon(
                 painter = painter,
                 contentDescription = null,
-                modifier = modifier.scale(0.8f),
+                modifier = modifier.scale(0.7f),
                 tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f),
             )
         }
@@ -449,7 +449,6 @@ fun ImageFromUrl(url: String, modifier: Modifier = Modifier) {
             modifier = modifier.fillMaxSize()
         )
     } else {
-        // Handle fallback if necessary
         Image(
             painter = painterResource(id = R.drawable.default_avatar),
             contentDescription = null,

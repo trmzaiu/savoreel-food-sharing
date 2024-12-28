@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -65,6 +67,7 @@ import kotlinx.coroutines.launch
 
 class ProfileActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +93,14 @@ class ProfileActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        userViewModel.getUser(
+            onSuccess = { user -> userViewModel.setUser(user) },
+            onFailure = { error -> Log.e("ProfileActivity", "Error retrieving user: $error") }
+        )
+    }
 }
 
 @Composable
@@ -104,22 +115,27 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
     var uid by remember {mutableStateOf("")}
     var isLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(Unit) {
-        userViewModel.getUser(onSuccess = { user ->
-            if (user != null) {
-                uid = user.userId.toString()
-                name = user.name.toString()
-                imgUrl = user.avatarUrl.toString()
-                numberOfFolower = user.followers.size
-                numberOfFollowing = user.following.size
-            } else {
-                Log.e("ProfileScreen", "User data not found")
+    val currentUser by userViewModel.user.collectAsState()
+
+    LaunchedEffect(currentUser) {
+        userViewModel.getUser(
+            onSuccess = { currentUser ->
+                if (currentUser != null) {
+                    uid = currentUser.userId.toString()
+                    name = currentUser.name.toString()
+                    imgUrl = currentUser.avatarUrl.toString()
+                    numberOfFolower = currentUser.followers.size
+                    numberOfFollowing = currentUser.following.size
+                } else {
+                    Log.e("ProfileScreen", "User data not found")
+                }
+                isLoading = false
+            },
+            onFailure = { error ->
+                Log.e("NameTheme", "Error retrieving user: $error")
+                isLoading = false
             }
-            isLoading = false
-        }, onFailure = { error ->
-            Log.e("ProfileScreen", "Error retrieving user: $error")
-            isLoading = false
-        })
+        )
     }
 
     LaunchedEffect(listState) {
@@ -193,8 +209,7 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-
+                            modifier = Modifier.weight(1f)
                         ) {
                             ImageFromUrl(
                                 url = imgUrl,
@@ -208,18 +223,17 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
                                 color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(top =5.dp)
+                                modifier = Modifier.padding(top = 5.dp)
                             )
                         }
+
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                .weight(1f)
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null
                                 ) {
-//                                    navController.navigate("follow/following/$uid")
                                     navigateToFollow("following", uid)
                                 }
                         ) {
@@ -236,15 +250,16 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                                 color = MaterialTheme.colorScheme.onBackground,
                             )
                         }
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                .weight(1f)
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null
                                 ) {
-//                                    navController.navigate("follow/follower/$uid")
                                     navigateToFollow("follower", uid)
                                 }
                         ) {

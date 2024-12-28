@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -31,10 +33,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.model.ThemeViewModel
-import com.example.savoreel.model.User
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.home.GridPostActivity
@@ -54,6 +53,7 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 
 class FollowActivity: ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +77,14 @@ class FollowActivity: ComponentActivity() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        userViewModel.getUser(
+            onSuccess = { user -> userViewModel.setUser(user) },
+            onFailure = { error -> Log.e("SettingActivity", "Error retrieving user: $error") }
+        )
+    }
 }
 
 @Composable
@@ -84,138 +92,155 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
     val userViewModel: UserViewModel = viewModel()
 
     var selectedTab by remember { mutableIntStateOf(if (initialTab == "following") 0 else 1) }
-    val followingList = remember { mutableListOf<String>() }
-    val followerList = remember { mutableListOf<String>() }
-    val isDarkModeEnabled by rememberSaveable { mutableStateOf(false) }
+    var followingList by remember { mutableStateOf<List<String>>(emptyList()) }
+    var followerList by remember { mutableStateOf<List<String>>(emptyList()) }
     var name by remember { mutableStateOf("") }
-    var imgUrl by remember { mutableStateOf("") }
+
     val tabs = listOf("Following", "Followers")
 
     // Track whether data has been loaded
     var isDataLoaded by remember { mutableStateOf(false) }
 
-    // When tab changes, load the corresponding data
-    LaunchedEffect(selectedTab) {
-        if (selectedTab == 0) {
-            // Load following list
-            if (userId != null) {
-                userViewModel.getUserById(
-                    userId,
-                    onSuccess = { user ->
-                        if (user != null) {
-                            followingList.clear()
-                            followingList.addAll(user.following)
-                            isDataLoaded = true // Mark data as loaded
-                        }
-                    },
-                    onFailure = { error ->
-                        Log.e("FollowScreen", "Error retrieving user: $error")
-                    }
-                )
-            }
-        } else {
-            // Load follower list
-            if (userId != null) {
-                userViewModel.getUserById(
-                    userId,
-                    onSuccess = { user ->
-                        if (user != null) {
-                            followerList.clear()
-                            followerList.addAll(user.followers)
-                            isDataLoaded = true // Mark data as loaded
-                        }
-                    },
-                    onFailure = { error ->
-                        Log.e("FollowScreen", "Error retrieving user: $error")
-                    }
-                )
-            }
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            userViewModel.getUserById(userId,
+                onSuccess = { user ->
+                    name = user?.name.toString()
+                },
+                onFailure = { error -> Log.e("UserList", "Error: $error") }
+            )
         }
     }
 
-    // Fetch user information once
-    LaunchedEffect(Unit) {
-        if (userId != null) {
-            userViewModel.getUserById(
-                userId,
-                onSuccess = { user ->
-                    if (user != null) {
-                        name = user.name.toString()
-                        imgUrl = user.avatarUrl.toString()
-                    } else {
-                        Log.e("FollowScreen", "User data not found")
-                    }
+    // When tab changes, load the corresponding data
+    LaunchedEffect(selectedTab) {
+        if (selectedTab == 0 && userId != null) {
+            userViewModel.getFollowing(userId,
+                onSuccess = { followingIds ->
+                    followingList = followingIds.toMutableList()
+                    isDataLoaded = true
+                    Log.d("FollowScreen", "Following list: $followingIds, $followingList")
                 },
                 onFailure = { error ->
-                    Log.e("FollowScreen", "Error retrieving user: $error")
+                    Log.e("FollowScreen", "Error fetching following: $error")
+                    isDataLoaded = true
+                }
+            )
+        } else if (selectedTab == 1 && userId != null) {
+            userViewModel.getFollowers(userId,
+                onSuccess = { followersIds ->
+                    followerList = followersIds.toMutableList()
+                    isDataLoaded = true
+                    Log.d("FollowScreen", "Followers list: $followersIds, $followerList")
+                },
+                onFailure = { error ->
+                    Log.e("FollowScreen", "Error fetching followers: $error")
+                    isDataLoaded = true
                 }
             )
         }
     }
 
-    SavoreelTheme(darkTheme = isDarkModeEnabled) {
-        Box(
-            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+    Box(
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = MaterialTheme.colorScheme.background)
             ) {
-                // Header
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .padding(top = 40.dp, bottom = 20.dp)
-                        .background(color = MaterialTheme.colorScheme.background),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    BackArrow()
-                    Text(
-                        text = name,
-                        fontFamily = nunitoFontFamily,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
+                BackArrow(
+                    modifier = Modifier.align(Alignment.TopStart).padding(start = 20.dp, top = 40.dp)
+                )
 
-                // Tab Row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                Text(
+                    text = name,
+                    fontFamily = nunitoFontFamily,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 32.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(top = 40.dp, bottom = 10.dp)
+                )
+            }
+
+            // Tab Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.onBackground,
                 ) {
-                    TabRow(
-                        selectedTabIndex = selectedTab,
-                        containerColor = MaterialTheme.colorScheme.background,
-                        contentColor = MaterialTheme.colorScheme.onBackground,
-                    ) {
-                        tabs.forEachIndexed { index, title ->
-                            Tab(
-                                selected = selectedTab == index,
-                                onClick = { selectedTab = index },
-                                modifier = Modifier.background(MaterialTheme.colorScheme.background)
-                                    .height(50.dp)
-                            ) {
-                                Text(
-                                    text = title,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontFamily = nunitoFontFamily,
-                                    color = if (selectedTab == index)
-                                        MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onBackground
-                                )
-                            }
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.background)
+                                .height(50.dp)
+                        ) {
+                            Text(
+                                text = title,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                fontFamily = nunitoFontFamily,
+                                color = if (selectedTab == index)
+                                    MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onBackground
+                            )
                         }
                     }
                 }
+            }
 
-                if (!isDataLoaded) {
-                    Text("Loading...")
+            if (!isDataLoaded) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center).padding(20.dp)
+                    )
+                }
+            } else {
+                if (selectedTab == 0) {
+                    if (followingList.isNotEmpty()) {
+                        LazyColumn(modifier = Modifier.fillMaxSize().padding(10.dp)) {
+                            items(followingList) { userId ->
+                                UserItem(userId, onUserClick)
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "You are not following anyone yet.",
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            fontSize = 16.sp,
+                            fontFamily = nunitoFontFamily,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 } else {
-                    val users = if (selectedTab == 0) followingList else followerList
-                    UserList(users = users, selectedTab = selectedTab, onUserClick = onUserClick)
+                    if (followerList.isNotEmpty()) {
+                        LazyColumn(modifier = Modifier.fillMaxSize().padding(10.dp)) {
+                            items(followerList) { userId ->
+                                UserItem(userId, onUserClick)
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "You have no followers yet.",
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            fontSize = 16.sp,
+                            fontFamily = nunitoFontFamily,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }
@@ -223,49 +248,21 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
 }
 
 @Composable
-fun UserList(users: List<String>, selectedTab: Int, onUserClick: (String) -> Unit) {
+fun UserItem(userId: String, onUserClick: (String) -> Unit) {
     val userViewModel: UserViewModel = viewModel()
-    val persons = remember { mutableStateListOf<User>() }
+    var name by remember { mutableStateOf("") }
+    var avatar by remember { mutableStateOf("") }
 
-    LaunchedEffect(users) {
-        persons.clear()
-        userViewModel.getUsersByIds(users,
-            onSuccess = { usersList -> persons.addAll(usersList) },
+    LaunchedEffect(userId) {
+        userViewModel.getUserById(userId,
+            onSuccess = { user ->
+                name = user?.name.toString()
+                avatar = user?.avatarUrl.toString()
+            },
             onFailure = { error -> Log.e("UserList", "Error: $error") }
         )
     }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        if (persons.isNotEmpty()) {
-            items(persons.size) { index ->
-                UserItem(user = persons[index], onUserClick = onUserClick)
-            }
-        } else {
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (selectedTab == 0) "No following yet" else "No followers yet",
-                        fontSize = 16.sp,
-                        fontFamily = nunitoFontFamily,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun UserItem(user: User, onUserClick: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -273,8 +270,7 @@ fun UserItem(user: User, onUserClick: (String) -> Unit) {
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) {
-                onUserClick(user.userId.toString())
-                Log.d("UserItem", user.userId.toString())
+                onUserClick(userId)
             }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -286,7 +282,7 @@ fun UserItem(user: User, onUserClick: (String) -> Unit) {
             modifier = Modifier.size(48.dp)
         )
         Text(
-            text = user.name.toString(),
+            text = name,
             fontSize = 20.sp,
             fontWeight = FontWeight.Normal,
             fontFamily = nunitoFontFamily,

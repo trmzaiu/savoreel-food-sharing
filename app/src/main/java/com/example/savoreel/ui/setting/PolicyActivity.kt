@@ -3,6 +3,7 @@ package com.example.savoreel.ui.setting
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -35,6 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.text.HtmlCompat
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.theme.SavoreelTheme
@@ -79,9 +82,7 @@ fun PolicyScreen(onAccept: () -> Unit) {
         fetchPolicyContent(policyContent, isLoading)
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
-    ) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)){
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -91,12 +92,10 @@ fun PolicyScreen(onAccept: () -> Unit) {
                     .background(color = MaterialTheme.colorScheme.background)
             ) {
                 BackArrow(
-                    modifier = Modifier.align(Alignment.TopStart)
-                        .padding(start = 20.dp, top = 40.dp)
+                    modifier = Modifier.align(Alignment.TopStart).padding(start = 20.dp, top = 40.dp)
                 )
-
                 Text(
-                    text = "Policy privacy",
+                    text = "Policy Privacy",
                     fontFamily = nunitoFontFamily,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.SemiBold,
@@ -107,7 +106,7 @@ fun PolicyScreen(onAccept: () -> Unit) {
                         .padding(top = 40.dp, bottom = 10.dp)
                 )
             }
-            LazyColumn(modifier = Modifier.padding(horizontal = 35.dp)) {
+            LazyColumn(modifier = Modifier.padding(horizontal = 5.dp)) {
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
 
@@ -119,50 +118,48 @@ fun PolicyScreen(onAccept: () -> Unit) {
                             fontSize = 20.sp
                         )
                     } else {
-                        Text(
-                            text = policyContent.value,
-                            fontSize = 14.sp,
-                            fontFamily = nunitoFontFamily,
-                            fontWeight = FontWeight.Normal,
+                        AndroidView(
+                            modifier = Modifier.fillMaxSize().padding(16.dp).background(MaterialTheme.colorScheme.background),
+                            factory = { context ->
+                                TextView(context).apply {
+                                    text = HtmlCompat.fromHtml(policyContent.value, HtmlCompat.FROM_HTML_MODE_LEGACY)
+                                    textSize = 16f
+                                    setLineSpacing(1.2f, 1.2f)
+                                }
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = isAccepted,
+                                onCheckedChange = { isAccepted = it }
+                            )
+                            Text(
+                                text = "I accept the privacy policy.",
+                                fontSize = 14.sp,
+                                fontFamily = nunitoFontFamily,
+                                fontWeight = FontWeight.Normal,
+                            )
+                        }
+
+                        Button(
+                            onClick = { onAccept() },
+                            enabled = isAccepted,
                             modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
                                 .fillMaxWidth()
-                                .padding(bottom = 8.dp)
-                                .align(Alignment.CenterHorizontally),
-                            textAlign = TextAlign.Start
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = isAccepted,
-                            onCheckedChange = { isAccepted = it }
-                        )
-                        Text(
-                            text = "I accept the privacy policy.",
-                            fontSize = 14.sp,
-                            fontFamily = nunitoFontFamily,
-                            fontWeight = FontWeight.Normal,
-                        )
-                    }
-
-                    Button(
-                        onClick = { onAccept() },
-                        enabled = isAccepted,
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .fillMaxWidth()
-                    ) {
-                        Text("Continue")
+                        ) {
+                            Text("Continue")
+                        }
                     }
                 }
             }
         }
-
     }
 }
 
@@ -176,7 +173,8 @@ private suspend fun fetchPolicyContent(policyContent: MutableState<String>, isLo
             if (response.isSuccessful) {
                 val html = response.body?.string()
                 val document = Jsoup.parse(html)
-                val content = document.body().text()
+
+                val content = document.body()?.html() ?: ""
 
                 withContext(Dispatchers.Main) {
                     policyContent.value = content

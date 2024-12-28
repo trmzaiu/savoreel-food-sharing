@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.R
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.CustomButton
@@ -51,7 +52,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FirebaseAuth
 
 @Suppress("DEPRECATION")
 class SignInActivity : ComponentActivity() {
@@ -125,6 +125,7 @@ fun SignInScreen(
     onFacebookSignIn: () -> Unit,
     navigateToSignUp: () -> Unit,
 ) {
+    val userViewModel: UserViewModel = viewModel()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -135,16 +136,15 @@ fun SignInScreen(
 
     fun signIn() {
         isLoading = true
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                isLoading = false
-                if (task.isSuccessful) {
-                    onSignInSuccess()
-                } else {
-                    errorMessage = "Make sure you entered your email and password correctly and try again."
-                    showErrorDialog = true
-                }
-            }
+        userViewModel.signIn(email, password, onSuccess = {
+            isLoading = false
+            onSignInSuccess()
+        }, onFailure = {
+            isLoading = false
+            errorMessage = "Make sure you entered your email and password correctly and try again."
+            showErrorDialog = true
+            Log.e("SignInScreen", errorMessage)
+        })
     }
 
     Box(

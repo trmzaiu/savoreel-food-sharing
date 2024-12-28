@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.savoreel.model
 
 import android.util.Log
@@ -5,15 +7,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 import java.util.Date
 
@@ -23,20 +23,25 @@ class UserViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    private val _user = MutableLiveData<User?>()
-    val user: LiveData<User?> get() = _user
+    private val _user = MutableStateFlow<User?>(null)
+    val user: StateFlow<User?> get() = _user
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> get() = _error
 
-    var signInSuccess: (() -> Unit)? = null
+    private var signInSuccess: (() -> Unit)? = null
+
+    private fun getCurrentUserId(): String? {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return null
+        return currentUser.uid
+    }
+
+    fun setUser(user: User?) {
+        _user.value = user
+    }
 
     // Function to sign in a user
-    fun signIn(
-        email: String,
-        password: String,
-        onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+    fun signIn(email: String, password: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit
     ) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
@@ -55,15 +60,9 @@ class UserViewModel : ViewModel() {
             }
     }
 
-    // Funtion to validate password
+    // Function to validate password
     fun validatePassword(password: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
-            onFailure("User not logged in.")
-            return
-        }
-
-        val userId = currentUser.uid
+        val userId = getCurrentUserId()?: return
         db.collection("users").document(userId).get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -88,11 +87,7 @@ class UserViewModel : ViewModel() {
     }
 
     // Function to create a new account
-    fun createAccount(
-        email: String,
-        password: String,
-        onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+    fun createAccount(email: String, password: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit
     ) {
         Log.d("CreateAccount", "Attempting to create account with email: $email")
 
@@ -119,7 +114,10 @@ class UserViewModel : ViewModel() {
                                             avatarUrl = null,
                                             darkModeEnabled = false,
                                             following = emptyList(),
-                                            followers = emptyList()
+                                            followers = emptyList(),
+                                            nameKeywords = emptyList(),
+                                            hashtags = emptyList(),
+                                            searchHistory = emptyList()
                                         )
                                         db.collection("users").document(userId).set(newUser)
                                             .addOnSuccessListener {
@@ -155,19 +153,15 @@ class UserViewModel : ViewModel() {
 
     // Function to retrieve user details
     fun getUser(onSuccess: (User?) -> Unit, onFailure: (String) -> Unit) {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
-            onFailure("User not logged in.")
-            return
-        }
-
-        val userId = currentUser.uid
+        val userId = getCurrentUserId() ?: return
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val userData = document.toObject(User::class.java)
+                    setUser(userData)
                     onSuccess(userData)
                 } else {
+                    _user.value = null
                     onSuccess(null)
                 }
             }
@@ -176,18 +170,96 @@ class UserViewModel : ViewModel() {
             }
     }
 
+    private fun generateNameKeywords(name: String): List<String> {
+        val words = name.toLowerCase().split(" ")
+        val keywords = mutableSetOf<String>()
+        for (word in words) {
+            for (i in 1..word.length) {
+                keywords.add(word.substring(0, i))
+            }
+        }
+        return keywords.toList()
+    }
+
+    fun updateHashtags(hashtag: String) {
+        val userId = getCurrentUserId()?: return
+        val userDocRef = db.collection("users").document(userId)
+
+        userDocRef.update("Hashtags", FieldValue.arrayUnion(hashtag))
+            .addOnSuccessListener {
+                println("Searched hashtags updated successfully.")
+            }
+            .addOnFailureListener { exception ->
+                println("Failed to update searched hashtags: ${exception.localizedMessage}")
+            }
+    }
+
+    fun updateSearchHistory(keyword: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val userId = getCurrentUserId() ?: return
+        val timestamp = System.currentTimeMillis()
+        val maxHistorySize = 10
+
+        db.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                val user = document.toObject(User::class.java)
+                val searchHistory = user?.searchHistory?.toMutableList() ?: mutableListOf()
+
+                val existingItem = searchHistory.find { it.keyword == keyword }
+                if (existingItem != null) {
+                    existingItem.timestamp = timestamp
+                } else {
+                    searchHistory.add(SearchHistoryItem(keyword, timestamp))
+                }
+
+                if (searchHistory.size > maxHistorySize) {
+                    searchHistory.sortByDescending { it.timestamp }
+                    searchHistory.removeAt(searchHistory.size - 1)
+                }
+
+                db.collection("users").document(userId)
+                    .update("searchHistory", searchHistory)
+                    .addOnSuccessListener {
+                        onSuccess()
+                    }
+                    .addOnFailureListener {
+                        onFailure(it.localizedMessage ?: "Failed to save search history.")
+                    }
+            }
+            .addOnFailureListener {
+                onFailure(it.localizedMessage ?: "Failed to retrieve user data.")
+            }
+    }
+
+    fun getSearchHistory(onSuccess: (List<SearchHistoryItem>) -> Unit, onFailure: (String) -> Unit) {
+        val userId = getCurrentUserId()?: return
+
+        db.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                val user = document.toObject(User::class.java)
+                val searchHistory = user?.searchHistory ?: emptyList()
+                val sortedSearchHistory = searchHistory.sortedByDescending { it.timestamp }
+
+                onSuccess(sortedSearchHistory)
+            }
+            .addOnFailureListener {
+                onFailure(it.localizedMessage ?: "Failed to retrieve search history.")
+            }
+    }
+
     // Function to update the user's name
     fun updateUserName(name: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
-            onFailure("User not logged in.")
-            return
-        }
+        val userId = getCurrentUserId()?: return
+        val nameKeywords = generateNameKeywords(name)
 
-        val userId = currentUser.uid
         db.collection("users").document(userId)
-            .update("name", name)
+            .update(mapOf(
+                "name" to name,
+                "nameKeywords" to nameKeywords
+            ))
             .addOnSuccessListener {
+                _user.value = _user.value?.copy(name = name) // Update user name immediately
                 onSuccess()
             }
             .addOnFailureListener {
@@ -246,17 +318,11 @@ class UserViewModel : ViewModel() {
 
     // Function to update the user's avatar
     fun updateUserAvatar(avatarUrl: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
-            onFailure("User not logged in.")
-            return
-        }
-
-        val userId = currentUser.uid
+        val userId = getCurrentUserId()?: return
         db.collection("users").document(userId)
             .update("avatar", avatarUrl)
             .addOnSuccessListener {
-                _user.postValue(_user.value?.copy(avatarUrl = avatarUrl))
+                _user.value = _user.value?.copy(avatarUrl = avatarUrl)
                 onSuccess()
             }
             .addOnFailureListener {
@@ -341,7 +407,10 @@ class UserViewModel : ViewModel() {
                                 avatarUrl = avatarUri,
                                 darkModeEnabled = false,
                                 following = emptyList(),
-                                followers = emptyList()
+                                followers = emptyList(),
+                                nameKeywords = emptyList(),
+                                hashtags = emptyList(),
+                                searchHistory = emptyList()
                             )
 
                             userDocRef.set(newUser)
@@ -367,7 +436,7 @@ class UserViewModel : ViewModel() {
         signInSuccess = onSuccess
     }
 
-    fun createFollowNotification(
+    private fun createFollowNotification(
         recipientId: String,
         onSuccess: () -> Unit,
         onFailure: (String) -> Unit
@@ -428,22 +497,15 @@ class UserViewModel : ViewModel() {
                 createFollowNotification(userId, {}, { error -> Log.e("Notification", error) })
             }
             val updatedFollowingList = if (isFollowing) currentFollowingList + userId else currentFollowingList - userId
-            _user.postValue(_user.value?.copy(following = updatedFollowingList))
+            _user.value = _user.value?.copy(following = updatedFollowingList)
             onSuccess(isFollowing)
         }.addOnFailureListener { exception ->
             onFailure("Failed to toggle follow status: ${exception.localizedMessage}")
         }
     }
 
-
     fun isFollowing(userId: String, onSuccess: (Boolean) -> Unit, onFailure: (String) -> Unit) {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
-            onFailure("User not logged in.")
-            return
-        }
-
-        val currentUserId = currentUser.uid
+        val currentUserId = getCurrentUserId() ?: return
         db.collection("users").document(currentUserId).get()
             .addOnSuccessListener { document ->
                 val userData = document.toObject(User::class.java)
@@ -474,6 +536,75 @@ class UserViewModel : ViewModel() {
             }
     }
 
+    fun getFollowers(
+        userId : String,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        Log.d("getFollowers", "Fetching followers for userId: $userId")
+
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val user = document.toObject(User::class.java)
+                    val followersIds = user?.followers ?: emptyList()
+
+                    Log.d("getFollowers", "Followers IDs: $followersIds")
+                    onSuccess(followersIds)
+                } else {
+                    Log.d("getFollowers", "No followers found for userId: $userId")
+                    onSuccess(emptyList())
+                }
+            }
+            .addOnFailureListener {
+                Log.e("getFollowers", "Failed to fetch followers for userId: $userId")
+                onFailure("Failed to fetch followers for userId: $userId")
+            }
+    }
+
+    fun getFollowing(
+        userId : String,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        Log.d("getFollowing", "Fetching following for userId: $userId")
+
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val user = document.toObject(User::class.java)
+                    val followingIds = user?.following ?: emptyList()
+
+                    Log.d("getFollowing", "Following IDs: $followingIds")
+                    onSuccess(followingIds)
+                } else {
+                    Log.d("getFollowing", "No following found for userId: $userId")
+                    onSuccess(emptyList())
+                }
+            }
+            .addOnFailureListener {
+                Log.e("getFollowing", "Failed to fetch following for userId: $userId")
+                onFailure("Failed to fetch following for userId: $userId")
+            }
+    }
+
+    fun getUsersByIds(
+        userIds: List<String>,
+        onSuccess: (List<User?>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val userRef = db.collection("users")
+        val batch = userRef.whereIn("userId", userIds).get()
+
+        batch.addOnSuccessListener { querySnapshot ->
+            val users = querySnapshot.documents.mapNotNull { it.toObject(User::class.java) }
+            onSuccess(users)
+        }
+        batch.addOnFailureListener {
+            onFailure("Failed to fetch user details.")
+        }
+    }
+
     suspend fun getUserByID(userId: String): User? {
         return try {
             val document = db.collection("users").document(userId).get().await() // Use 'await' to make it suspending
@@ -487,23 +618,23 @@ class UserViewModel : ViewModel() {
         }
     }
 
-    fun getUsersByIds(userIds: List<String>, onSuccess: (List<User>) -> Unit, onFailure: (String) -> Unit) {
-        viewModelScope.launch {
-            try {
-                val usersDeferred = userIds.map { userId ->
-                    async {
-                        getUserByID(userId)
-                    }
-                }
-
-                val users = usersDeferred.awaitAll().filterNotNull()
-
-                onSuccess(users)
-            } catch (e: Exception) {
-                onFailure("Error loading users: ${e.message}")
-            }
-        }
-    }
+//    fun getUsersByIds(userIds: List<String>, onSuccess: (List<User>) -> Unit, onFailure: (String) -> Unit) {
+//        viewModelScope.launch {
+//            try {
+//                val usersDeferred = userIds.map { userId ->
+//                    async {
+//                        getUserByID(userId)
+//                    }
+//                }
+//
+//                val users = usersDeferred.awaitAll().filterNotNull()
+//
+//                onSuccess(users)
+//            } catch (e: Exception) {
+//                onFailure("Error loading users: ${e.message}")
+//            }
+//        }
+//    }
 
     fun getAllUsersByNameKeyword(
         keyword: String,
@@ -519,20 +650,21 @@ class UserViewModel : ViewModel() {
         val lowerCaseKeyword = keyword.toLowerCase()
 
         db.collection("users")
-            .orderBy("name")
-            .startAt(lowerCaseKeyword)
-            .endAt(lowerCaseKeyword + "\uf8ff")
             .get()
             .addOnSuccessListener { documents ->
                 if (documents.isEmpty) {
-                    onFailure("No users found for the given keyword.")
+                    onFailure("No users found in the database.")
                 } else {
                     val users = documents.mapNotNull { doc ->
                         val user = doc.toObject(User::class.java)
-                        if (doc.id != currentUserId) user else null // Exclude current user
+                        if (doc.id != currentUserId) user else null
+                    }.filter { user ->
+                        val nameKeywords = user.nameKeywords ?: emptyList()
+                        nameKeywords.any { it == lowerCaseKeyword }
                     }
+
                     if (users.isEmpty()) {
-                        onFailure("No users found for the given keyword, excluding current user.")
+                        onFailure("No users found matching the keyword '$keyword'.")
                     } else {
                         onSuccess(users)
                     }

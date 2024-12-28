@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -37,8 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +51,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter.Companion.tint
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -84,7 +85,6 @@ class SearchActivity: ComponentActivity() {
             val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
             SavoreelTheme(darkTheme = isDarkMode) {
                 val initialQuery = intent.getStringExtra("initialQuery") ?:""
-//                val item = intent.getStringExtra("item") ?:""
                 SearchScreen(
                     initialQuery = initialQuery,
                     searchResult = {
@@ -108,22 +108,47 @@ class SearchActivity: ComponentActivity() {
 @Composable
 fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (String) -> Unit) {
     val userViewModel: UserViewModel = viewModel()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     var searchQuery by remember { mutableStateOf(initialQuery) }
     var selectedTab by remember { mutableIntStateOf(0) }
+    var showSuggestions by remember { mutableStateOf(searchQuery.isEmpty()) }
+    var recentSearches by remember { mutableStateOf<List<String>>(emptyList()) }
     val tabs = listOf("All", "People", "Post")
 
     var persons by remember { mutableStateOf(emptyList<User>()) }
 
-    userViewModel.getAllUsersByNameKeyword(
-        searchQuery,
-        onSuccess = { users ->
-            persons = users
-        },
-        onFailure = { /* Handle error */ }
-    )
+    // Fetch recent search history
+    LaunchedEffect(Unit) {
+        userViewModel.getSearchHistory(
+            onSuccess = { searchHistory ->
+                recentSearches = searchHistory.map { it.keyword.toString() }
+            },
+            onFailure = { error ->
+                Log.e("Search", "Failed to fetch search history: $error")
+            }
+        )
+    }
 
-    var showSuggestions by remember { mutableStateOf(searchQuery.isEmpty()) }
+    // Launch effect when searchQuery changes
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.isNotEmpty()) {
+            userViewModel.getAllUsersByNameKeyword(
+                searchQuery,
+                onSuccess = { users ->
+                    persons = users.filter { user ->
+                        user.name?.contains(searchQuery, ignoreCase = true) == true
+                    }
+                },
+                onFailure = { error ->
+                    Log.e("Search", "Failed to fetch users: $error")
+                }
+            )
+        } else {
+            persons = emptyList()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -144,76 +169,86 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                     .padding(top = 40.dp, bottom = 20.dp),
             ) {
                 BackArrow()
-                TextField(
-                    value = searchQuery,
-                    onValueChange = {
-                        searchQuery = it
-                        showSuggestions = it.isEmpty()
-                    },
+                Box(
                     modifier = Modifier
-                        .height(48.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.secondary,
-                            shape = RoundedCornerShape(15.dp)
-                        )
-                        .padding(horizontal = 10.dp),
-                    label = null, // Remove default label to mimic placeholder
-                    placeholder = {
-                        Text(
-                            text = "Search",
+                        .height(50.dp)
+                        .background(MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(15.dp))
+                        .padding(horizontal = 10.dp)
+                ) {
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = {
+                            searchQuery = it
+                            showSuggestions = searchQuery.isEmpty()
+                        },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxSize(),
+                        textStyle = TextStyle(
                             fontSize = 16.sp,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Medium,
-                            modifier = Modifier.height(40.dp)
-                        )
-                    },
-                    singleLine = true,
-                    textStyle = TextStyle(
-                        fontSize = 16.sp,
-                        fontFamily = nunitoFontFamily,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        lineHeight = 24.sp
-                    ),
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        if (searchQuery.isNotBlank()) {
-                            searchResult()
+                            color = MaterialTheme.colorScheme.onBackground
+                        ),
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = {
+                            if (searchQuery.isNotBlank()) {
+                                userViewModel.updateSearchHistory(searchQuery, onSuccess = {
+                                    searchResult()
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                }, onFailure = { errorMessage ->
+                                    Log.e("Search", "Failed to save search history: $errorMessage")
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                })
+                            }
+                        }),
+                        decorationBox = { innerTextField ->
+                            Box(
+                                contentAlignment = Alignment.CenterStart,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                if (searchQuery.isEmpty()) {
+                                    Text(
+                                        text = "Search",
+                                        fontSize = 16.sp,
+                                        fontFamily = nunitoFontFamily,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                    )
+                                }
+                                innerTextField()
+                            }
                         }
-                    }),
-                    colors = TextFieldDefaults.colors(
-                        unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                        focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                        cursorColor = MaterialTheme.colorScheme.onBackground,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    shape = RoundedCornerShape(40)
-                )
+                    )
+                }
+
             }
 
             // Show suggestions if search query is empty
             if (showSuggestions) {
                 Column (modifier = Modifier.padding(start = 20.dp, top = 10.dp)) {
                     SearchCategory(
-                        title = "Recent search",
-                        items = listOf(
-                            "vietnamese",
-                            "vegetarian",
-                            "korean",
-                            "tiramisu",
-                            "fastfood",
-                            "bunbo",
-                            "buffet",
-                            "seafood"
-                        ),
+                        title = if (recentSearches.size > 0) "Recent search" else "",
+                        items = recentSearches,
+
                         isSuggestion = false,
                         onItemClick = { selectedItem ->
+                            userViewModel.updateSearchHistory(selectedItem, onSuccess = {
+                                searchResult()
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                            }, onFailure = { errorMessage ->
+                                Log.e("Search", "Failed to save search history: $errorMessage")
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                            })
                             showSuggestions = false
                             searchQuery = selectedItem
-                            searchResult()
                         }
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     SearchCategory(
                         title = "Suggestion for you",
@@ -229,9 +264,17 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                         ),
                         isSuggestion = true,
                         onItemClick = { selectedItem ->
+                            userViewModel.updateSearchHistory(selectedItem, onSuccess = {
+                                searchResult()
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                            }, onFailure = { errorMessage ->
+                                Log.e("Search", "Failed to save search history: $errorMessage")
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                            })
                             showSuggestions = false
                             searchQuery = selectedItem
-                            searchResult()
                         }
                     )
                 }
@@ -254,41 +297,52 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                 Spacer(modifier = Modifier.height(16.dp))
 
                 when (tabs[selectedTab]) {
-                    "People" -> LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 20.dp),
-                        content = {
-                            items(persons.size) { i ->
-                                var user = persons[i]
-                                var isFolow by remember { mutableStateOf(false) }
-                                userViewModel.isFollowing(user.userId.toString(),
-                                    onSuccess = { isFollowing ->
-                                        isFolow = isFollowing
-                                    },
-                                    onFailure = { errorMessage ->
-                                        // Handle failure
-                                    }
-                                )
-                                SearchResultItem(
-                                    user = user,
-                                    onFollowClick = { person ->
-                                        userViewModel.toggleFollowStatus(
-                                            userId = user.userId.toString(),
+                    "People" ->
+                        if (persons.isEmpty()) {
+                            // Show a "No results found" message when no users are found
+                            Text(
+                                text = "No results found",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(horizontal = 15.dp, vertical = 5.dp),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 20.dp),
+                                content = {
+                                    items(persons.size) { i ->
+                                        var user = persons[i]
+                                        var isFollow by remember { mutableStateOf(false) }
+                                        userViewModel.isFollowing(user.userId.toString(),
                                             onSuccess = { isFollowing ->
-                                                user = person.copy(following = person.following)
+                                                isFollow = isFollowing
                                             },
                                             onFailure = { errorMessage ->
-                                                // Handle failure
+                                                Log.e("Search Activity", errorMessage)
                                             }
                                         )
-                                    },
-                                    onUserClick = onUserClick
-                                )
-                            }
+                                        SearchResultItem(
+                                            user = user,
+                                            onFollowClick = { person ->
+                                                userViewModel.toggleFollowStatus(
+                                                    userId = user.userId.toString(),
+                                                    onSuccess = { isFollowing ->
+                                                        user = person.copy(following = person.following)
+                                                    },
+                                                    onFailure = { errorMessage ->
+                                                        // Handle failure
+                                                    }
+                                                )
+                                            },
+                                            onUserClick = onUserClick
+                                        )
+                                    }
 
+                                }
+                            )
                         }
-                    )
                     "Post" -> GridImage(
                         posts = postss,
                         onClick = {},
@@ -302,48 +356,57 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                             Text(
                                 text = "People",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onBackground
+                                color = MaterialTheme.colorScheme.onSecondary
                             )
 
-                            persons.take(3).forEachIndexed { i, user ->
-                                var us = user
-                                var isFolow by remember { mutableStateOf(false) }
-                                userViewModel.isFollowing(user.userId.toString(),
-                                    onSuccess = { isFollowing ->
-                                        isFolow = isFollowing
-                                    },
-                                    onFailure = { errorMessage ->
-                                        // Handle failure
-                                    }
+                            if (persons.isEmpty()) {
+                                // Show a "No results found" message when no users are found
+                                Text(
+                                    text = "No results found",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(horizontal = 20.dp),
+                                    color = MaterialTheme.colorScheme.onBackground
                                 )
-                                SearchResultItem(
-                                    user = user,
-                                    onFollowClick = { person ->
-                                        userViewModel.toggleFollowStatus(
-                                            userId = user.userId.toString(),
-                                            onSuccess = { isFollowing ->
-                                                us = person.copy(following = person.following)
-                                            },
-                                            onFailure = { errorMessage ->
-                                                // Handle failure
-                                            }
-                                        )
-                                    },
-                                    onUserClick = onUserClick
-                                )
+                            } else {
+                                persons.take(3).forEachIndexed { i, user ->
+                                    var isFolow by remember { mutableStateOf(false) }
+                                    userViewModel.isFollowing(user.userId.toString(),
+                                        onSuccess = { isFollowing ->
+                                            isFolow = isFollowing
+                                        },
+                                        onFailure = { errorMessage ->
+                                            Log.e("SearchActivity", errorMessage)
+                                        }
+                                    )
+
+                                    SearchResultItem(
+                                        user = user,
+                                        onFollowClick = { person ->
+                                            userViewModel.toggleFollowStatus(
+                                                userId = user.userId.toString(),
+                                                onSuccess = { isFollowing ->
+                                                    var us = person.copy(following = person.following)
+                                                },
+                                                onFailure = { errorMessage ->
+                                                    Log.e("SearchActivity", errorMessage)
+                                                }
+                                            )
+                                        },
+                                        onUserClick = onUserClick
+                                    )
+                                }
+                                if (persons.size > 3) {
+                                    Text(
+                                        text = "See more",
+                                        modifier = Modifier
+                                            .fillMaxWidth().clickable { selectedTab = 1 },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray,
+                                        textDecoration = TextDecoration.Underline,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
-
-
-                            Text(
-                                text = "See more",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { selectedTab = 1 },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray,
-                                textDecoration = TextDecoration.Underline,
-                                textAlign = TextAlign.Center
-                            )
 
                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -352,7 +415,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                 text = "Posts",
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(vertical = 8.dp),
-                                color = MaterialTheme.colorScheme.onBackground
+                                color = MaterialTheme.colorScheme.onSecondary
                             )
                             GridImage(posts = postss.take(9), onClick = {})
                             Text(
@@ -385,7 +448,7 @@ fun SearchResultItem(user: User, onFollowClick: (User) -> Unit, onUserClick: (St
                 isFollowed = isFollowing
             },
             onFailure = { errorMessage ->
-                // Handle failure
+               Log.e("SearchResult", errorMessage)
             }
         )
     }
@@ -413,7 +476,8 @@ fun SearchResultItem(user: User, onFollowClick: (User) -> Unit, onUserClick: (St
         Text(
             text = user.name.toString(),
             modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
         Button(
             onClick = {
@@ -457,7 +521,7 @@ fun SearchCategory(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp),
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onSecondary
         )
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),

@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +69,7 @@ import com.google.firebase.auth.FirebaseAuth
 @Suppress("DEPRECATION")
 class SettingActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,17 +109,29 @@ class SettingActivity : ComponentActivity() {
                         }
                         startActivity(intent)
                     },
-                    onChangeNotificate = {
+                    onChangeNotification = {
                         val intent = Intent(this, NotiSettingActivity::class.java)
                         startActivity(intent)
                     },
                     navigateToTerm = {
                         val intent = Intent(this, TermsActivity::class.java)
                         startActivity(intent)
+                    },
+                    navigateToPolicy = {
+                        val intent = Intent(this, PolicyActivity::class.java)
+                        startActivity(intent)
                     }
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        userViewModel.getUser(
+            onSuccess = { user -> userViewModel.setUser(user) },
+            onFailure = { error -> Log.e("SettingActivity", "Error retrieving user: $error") }
+        )
     }
 }
 
@@ -129,28 +143,27 @@ fun SettingTheme(
     onChangeName: () -> Unit,
     onChangeEmail: () -> Unit,
     onChangePassword: () -> Unit,
-    onChangeNotificate: () -> Unit,
-    navigateToTerm: () -> Unit
+    onChangeNotification: () -> Unit,
+    navigateToTerm: () -> Unit,
+    navigateToPolicy: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
+    val themeViewModel: ThemeViewModel = viewModel()
+    val userViewModel: UserViewModel = viewModel()
+
     var showModal by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var isSignOut by remember { mutableStateOf(false) }
-    val themeViewModel: ThemeViewModel = viewModel()
-    val userViewModel: UserViewModel = viewModel()
-    val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+    var name by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        userViewModel.getUser(onSuccess = { user ->
-            if (user != null) {
-                name = user.name.toString()
-            } else {
-                Log.e("Setting", "User data not found")
-            }
-        }, onFailure = { error ->
-            Log.e("NameTheme", "Error retrieving user: $error")
-        })
+    val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+    val currentUser by userViewModel.user.collectAsState()
+
+    LaunchedEffect(currentUser) {
+        userViewModel.getUser(
+            onSuccess = { currentUser -> name = currentUser?.name.toString() },
+            onFailure = { error -> Log.e("NameTheme", "Error retrieving user: $error") }
+        )
     }
 
     fun deleteAccount() {
@@ -295,7 +308,7 @@ fun SettingTheme(
                         SettingItemWithNavigation(
                             icon = ImageVector.vectorResource(R.drawable.ic_noti),
                             text = "Notifications",
-                            onClick = { onChangeNotificate() }
+                            onClick = { onChangeNotification() }
                         )
                         SettingItemWithNavigation(
                             icon = ImageVector.vectorResource(R.drawable.ic_report),
@@ -313,13 +326,13 @@ fun SettingTheme(
                         )
                         SettingItemWithNavigation(
                             icon = ImageVector.vectorResource(R.drawable.ic_term),
-                            text = "Terms of service",
+                            text = "Terms and conditions",
                             onClick = { navigateToTerm() }
                         )
                         SettingItemWithNavigation(
                             icon = ImageVector.vectorResource(R.drawable.ic_privacy),
-                            text = "Privacy",
-                            onClick = {}
+                            text = "Policy privacy",
+                            onClick = { navigateToPolicy() }
                         )
                     }
 

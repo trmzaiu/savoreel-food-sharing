@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -56,25 +57,27 @@ fun NameScreen(
     onNameSuccess: (String) -> Unit
 ) {
     val userViewModel: UserViewModel = viewModel()
+    val currentUser by userViewModel.user.collectAsState()
     var name by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        if(isChangeName) {
-            userViewModel.getUser(onSuccess = { user ->
-                if (user != null) {
-                    name = user.name ?: ""
-                } else {
-                    Log.e("NameTheme", "User data not found")
+    LaunchedEffect(isChangeName) {
+        if (isChangeName) {
+            userViewModel.getUser(
+                onSuccess = { user ->
+                    name = user?.name ?: ""
+                    userViewModel.setUser(user)
+                },
+                onFailure = { error ->
+                    Log.e("NameScreen", "Error retrieving user: $error")
                 }
-            }, onFailure = { error ->
-                Log.e("NameTheme", "Error retrieving user: $error")
-            })
+            )
         }
     }
 
     fun changeName() {
         userViewModel.updateUserName(name, onSuccess = {
             onNameSuccess(name)
+            userViewModel.setUser(currentUser?.copy(name = name))
         }, onFailure = { error ->
             Log.e("NameTheme", "Error updating name: $error")
         })
