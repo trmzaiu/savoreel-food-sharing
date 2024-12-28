@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,7 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.savoreel.R
-import com.example.savoreel.model.User
+import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.component.CustomInputField
 import com.example.savoreel.ui.component.ErrorDialog
@@ -51,14 +52,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.firestore.FirebaseFirestore
 
 @Suppress("DEPRECATION")
 class SignInActivity : ComponentActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val firebaseAuth = FirebaseAuth.getInstance()
-    private val firebaseFirestore = FirebaseFirestore.getInstance()
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +66,12 @@ class SignInActivity : ComponentActivity() {
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+        userViewModel.setSignInSuccessListener {
+            val intent = Intent(this, TakePhotoActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         setContent {
             SavoreelTheme(darkTheme = false) {
@@ -99,67 +103,17 @@ class SignInActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                try {
-                    val account = task.getResult(ApiException::class.java)
-                    firebaseAuthWithGoogle(account.idToken!!)
-                } catch (e: ApiException) {
-                    Log.w("SignInActivity", "Google sign-in failed", e)
-                }
+                val account = task.getResult(ApiException::class.java)
+                account?.let { userViewModel.signInWithGoogle(it) }
             }
         }
 
     private fun signInWithGoogle() {
-        val signInIntent = googleSignInClient.signInIntent
-        googleSignInLauncher.launch(signInIntent)
-    }
-
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-
-        firebaseAuth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    val user = firebaseAuth.currentUser
-                    if (user != null) {
-                        val userId = user.uid
-                        Log.d("CreateAccount", "User ID retrieved: $userId")
-                        val userDocRef = firebaseFirestore.collection("users").document(userId)
-                        userDocRef.get().addOnSuccessListener { document ->
-                            if (!document.exists()) {
-                                val name = user.displayName
-                                val email = user.email
-                                val avatarUrl = user.photoUrl?.toString()
-
-                                val newUser = User(
-                                    userId = userId,
-                                    name = name,
-                                    email = email,
-                                    avatarUrl = avatarUrl,
-                                    darkModeEnabled = false,
-                                    following = emptyList(),
-                                    followers = emptyList()
-                                )
-
-                                userDocRef.set(newUser)
-                                    .addOnSuccessListener {
-                                        Log.d("CreateAccount", "User data saved to Firestore successfully.")
-                                        startActivity(Intent(this, TakePhotoActivity::class.java))
-                                        finish()
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Log.e("CreateAccount", "Failed to save user data: ${e.localizedMessage}", e)
-                                    }
-                            } else {
-                                Log.d("CreateAccount", "User data already exists in Firestore.")
-                                startActivity(Intent(this, TakePhotoActivity::class.java))
-                                finish()
-                            }
-                        }
-                    }
-                } else {
-                    Log.w("SignInActivity", "Google sign-in failed", task.exception)
-                }
-            }
+        googleSignInClient.signOut().addOnCompleteListener {
+            Log.d("SignInActivity", "Google account signed out. Starting new sign-in flow.")
+            val signInIntent = googleSignInClient.signInIntent
+            googleSignInLauncher.launch(signInIntent)
+        }
     }
 }
 
@@ -169,7 +123,7 @@ fun SignInScreen(
     onForgotPassword: () -> Unit,
     onGoogleSignIn: () -> Unit,
     onFacebookSignIn: () -> Unit,
-    navigateToSignUp: () -> Unit
+    navigateToSignUp: () -> Unit,
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

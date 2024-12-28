@@ -92,6 +92,10 @@
             android:exported="true"
             android:theme="@style/Theme.Savoreel">
         </activity>
+        <activity android:name=".ui.setting.PolicyActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Savoreel">
+        </activity>
 
         <activity android:name=".ui.home.TakePhotoActivity"
             android:exported="true"

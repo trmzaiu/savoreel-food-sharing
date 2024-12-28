@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.async
@@ -25,6 +27,8 @@ class UserViewModel : ViewModel() {
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> get() = _error
+
+    var signInSuccess: (() -> Unit)? = null
 
     // Function to sign in a user
     fun signIn(
@@ -311,6 +315,57 @@ class UserViewModel : ViewModel() {
                 onFailure("Failed to delete user data.")
             }
     }
+
+    // Sign in with Google
+    fun signInWithGoogle(account: GoogleSignInAccount) {
+        val idToken = account.idToken ?: return
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+
+        auth.signInWithCredential(credential).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val user = auth.currentUser
+                if (user != null) {
+                    val userId = user.uid
+                    val userDocRef = db.collection("users").document(userId)
+                    userDocRef.get().addOnSuccessListener { document ->
+                        if (!document.exists()) {
+                            val name = user.displayName
+                            val email = user.email
+                            val avatarUri = user.photoUrl?.toString()
+
+                            val newUser = User(
+                                userId = userId,
+                                name = name,
+                                email = email,
+                                avatarUrl = avatarUri,
+                                darkModeEnabled = false,
+                                following = emptyList(),
+                                followers = emptyList()
+                            )
+
+                            userDocRef.set(newUser)
+                                .addOnSuccessListener {
+                                    Log.d("CreateAccount", "User data saved to Firestore successfully.")
+                                    signInSuccess?.invoke()
+                                }
+                                .addOnFailureListener { e ->
+                                }
+                        } else {
+                            Log.d("CreateAccount", "User data already exists in Firestore.")
+                            signInSuccess?.invoke()
+                        }
+                    }
+                }
+            } else {
+                Log.w("SignInActivity", "Google sign-in failed", task.exception)
+            }
+        }
+    }
+
+    fun setSignInSuccessListener(onSuccess: () -> Unit) {
+        signInSuccess = onSuccess
+    }
+
     private fun createFollowNotification(
         recipientId: String,
         onSuccess: () -> Unit,
@@ -483,33 +538,6 @@ class UserViewModel : ViewModel() {
             }
             .addOnFailureListener { exception ->
                 onFailure("Failed to get users: ${exception.localizedMessage}")
-            }
-    }
-
-    fun getUserAvatarById(
-        userId: String,
-        onSuccess: (String?) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        if (userId.isBlank()) {
-            onFailure("Invalid user ID")
-            return
-        }
-
-        db.collection("users")
-            .document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    // Change from "photoUrl" to "avatarUrl" to match your User data model
-                    val avatarUrl = document.getString("avatarUrl")
-                    onSuccess(avatarUrl)
-                } else {
-                    onFailure("User not found")
-                }
-            }
-            .addOnFailureListener { exception ->
-                onFailure(exception.message ?: "Error fetching user data")
             }
     }
 }

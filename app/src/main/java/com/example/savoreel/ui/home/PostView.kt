@@ -158,11 +158,3 @@ fun PostView(
         )
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    SavoreelTheme() {
-//        PostView(rememberNavController(), UserViewModel(), userId = "7qu2YPf1ncZza45VHZnIiXzuOTy1")
-//    }
-//}
