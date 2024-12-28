@@ -102,6 +102,8 @@ dependencies {
     implementation("com.google.maps.android:maps-compose-utils:4.4.2")
     implementation("com.google.android.libraries.places:places:3.3.0")
 
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
     implementation("androidx.emoji2:emoji2:1.3.0")
     implementation("androidx.emoji2:emoji2-views:1.3.0")
     implementation("androidx.emoji2:emoji2-views-helper:1.3.0")
@@ -118,4 +120,13 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
     implementation("org.jsoup:jsoup:1.14.3")
 
+
+    implementation("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.0")
+
+
+    implementation("androidx.compose.foundation:foundation:1.5.0")
+    implementation("androidx.compose.material:material:1.5.0")
+
+    implementation("androidx.compose.compiler:compiler:1.5.0")
 }

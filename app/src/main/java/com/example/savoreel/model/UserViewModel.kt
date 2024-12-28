@@ -15,7 +15,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
-import java.util.Date
 
 @Suppress("DEPRECATION")
 class UserViewModel : ViewModel() {
@@ -449,10 +448,9 @@ class UserViewModel : ViewModel() {
         val notification = Notification(
             notificationId = db.collection("notifications").document().id,
             recipientId = recipientId,
-            type = "follow",
             senderId = currentUser.uid,
-            date = Date(),
-            description = "started following you"
+            description = "started following you",
+            type = "follow"
         )
 
         db.collection("notifications").document(notification.notificationId)

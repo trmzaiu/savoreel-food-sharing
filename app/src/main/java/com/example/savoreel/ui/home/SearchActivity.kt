@@ -69,7 +69,7 @@ import com.example.savoreel.model.User
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.model.postss
 import com.example.savoreel.ui.component.BackArrow
-import com.example.savoreel.ui.component.ImageFromUrl
+import com.example.savoreel.ui.profile.UserAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
@@ -466,8 +466,8 @@ fun SearchResultItem(user: User, onFollowClick: (User) -> Unit, onUserClick: (St
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ImageFromUrl(
-            url = user.avatarUrl.toString(),
+        UserAvatar(
+            userId = user.userId.toString(),
             modifier = Modifier
                 .size(40.dp)
                 .clip(MaterialTheme.shapes.extraLarge)

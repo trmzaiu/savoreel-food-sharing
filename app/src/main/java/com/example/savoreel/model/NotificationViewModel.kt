@@ -38,7 +38,7 @@ class NotificationViewModel: ViewModel() {
     fun markAsRead(notificationId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         db.collection("notifications")
             .document(notificationId)
-            .update("isRead", true)
+            .update("read", true)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onFailure(it.message ?: "Error marking notification as read") }
     }
@@ -51,12 +51,12 @@ class NotificationViewModel: ViewModel() {
 
         db.collection("notifications")
             .whereEqualTo("recipientId", currentUser.uid)
-            .whereEqualTo("isRead", false)
+            .whereEqualTo("read", false)
             .get()
             .addOnSuccessListener { documents ->
                 val batch = db.batch()
                 documents.forEach { doc ->
-                    batch.update(doc.reference, "isRead", true)
+                    batch.update(doc.reference, "read", true)
                 }
                 batch.commit()
                     .addOnSuccessListener { onSuccess() }

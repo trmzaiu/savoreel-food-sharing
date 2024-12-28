@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -42,8 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,6 +59,7 @@ import com.example.savoreel.ui.onboarding.NameActivity
 import com.example.savoreel.ui.onboarding.OnboardingActivity
 import com.example.savoreel.ui.onboarding.PasswordActivity
 import com.example.savoreel.ui.onboarding.SignInActivity
+import com.example.savoreel.ui.profile.UserAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.google.firebase.auth.FirebaseAuth
@@ -150,18 +148,24 @@ fun SettingTheme(
     val themeViewModel: ThemeViewModel = viewModel()
     val userViewModel: UserViewModel = viewModel()
 
+    var uid by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var imgRes by remember { mutableStateOf("") }
     var showModal by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var isSignOut by remember { mutableStateOf(false) }
-    var name by remember { mutableStateOf("") }
 
     val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
     val currentUser by userViewModel.user.collectAsState()
 
     LaunchedEffect(currentUser) {
         userViewModel.getUser(
-            onSuccess = { currentUser -> name = currentUser?.name.toString() },
+            onSuccess = { currentUser ->
+                name = currentUser?.name.toString()
+                uid = currentUser?.userId.toString()
+                imgRes = currentUser?.avatarUrl.toString()
+                        },
             onFailure = { error -> Log.e("NameTheme", "Error retrieving user: $error") }
         )
     }
@@ -223,14 +227,12 @@ fun SettingTheme(
                             .fillMaxWidth()
                             .align(Alignment.CenterHorizontally)
                     ) {
-                        Image(
-                            painter = painterResource(R.drawable.default_avatar),
-                            contentDescription = "User Avatar",
+                        UserAvatar(
+                            userId = uid,
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .clickable { showModal = true }
                                 .size(150.dp),
-                            contentScale = ContentScale.Crop
                         )
                     }
 
