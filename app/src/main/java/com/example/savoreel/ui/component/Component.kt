@@ -4,10 +4,8 @@ package com.example.savoreel.ui.component
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.BitmapFactory
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -43,8 +41,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -58,12 +54,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.savoreel.R
+import com.example.savoreel.model.PostImage
 import com.example.savoreel.ui.home.NotificationActivity
 import com.example.savoreel.ui.home.SearchActivity
 import com.example.savoreel.ui.profile.ProfileActivity
+import com.example.savoreel.ui.profile.UserAvatar
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import java.io.InputStream
-import java.net.URL
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun CustomInputField(
@@ -290,7 +287,7 @@ fun IconTheme(
 
 @Composable
 fun ImageCustom(
-    painter: Painter,
+    url: String,
     onClick: () -> Unit
 ){
     Box(
@@ -300,11 +297,7 @@ fun ImageCustom(
             .clickable { onClick },
         contentAlignment = Alignment.BottomStart
     ) {
-        Image(
-            painter = painter,
-            contentDescription = null,
-            alignment = Alignment.Center,
-            )
+        PostImage(url = url)
     }
 }
 
@@ -359,11 +352,12 @@ fun CustomSwitch(
 
 @Composable
 fun NavButton(
-    painter: Painter,
+    painter: Painter?,
     onClickAction: () -> Unit,
     modifier: Modifier = Modifier,
     isChecked: Boolean = false
 ) {
+    val currentUser = FirebaseAuth.getInstance().currentUser
     IconButton(
         onClick = {
             onClickAction()
@@ -376,20 +370,23 @@ fun NavButton(
         )
     ) {
         if (isChecked){
-            Image(
-                painter = painter,
-                contentDescription = null,
-                modifier = modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(50)),
-            )
+            if (currentUser != null) {
+                UserAvatar(
+                    userId = currentUser.uid,
+                    modifier = modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(50)),
+                )
+            }
         } else {
-            Icon(
-                painter = painter,
-                contentDescription = null,
-                modifier = modifier.scale(0.8f),
-                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f),
-            )
+            if (painter != null) {
+                Icon(
+                    painter = painter,
+                    contentDescription = null,
+                    modifier = modifier.scale(0.8f),
+                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f),
+                )
+            }
         }
     }
 }
@@ -419,7 +416,7 @@ fun PostTopBar() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             NavButton(
-                painter = painterResource(R.drawable.default_avatar),
+                painter = null,
                 onClickAction = { navigateToProfile() },
                 isChecked = true
             )
@@ -438,32 +435,52 @@ fun PostTopBar() {
     }
 }
 
-@Composable
-fun ImageFromUrl(url: String, modifier: Modifier = Modifier) {
-    val imageBitmap: ImageBitmap? = loadImageBitmapFromUrl(url)
-
-    if (imageBitmap != null) {
-        Image(
-            bitmap = imageBitmap,
-            contentDescription = null,
-            modifier = modifier.fillMaxSize()
-        )
-    } else {
-        // Handle fallback if necessary
-        Image(
-            painter = painterResource(id = R.drawable.default_avatar),
-            contentDescription = null,
-            modifier = modifier.fillMaxSize()
-        )
-    }
-}
-
-fun loadImageBitmapFromUrl(url: String): ImageBitmap? {
-    return try {
-        val inputStream: InputStream = URL(url).openStream()
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        bitmap.asImageBitmap()
-    } catch (e: Exception) {
-        null
-    }
-}
+//
+//@Composable
+//fun UserProfileImage(modifier: Modifier = Modifier) {
+//    val photoUrl = getCurrentUserPhotoUrl() ?: "https://sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png"
+//
+//    val painter = rememberAsyncImagePainter(
+//        model = ImageRequest.Builder(LocalContext.current)
+//            .data(photoUrl)
+//            .crossfade(true) // Hiệu ứng mờ dần
+//            .size(Size.ORIGINAL)
+//            .build()
+//    )
+//
+//    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+//        when (painter.state) {
+//            is AsyncImagePainter.State.Loading -> {
+//                Image(
+//                    painter = painterResource(R.drawable.avatar_loading),
+//                    contentDescription = "Loading",
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentScale = ContentScale.Crop
+//                )
+//            }
+//            is AsyncImagePainter.State.Error -> {
+//                Image(
+//                    painter = painterResource(R.drawable.avatar_error),
+//                    contentDescription = "Error loading image",
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentScale = ContentScale.Crop
+//                )
+//            }
+//            else -> {
+//                AsyncImage(
+//                    model = photoUrl,
+//                    contentDescription = "User Profile Image",
+//                    contentScale = ContentScale.Crop,
+//                    modifier = Modifier.fillMaxSize()
+//                )
+//            }
+//        }
+//    }
+//}
+//
+//fun getCurrentUserPhotoUrl(): String? {
+//    val currentUser = FirebaseAuth.getInstance().currentUser
+//    return currentUser?.photoUrl?.toString()
+//}
+//
+//

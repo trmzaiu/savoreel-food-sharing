@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -41,8 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +58,7 @@ import com.example.savoreel.ui.onboarding.NameActivity
 import com.example.savoreel.ui.onboarding.OnboardingActivity
 import com.example.savoreel.ui.onboarding.PasswordActivity
 import com.example.savoreel.ui.onboarding.SignInActivity
+import com.example.savoreel.ui.profile.UserAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.google.firebase.auth.FirebaseAuth
@@ -132,7 +130,9 @@ fun SettingTheme(
     onChangeNotificate: () -> Unit,
     navigateToTerm: () -> Unit
 ) {
+    var uid by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
+    var imgRes by remember { mutableStateOf("") }
     var showModal by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -144,7 +144,9 @@ fun SettingTheme(
     LaunchedEffect(Unit) {
         userViewModel.getUser(onSuccess = { user ->
             if (user != null) {
+                uid = user.userId.toString()
                 name = user.name.toString()
+                imgRes = user.avatarUrl.toString()
             } else {
                 Log.e("Setting", "User data not found")
             }
@@ -210,14 +212,12 @@ fun SettingTheme(
                             .fillMaxWidth()
                             .align(Alignment.CenterHorizontally)
                     ) {
-                        Image(
-                            painter = painterResource(R.drawable.default_avatar),
-                            contentDescription = "User Avatar",
+                        UserAvatar(
+                            userId = uid,
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .clickable { showModal = true }
                                 .size(150.dp),
-                            contentScale = ContentScale.Crop
                         )
                     }
 

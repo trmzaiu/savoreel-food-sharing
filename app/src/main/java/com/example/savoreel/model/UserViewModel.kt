@@ -13,7 +13,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.util.Date
 
 @Suppress("DEPRECATION")
 class UserViewModel : ViewModel() {
@@ -312,7 +311,7 @@ class UserViewModel : ViewModel() {
                 onFailure("Failed to delete user data.")
             }
     }
-    fun createFollowNotification(
+    private fun createFollowNotification(
         recipientId: String,
         onSuccess: () -> Unit,
         onFailure: (String) -> Unit
@@ -325,10 +324,9 @@ class UserViewModel : ViewModel() {
         val notification = Notification(
             notificationId = db.collection("notifications").document().id,
             recipientId = recipientId,
-            type = "follow",
             senderId = currentUser.uid,
-            date = Date(),
-            description = "started following you"
+            description = "started following you",
+            type = "follow"
         )
 
         db.collection("notifications").document(notification.notificationId)
@@ -485,6 +483,33 @@ class UserViewModel : ViewModel() {
             }
             .addOnFailureListener { exception ->
                 onFailure("Failed to get users: ${exception.localizedMessage}")
+            }
+    }
+
+    fun getUserAvatarById(
+        userId: String,
+        onSuccess: (String?) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        if (userId.isBlank()) {
+            onFailure("Invalid user ID")
+            return
+        }
+
+        db.collection("users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // Change from "photoUrl" to "avatarUrl" to match your User data model
+                    val avatarUrl = document.getString("avatarUrl")
+                    onSuccess(avatarUrl)
+                } else {
+                    onFailure("User not found")
+                }
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception.message ?: "Error fetching user data")
             }
     }
 }

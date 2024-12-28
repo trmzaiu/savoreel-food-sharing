@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -25,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -42,19 +42,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.savoreel.R
 import com.example.savoreel.model.Post
+import com.example.savoreel.model.PostImage
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.model.getMonthName
 import com.example.savoreel.model.posts
 import com.example.savoreel.ui.component.BackArrow
-import com.example.savoreel.ui.component.ImageFromUrl
 import com.example.savoreel.ui.component.NavButton
 import com.example.savoreel.ui.setting.SettingActivity
 import com.example.savoreel.ui.theme.SavoreelTheme
@@ -196,8 +198,8 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                             horizontalAlignment = Alignment.CenterHorizontally
 
                         ) {
-                            ImageFromUrl(
-                                url = imgUrl,
+                            UserAvatar(
+                                userId = uid,
                                 modifier = Modifier
                                     .size(100.dp)
                                     .clip(RoundedCornerShape(50))
@@ -318,9 +320,8 @@ fun CalendarWithImages(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             posts.forEach { post ->
-                Image(
-                    painter = painterResource(id = post.imageRes),
-                    contentDescription = null,
+                PostImage(
+                    url = post.imageRes.toString(),
                     modifier = Modifier
                         .size(60.dp)
                         .aspectRatio(1f)
@@ -330,6 +331,67 @@ fun CalendarWithImages(
                             //chanh à nếu m làm tới đây bạn sẽ thấy tôi đợi bạn
                         }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun UserAvatar(
+    userId: String,
+    modifier: Modifier = Modifier
+) {
+    var avatarUrl by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var name by remember { mutableStateOf<String?>(null) }
+    val userViewModel: UserViewModel = viewModel()
+
+    LaunchedEffect(userId) {
+        if (userId.isBlank()) return@LaunchedEffect
+
+        try {
+            userViewModel.getUserById(
+                userId = userId,
+                onSuccess = { user ->
+                    avatarUrl = user?.avatarUrl.toString()
+                    name = user?.name.toString()
+                    error = null
+                },
+                onFailure = { errorMsg ->
+                    error = errorMsg
+                    avatarUrl = null
+                }
+            )
+        } catch (e: Exception) {
+            error = e.message
+            avatarUrl = null
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        if (avatarUrl != null) {
+            AsyncImage(
+                model = avatarUrl,
+                contentDescription = "User avatar",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.secondary),
+                contentAlignment = Alignment.Center,
+            ) {
+                name?.take(1)?.let {
+                    Text(
+                        text = it.uppercase(),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
         }
     }

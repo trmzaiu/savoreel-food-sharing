@@ -36,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,9 +45,9 @@ import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.model.postss
 import com.example.savoreel.ui.component.ImageCustom
-import com.example.savoreel.ui.component.ImageFromUrl
 import com.example.savoreel.ui.component.PostTopBar
 import com.example.savoreel.ui.profile.FollowActivity
+import com.example.savoreel.ui.profile.UserAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
@@ -77,7 +76,7 @@ fun GridPost(userID: String) {
     var isRowVisible by remember { mutableStateOf(false) }
 
     var name by remember { mutableStateOf("") }
-    var avatarUrl by remember { mutableStateOf("") }
+    var uid by remember { mutableStateOf("") }
     var numberOfFollower by remember { mutableIntStateOf(0) }
     var numberOfFollowing by remember { mutableIntStateOf(0) }
 
@@ -89,7 +88,7 @@ fun GridPost(userID: String) {
             onSuccess = { user ->
                 if (user != null) {
                     name = user.name.toString()
-                    avatarUrl = user.avatarUrl.toString()
+                    uid = user.userId.toString()
                     numberOfFollower = user.followers.size
                     numberOfFollowing = user.following.size
                 } else {
@@ -122,8 +121,8 @@ fun GridPost(userID: String) {
                     val context = LocalContext.current
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        ImageFromUrl(
-                            url = avatarUrl,
+                        UserAvatar(
+                            userId = uid,
                             modifier = Modifier
                                 .size(100.dp)
                                 .clip(RoundedCornerShape(50))
@@ -206,8 +205,10 @@ fun GridImage(posts: List<Post>, onClick: (Post) -> Unit, modifier: Modifier = M
     ) {
         items(posts) { post ->
             ImageCustom(
-                painter = painterResource(post.imageRes),
-                onClick = {}
+                url = post.imageRes,
+                onClick = {
+                    // doi chanh
+                }
             )
         }
     }

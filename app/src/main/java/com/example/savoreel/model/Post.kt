@@ -1,6 +1,19 @@
 package com.example.savoreel.model
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.savoreel.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -11,7 +24,7 @@ data class Post(
     val postId: String,
     val userId: String,
     val title: String,
-    val imageRes: Int,
+    val imageRes: String,
     val datetime: Date,
 )
 
@@ -29,7 +42,7 @@ val postss = List(200) { i ->
         postId = "${i + 1}",
         userId = "${i + 1}",
         title = "Post ${i + 1}",
-        imageRes = R.drawable.food,
+        imageRes = "https://sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png",
         datetime = calendar.time
     )
 }
@@ -56,4 +69,47 @@ fun getMonthName(month: Int): String {
         set(Calendar.MONTH, month - 1)
     }
     return dateFormat.format(calendar.time)
+}
+
+
+@Composable
+fun PostImage(
+    url: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(context)
+            .data(url)
+            .crossfade(true)
+            .build()
+    )
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
+        when (painter.state) {
+            is AsyncImagePainter.State.Loading -> {
+                CircularProgressIndicator()
+            }
+            is AsyncImagePainter.State.Error -> {
+                Image(
+                    painter = painterResource(R.drawable.avatar_error),
+                    contentDescription = "Error loading post",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            else -> {
+                Image(
+                    painter = painter,
+                    contentDescription = "Post image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+        }
+    }
 }
