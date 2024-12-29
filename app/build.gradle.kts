@@ -125,6 +125,17 @@ dependencies {
 
     // LiveData
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.emoji2.emojipicker)
+    implementation(libs.firebase.auth)
+    implementation (libs.accompanist.pager)
+
+    // imgur
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Cloudinary
+    implementation ("com.cloudinary:cloudinary-android:2.3.1")
+    implementation ("com.cloudinary:cloudinary-core:1.33.0")
 
     // Testing
     testImplementation(libs.junit)

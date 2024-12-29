@@ -1,30 +1,20 @@
 [versions]
-accompanistFlowlayout = "0.24.13-rc"
-accompanistNavigationAnimation = "0.30.0"
-agp = "8.6.1"
+accompanistPager = "0.29.0-alpha"
+agp = "8.7.3"
 accompanistCoil = "0.31.0-alpha"
 androidxCameraCore = "1.3.2"
-androidxNavigationCompose = "2.7.1"
 animation = "1.7.6"
-animationVersion = "1.7.5"
-cameraCamera2 = "1.4.1"
 cameraCoreVersion = "1.5.0"
 cameraLifecycleVersion = "1.5.0"
 cameraViewVersion = "1.5.0"
+cloudinaryAndroid = "1.30.0"
 coilCompose = "2.2.2"
-coilComposeVersion = "2.4.0"
-compose = "1.0.0-alpha.1"
-emoji2Version = "1.3.0"
-emoji2Views = "1.5.0"
-facebookLogin = "12.3.0"
-firebaseBom = "33.7.0"
-foundation = "1.7.6"
-googleApiClient = "1.34.0"
+emoji2Emojipicker = "1.5.0"
+googleApiClientAndroid = "2.2.0"
 googleApiServicesDrive = "v3-rev305-1.25.0"
-googleHttpClientAndroid = "1.40.1"
+googleAuthLibraryCredentials = "1.17.0"
 googleHttpClientGson = "1.41.8"
 googleOauthClientJetty = "1.34.0"
-jsoup = "1.14.3"
 kotlin = "1.9.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -35,25 +25,12 @@ activityCompose = "1.9.3"
 composeBom = "2024.04.01"
 appcompat = "1.7.0"
 constraintlayout = "2.2.0"
-mapsCompose = "4.4.2"
-mapsComposeUtils = "4.4.2"
-mapsComposeWidgets = "4.3.2"
-material = "1.7.6"
-material3Version = "1.3.1"
+litr = "1.3.4"
 navigationCompose = "2.8.4"
 cameraView = "1.4.1"
 cameraLifecycle = "1.4.1"
 cameraCore = "1.4.1"
 navigationComposeVersion = "2.6.0"
-okhttp = "4.11.0"
-places = "4.1.0"
-playServicesAuth = "20.3.0"
-playServicesAuthVersion = "21.3.0"
-playServicesDrive = "17.0.0"
-playServicesMaps = "19.0.0"
-runtime = "1.7.6"
-uiTestJunit4 = "1.7.6"
-uiTestManifest = "1.7.6"
 uiText = "1.7.6"
 storage = "1.5.0"
 playServices = "12.0.1"
@@ -62,50 +39,31 @@ firebaseAuthKtx = "23.1.0"
 firebaseFirestoreKtx = "25.1.1"
 runtimeLivedata = "1.7.6"
 emoji2 = "1.5.0"
+supportEmoji = "28.0.0"
 firebaseAuth = "23.1.0"
-uiTextVersion = "1.7.5"
-uiToolingPreview = "1.7.6"
+firebaseDatabaseKtx = "21.0.0"
 
 [libraries]
 accompanist-coil = { module = "com.google.accompanist:accompanist-coil", version.ref = "accompanistCoil" }
-accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
-accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
+accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
+android-cloudinary-android = { module = "com.cloudinary.android:cloudinary-android", version.ref = "cloudinaryAndroid" }
 androidx-animation = { module = "androidx.compose.animation:animation", version.ref = "animation" }
-androidx-animation-v175 = { module = "androidx.compose.animation:animation", version.ref = "animationVersion" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCoreVersion" }
-androidx-camera-camera2-v141 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
 androidx-camera-core-v132 = { module = "androidx.camera:camera-core", version.ref = "androidxCameraCore" }
 androidx-camera-core-v150 = { module = "androidx.camera:camera-core", version.ref = "cameraCoreVersion" }
 androidx-camera-lifecycle-v150 = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraLifecycleVersion" }
 androidx-camera-view-v150 = { module = "androidx.camera:camera-view", version.ref = "cameraViewVersion" }
-androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3Version" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-emoji2-v130 = { module = "androidx.emoji2:emoji2", version.ref = "emoji2Version" }
-androidx-emoji2-views = { module = "androidx.emoji2:emoji2-views", version.ref = "emoji2Views" }
-androidx-emoji2-views-helper = { module = "androidx.emoji2:emoji2-views-helper", version.ref = "emoji2Version" }
-androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
-androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
+androidx-emoji2-emojipicker = { module = "androidx.emoji2:emoji2-emojipicker", version.ref = "emoji2Emojipicker" }
 androidx-navigation-compose-v260 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
-androidx-navigation-compose-v271 = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigationCompose" }
-androidx-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "runtime" }
 androidx-ui-text = { module = "androidx.compose.ui:ui-text", version.ref = "uiText" }
-androidx-ui-text-v175 = { module = "androidx.compose.ui:ui-text", version.ref = "uiTextVersion" }
+cloudinary-android = { module = "com.cloudinary:cloudinary-android", version.ref = "cloudinaryAndroid" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-coil-compose-v240 = { module = "io.coil-kt:coil-compose", version.ref = "coilComposeVersion" }
-compose = { module = "com.github.bumptech.glide:compose", version.ref = "compose" }
-facebook-login = { module = "com.facebook.android:facebook-login", version.ref = "facebookLogin" }
-firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-gms-play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuthVersion" }
-google-api-client = { module = "com.google.api-client:google-api-client", version.ref = "googleApiClient" }
+google-api-client-android = { module = "com.google.api-client:google-api-client-android", version.ref = "googleApiClientAndroid" }
 google-api-services-drive = { module = "com.google.apis:google-api-services-drive", version.ref = "googleApiServicesDrive" }
-google-firebase-auth-ktx = { module = "com.google.firebase:firebase.auth.ktx" }
-google-firebase-firestore-ktx = { module = "com.google.firebase:firebase.firestore.ktx" }
-google-firebase-functions-ktx = { module = "com.google.firebase:firebase-functions.ktx" }
-google-http-client-android = { module = "com.google.http-client:google-http-client-android", version.ref = "googleHttpClientAndroid" }
+google-auth-library-credentials = { module = "com.google.auth:google-auth-library-credentials", version.ref = "googleAuthLibraryCredentials" }
 google-http-client-gson = { module = "com.google.http-client:google-http-client-gson", version.ref = "googleHttpClientGson" }
 google-oauth-client-jetty = { module = "com.google.oauth-client:google-oauth-client-jetty", version.ref = "googleOauthClientJetty" }
-jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -126,25 +84,16 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraLifecycle" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraCore" }
 androidx-storage = { group = "androidx.test.services", name = "storage", version.ref = "storage" }
-maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
-maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "mapsComposeUtils" }
-maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "mapsComposeWidgets" }
-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
-places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
+litr = { module = "com.linkedin.android.litr:litr", version.ref = "litr" }
 play-services = { group = "com.google.android.gms", name = "play-services", version.ref = "playServices" }
 firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "emoji2" }
+support-emoji = { group = "com.android.support", name = "support-emoji", version.ref = "supportEmoji" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
-play-services-auth-v2030 = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
-play-services-drive = { module = "com.google.android.gms:play-services-drive", version.ref = "playServicesDrive" }
-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesAuthVersion" }
-play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
+firebase-database-ktx = { group = "com.google.firebase", name = "firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
