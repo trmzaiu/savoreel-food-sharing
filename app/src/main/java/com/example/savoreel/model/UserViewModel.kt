@@ -14,7 +14,6 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.tasks.await
 
 @Suppress("DEPRECATION")
 class UserViewModel : ViewModel() {
@@ -86,8 +85,7 @@ class UserViewModel : ViewModel() {
     }
 
     // Function to create a new account
-    fun createAccount(email: String, password: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit
-    ) {
+    fun createAccount(email: String, password: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
         Log.d("CreateAccount", "Attempting to create account with email: $email")
 
         auth.fetchSignInMethodsForEmail(email)
@@ -352,33 +350,71 @@ class UserViewModel : ViewModel() {
             onFailure("User not logged in.")
             return
         }
-        val userId = currentUser.uid
-        val db = FirebaseFirestore.getInstance()
-        db.collection("users").document(userId)
-            .delete()
-            .addOnSuccessListener {
-                Log.d("FirebaseAuth", "User data deleted from Firestore.")
 
-                currentUser.delete()
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Log.d(
-                                "FirebaseAuth",
-                                "User account deleted from Firebase Authentication."
-                            )
-                            onSuccess()
-                        } else {
-                            Log.e(
-                                "FirebaseAuth",
-                                "Failed to delete user account: ${task.exception?.message}"
-                            )
-                            onFailure("Failed to delete user account.")
-                        }
+        val userId = currentUser.uid
+
+        // Bước 1: Truy vấn dữ liệu người dùng bị xóa
+        val userRef = db.collection("users").document(userId)
+        userRef.get()
+            .addOnSuccessListener { snapshot ->
+                if (!snapshot.exists()) {
+                    onFailure("User data does not exist.")
+                    return@addOnSuccessListener
+                }
+
+                // Lấy danh sách người dùng đang follow mình
+                val followersList = (snapshot.get("followers") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+                // Lấy danh sách người dùng mình đang follow
+                val followingList = (snapshot.get("following") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+
+                val batch = db.batch()
+
+                // Bước 2: Xóa userId khỏi danh sách `followers` của những người mà mình follow
+                followingList.forEach { followedUserId ->
+                    val followedUserRef = db.collection("users").document(followedUserId)
+                    batch.update(followedUserRef, "followers", FieldValue.arrayRemove(userId))
+                }
+
+                // Bước 3: Xóa userId khỏi danh sách `following` của những người đang follow mình
+                followersList.forEach { followerUserId ->
+                    val followerUserRef = db.collection("users").document(followerUserId)
+                    batch.update(followerUserRef, "following", FieldValue.arrayRemove(userId))
+                }
+
+                // Xóa chính người dùng này khỏi Firestore
+                batch.delete(userRef)
+
+                // Thực thi batch
+                batch.commit()
+                    .addOnSuccessListener {
+                        Log.d("FirebaseAuth", "User data deleted from Firestore and relationships updated.")
+
+                        // Bước 4: Xóa tài khoản người dùng từ Firebase Authentication
+                        currentUser.delete()
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Log.d(
+                                        "FirebaseAuth",
+                                        "User account deleted from Firebase Authentication."
+                                    )
+                                    onSuccess()
+                                } else {
+                                    Log.e(
+                                        "FirebaseAuth",
+                                        "Failed to delete user account: ${task.exception?.message}"
+                                    )
+                                    onFailure("Failed to delete user account.")
+                                }
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FirebaseAuth", "Failed to delete user data: ${e.message}")
+                        onFailure("Failed to delete user data.")
                     }
             }
             .addOnFailureListener { e ->
-                Log.e("FirebaseAuth", "Failed to delete user data: ${e.message}")
-                onFailure("Failed to delete user data.")
+                Log.e("FirebaseAuth", "Failed to retrieve user data: ${e.message}")
+                onFailure("Failed to retrieve user data.")
             }
     }
 
@@ -397,17 +433,18 @@ class UserViewModel : ViewModel() {
                         if (!document.exists()) {
                             val name = user.displayName
                             val email = user.email
-                            val avatarUri = user.photoUrl?.toString()
+                            val avatarUrl = user.photoUrl?.toString()
+                            val nameKeywords = generateNameKeywords(name.toString())
 
                             val newUser = User(
                                 userId = userId,
                                 name = name,
                                 email = email,
-                                avatarUrl = avatarUri,
+                                avatarUrl = avatarUrl,
                                 darkModeEnabled = false,
                                 following = emptyList(),
                                 followers = emptyList(),
-                                nameKeywords = emptyList(),
+                                nameKeywords = nameKeywords,
                                 hashtags = emptyList(),
                                 searchHistory = emptyList()
                             )
@@ -418,6 +455,7 @@ class UserViewModel : ViewModel() {
                                     signInSuccess?.invoke()
                                 }
                                 .addOnFailureListener { e ->
+                                    Log.e("CreateAccount", "Failed to save user data: ${e.message}")
                                 }
                         } else {
                             Log.d("CreateAccount", "User data already exists in Firestore.")
@@ -465,37 +503,39 @@ class UserViewModel : ViewModel() {
         onSuccess: (Boolean) -> Unit,
         onFailure: (String) -> Unit
     ) {
-        val currentUser = auth.currentUser ?: run {
-            onFailure("User not logged in")
-            return
-        }
+        val currentUserId = getCurrentUserId()?: return
 
-        val currentUserId = currentUser.uid
         val currentUserRef = db.collection("users").document(currentUserId)
         val targetUserRef = db.collection("users").document(userId)
-        var currentFollowingList: List<String> = emptyList()
 
         db.runTransaction { transaction ->
             val currentUserSnapshot = transaction.get(currentUserRef)
-            val targetUserSnapshot = transaction.get(targetUserRef)
+            val currentFollowingList = (currentUserSnapshot.get("following") as? List<*>)
+                ?.filterIsInstance<String>()
+                ?: emptyList()
 
-            currentFollowingList = currentUserSnapshot.get("following") as? List<String> ?: emptyList()
-            val isNowFollowing = !currentFollowingList.contains(userId)
+            val shouldFollow = !currentFollowingList.contains(userId)
 
-            if (isNowFollowing) {
+            if (shouldFollow) {
                 transaction.update(currentUserRef, "following", FieldValue.arrayUnion(userId))
                 transaction.update(targetUserRef, "followers", FieldValue.arrayUnion(currentUserId))
             } else {
                 transaction.update(currentUserRef, "following", FieldValue.arrayRemove(userId))
                 transaction.update(targetUserRef, "followers", FieldValue.arrayRemove(currentUserId))
             }
-            isNowFollowing
+            shouldFollow
         }.addOnSuccessListener { isFollowing ->
             if (isFollowing) {
                 createFollowNotification(userId, {}, { error -> Log.e("Notification", error) })
             }
-            val updatedFollowingList = if (isFollowing) currentFollowingList + userId else currentFollowingList - userId
+
+            val updatedFollowingList = if (isFollowing) {
+                _user.value?.following?.plus(userId) ?: listOf(userId)
+            } else {
+                _user.value?.following?.minus(userId) ?: emptyList()
+            }
             _user.value = _user.value?.copy(following = updatedFollowingList)
+
             onSuccess(isFollowing)
         }.addOnFailureListener { exception ->
             onFailure("Failed to toggle follow status: ${exception.localizedMessage}")
@@ -585,54 +625,6 @@ class UserViewModel : ViewModel() {
                 onFailure("Failed to fetch following for userId: $userId")
             }
     }
-
-    fun getUsersByIds(
-        userIds: List<String>,
-        onSuccess: (List<User?>) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        val userRef = db.collection("users")
-        val batch = userRef.whereIn("userId", userIds).get()
-
-        batch.addOnSuccessListener { querySnapshot ->
-            val users = querySnapshot.documents.mapNotNull { it.toObject(User::class.java) }
-            onSuccess(users)
-        }
-        batch.addOnFailureListener {
-            onFailure("Failed to fetch user details.")
-        }
-    }
-
-    suspend fun getUserByID(userId: String): User? {
-        return try {
-            val document = db.collection("users").document(userId).get().await() // Use 'await' to make it suspending
-            if (document.exists()) {
-                document.toObject(User::class.java)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-//    fun getUsersByIds(userIds: List<String>, onSuccess: (List<User>) -> Unit, onFailure: (String) -> Unit) {
-//        viewModelScope.launch {
-//            try {
-//                val usersDeferred = userIds.map { userId ->
-//                    async {
-//                        getUserByID(userId)
-//                    }
-//                }
-//
-//                val users = usersDeferred.awaitAll().filterNotNull()
-//
-//                onSuccess(users)
-//            } catch (e: Exception) {
-//                onFailure("Error loading users: ${e.message}")
-//            }
-//        }
-//    }
 
     fun getAllUsersByNameKeyword(
         keyword: String,

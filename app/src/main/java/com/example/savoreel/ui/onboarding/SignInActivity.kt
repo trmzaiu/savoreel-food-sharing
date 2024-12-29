@@ -68,7 +68,7 @@ class SignInActivity : ComponentActivity() {
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
         userViewModel.setSignInSuccessListener {
-            val intent = Intent(this, TakePhotoActivity::class.java)
+            val intent = Intent(this, SuccessActivity::class.java)
             startActivity(intent)
             finish()
         }

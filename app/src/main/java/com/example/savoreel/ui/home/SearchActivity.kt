@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -34,6 +35,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -118,6 +120,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
     val tabs = listOf("All", "People", "Post")
 
     var persons by remember { mutableStateOf(emptyList<User>()) }
+    var loadingFollowStatus by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
 
     // Fetch recent search history
     LaunchedEffect(Unit) {
@@ -228,27 +231,27 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
             // Show suggestions if search query is empty
             if (showSuggestions) {
                 Column (modifier = Modifier.padding(start = 20.dp, top = 10.dp)) {
-                    SearchCategory(
-                        title = if (recentSearches.size > 0) "Recent search" else "",
-                        items = recentSearches,
-
-                        isSuggestion = false,
-                        onItemClick = { selectedItem ->
-                            userViewModel.updateSearchHistory(selectedItem, onSuccess = {
-                                searchResult()
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                            }, onFailure = { errorMessage ->
-                                Log.e("Search", "Failed to save search history: $errorMessage")
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                            })
-                            showSuggestions = false
-                            searchQuery = selectedItem
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
+                    if (recentSearches.isNotEmpty()) {
+                        SearchCategory(
+                            title = "Recent search",
+                            items = recentSearches,
+                            isSuggestion = false,
+                            onItemClick = { selectedItem ->
+                                userViewModel.updateSearchHistory(selectedItem, onSuccess = {
+                                    searchResult()
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                }, onFailure = { errorMessage ->
+                                    Log.e("Search", "Failed to save search history: $errorMessage")
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                })
+                                showSuggestions = false
+                                searchQuery = selectedItem
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
 
                     SearchCategory(
                         title = "Suggestion for you",
@@ -307,41 +310,58 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                 color = MaterialTheme.colorScheme.onBackground
                             )
                         } else {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 20.dp),
-                                content = {
-                                    items(persons.size) { i ->
-                                        var user = persons[i]
-                                        var isFollow by remember { mutableStateOf(false) }
-                                        userViewModel.isFollowing(user.userId.toString(),
-                                            onSuccess = { isFollowing ->
-                                                isFollow = isFollowing
-                                            },
-                                            onFailure = { errorMessage ->
-                                                Log.e("Search Activity", errorMessage)
-                                            }
-                                        )
-                                        SearchResultItem(
-                                            user = user,
-                                            onFollowClick = { person ->
-                                                userViewModel.toggleFollowStatus(
-                                                    userId = user.userId.toString(),
-                                                    onSuccess = { isFollowing ->
-                                                        user = person.copy(following = person.following)
-                                                    },
-                                                    onFailure = { errorMessage ->
-                                                        // Handle failure
-                                                    }
-                                                )
-                                            },
-                                            onUserClick = onUserClick
-                                        )
+                            LazyColumn(modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 10.dp),
+                            ) {
+                                items(persons) { person ->
+                                    var isFollow by remember { mutableStateOf(false) }
+                                    val isLoading = loadingFollowStatus[person.userId.toString()] ?: false
+
+                                    LaunchedEffect(person.userId) {
+                                        if (!loadingFollowStatus.containsKey(person.userId.toString())) {
+                                            loadingFollowStatus = loadingFollowStatus + (person.userId.toString() to true)
+                                            userViewModel.isFollowing(person.userId.toString(),
+                                                onSuccess = { isFollowing ->
+                                                    isFollow = isFollowing
+                                                    loadingFollowStatus = loadingFollowStatus - person.userId.toString() // Remove loading state
+                                                },
+                                                onFailure = { error ->
+                                                    Log.e("SearchScreen", "Failed to fetch follow status: $error")
+                                                    loadingFollowStatus = loadingFollowStatus - person.userId.toString() // Remove loading state
+                                                }
+                                            )
+                                        }
                                     }
 
+                                    SearchResultItem(
+                                        user = person,
+                                        isFollow = isFollow,
+                                        isLoading = isLoading,
+                                        onFollowClick = {
+                                            userViewModel.toggleFollowStatus(
+                                                userId = person.userId.toString(),
+                                                onSuccess = { isFollowing ->
+                                                    val updatedList = persons.map {
+                                                        if (it.userId == person.userId) {
+                                                            it.copy(following = (if (isFollowing) it.following - person.userId else it.following + person.userId) as List<String>)
+                                                        } else {
+                                                            it
+                                                        }
+                                                    }
+                                                    persons = updatedList // Update the persons list with modified follow status
+                                                    isFollow = isFollowing // Flip the follow status
+                                                    Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
+                                                },
+                                                onFailure = { errorMessage ->
+                                                    Log.e("SearchScreen", "Failed to follow/unfollow: $errorMessage")
+                                                },
+                                            )
+                                        },
+                                        onUserClick
+                                    )
                                 }
-                            )
+                            }
                         }
                     "Post" -> GridImage(
                         posts = postss,
@@ -351,7 +371,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                     "All" -> {
                         Column(modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 20.dp)) {
+                            .padding(horizontal = 10.dp)) {
                             // People section
                             Text(
                                 text = "People",
@@ -368,32 +388,54 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                     color = MaterialTheme.colorScheme.onBackground
                                 )
                             } else {
-                                persons.take(3).forEachIndexed { i, user ->
-                                    var isFolow by remember { mutableStateOf(false) }
-                                    userViewModel.isFollowing(user.userId.toString(),
-                                        onSuccess = { isFollowing ->
-                                            isFolow = isFollowing
-                                        },
-                                        onFailure = { errorMessage ->
-                                            Log.e("SearchActivity", errorMessage)
-                                        }
-                                    )
+                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    items(persons.take(3)) { person ->
+                                        var isFollow by remember { mutableStateOf(false) }
+                                        val isLoading = loadingFollowStatus[person.userId.toString()] ?: false
 
-                                    SearchResultItem(
-                                        user = user,
-                                        onFollowClick = { person ->
-                                            userViewModel.toggleFollowStatus(
-                                                userId = user.userId.toString(),
-                                                onSuccess = { isFollowing ->
-                                                    var us = person.copy(following = person.following)
-                                                },
-                                                onFailure = { errorMessage ->
-                                                    Log.e("SearchActivity", errorMessage)
-                                                }
-                                            )
-                                        },
-                                        onUserClick = onUserClick
-                                    )
+                                        LaunchedEffect(person.userId) {
+                                            if (!loadingFollowStatus.containsKey(person.userId.toString())) {
+                                                loadingFollowStatus = loadingFollowStatus + (person.userId.toString() to true)
+                                                userViewModel.isFollowing(person.userId.toString(),
+                                                    onSuccess = { isFollowing ->
+                                                        isFollow = isFollowing
+                                                        loadingFollowStatus = loadingFollowStatus - person.userId.toString() // Remove loading state
+                                                    },
+                                                    onFailure = { error ->
+                                                        Log.e("SearchScreen", "Failed to fetch follow status: $error")
+                                                        loadingFollowStatus = loadingFollowStatus - person.userId.toString() // Remove loading state
+                                                    }
+                                                )
+                                            }
+                                        }
+
+                                        SearchResultItem(
+                                            user = person,
+                                            isFollow = isFollow,
+                                            isLoading = isLoading,
+                                            onFollowClick = {
+                                                userViewModel.toggleFollowStatus(
+                                                    userId = person.userId.toString(),
+                                                    onSuccess = { isFollowing ->
+                                                        val updatedList = persons.map {
+                                                            if (it.userId == person.userId) {
+                                                                it.copy(following = (if (isFollowing) it.following - person.userId else it.following + person.userId) as List<String>)
+                                                            } else {
+                                                                it
+                                                            }
+                                                        }
+                                                        persons = updatedList // Update the persons list with modified follow status
+                                                        isFollow = isFollowing // Flip the follow status
+                                                        Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
+                                                    },
+                                                    onFailure = { errorMessage ->
+                                                        Log.e("SearchScreen", "Failed to follow/unfollow: $errorMessage")
+                                                    },
+                                                )
+                                            },
+                                            onUserClick
+                                        )
+                                    }
                                 }
                                 if (persons.size > 3) {
                                     Text(
@@ -437,21 +479,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
 }
 
 @Composable
-fun SearchResultItem(user: User, onFollowClick: (User) -> Unit, onUserClick: (String) -> Unit){
-    val userViewModel: UserViewModel = viewModel()
-
-    var isFollowed by remember { mutableStateOf(false) }
-
-    LaunchedEffect(user.userId) {
-        userViewModel.isFollowing(user.userId.toString(),
-            onSuccess = { isFollowing ->
-                isFollowed = isFollowing
-            },
-            onFailure = { errorMessage ->
-               Log.e("SearchResult", errorMessage)
-            }
-        )
-    }
+fun SearchResultItem(user: User, isFollow: Boolean, isLoading: Boolean, onFollowClick: (User) -> Unit, onUserClick: (String) -> Unit){
 
     Row(
         modifier = Modifier
@@ -462,7 +490,7 @@ fun SearchResultItem(user: User, onFollowClick: (User) -> Unit, onUserClick: (St
                 indication = null
             ) {
                 onUserClick(user.userId.toString())
-                Log.d("UserItem", user.userId.toString())
+                Log.d("SearchResultItem", "User clicked: ${user.name}")
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -479,31 +507,27 @@ fun SearchResultItem(user: User, onFollowClick: (User) -> Unit, onUserClick: (St
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
-        Button(
-            onClick = {
-                onFollowClick(user)
-                userViewModel.toggleFollowStatus(
-                    userId = user.userId.toString(),
-                    onSuccess = { isFollowing ->
-                        isFollowed = isFollowing
-                    },
-                    onFailure = { errorMessage ->
-                        // Handle failure
-                    }
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+        } else {
+            Button(
+                onClick = {
+                    onFollowClick(user)
+                    Log.d("SearchResultItem", "Follow button clicked for: ${user.name}")
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = if(isFollow) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary)
+            ) {
+                Image(
+                    imageVector = if (isFollow) Icons.Default.Check else Icons.Default.Add,
+                    contentDescription = null,
+                    colorFilter = tint(if (isFollow) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onPrimary)
                 )
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = if(isFollowed) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary)
-        ) {
-            Image(
-                imageVector = if (isFollowed) Icons.Default.Check else Icons.Default.Add,
-                contentDescription = null,
-                colorFilter = tint(if (isFollowed) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onPrimary)
-            )
-            Spacer(modifier = Modifier.width(5.dp))
-            Text(
-                text = if (isFollowed) "Unfollow" else "Follow",
-                color = if (isFollowed) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onPrimary
-            )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = if (isFollow) "Unfollow" else "Follow",
+                    color = if (isFollow) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
     }
 }
