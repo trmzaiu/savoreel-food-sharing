@@ -6,14 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 
 class PostViewModel : ViewModel() {
-    private val _currentState = mutableStateOf(PhotoState.TakePhoto)
+    private val _currentState = mutableStateOf(PhotoState.None)
     val currentState : State<PhotoState> = _currentState
-
-    private val _isCapturing = mutableStateOf(false)
-    val isCapturing: State<Boolean> = _isCapturing
-
-    private val _isCaptureLocked = mutableStateOf(false)
-    val isCaptureLocked: State<Boolean> = _isCaptureLocked
 
     // Photo states
     private val _photoUri = mutableStateOf<Uri?>(null)
@@ -43,6 +37,19 @@ class PostViewModel : ViewModel() {
     private val _option = mutableStateOf<List<Pair<String, Int>>>(emptyList())
     val option: State<List<Pair<String, Int>>> = _option
 
+    private val _currentSheetContent = mutableStateOf(SheetContent.NONE)
+    val currentSheetContent: State<SheetContent> = _currentSheetContent
+
+    private val _selectedEmoji = mutableStateOf<String?>(null)
+    val selectedEmoji: State<String?> = _selectedEmoji
+
+    fun setcurrentSheetContent(state: SheetContent) {
+        _currentSheetContent.value = state
+    }
+
+    fun setSelectedEmoji(emoji: String?) {
+        _selectedEmoji.value = emoji
+    }
 
     fun navigateToState(state: PhotoState) {
         _currentState.value = state
@@ -67,19 +74,13 @@ class PostViewModel : ViewModel() {
     fun setisFlashEnabled(value: Boolean) {
         _flashEnabled.value = value
     }
-    
-    fun setisCaptureLocked(value: Boolean) {
-        _isCaptureLocked.value = value
-    }
-    
+
     fun resetPhoto() {
         _photoUri.value = null
         _isPhotoTaken.value = false
-        _isCapturing.value = false
         _title.value = ""
         _location.value = ""
         _hashtag.value = ""
-        _isCaptureLocked.value = false
     }
 
     fun startEditingField(field: String) {

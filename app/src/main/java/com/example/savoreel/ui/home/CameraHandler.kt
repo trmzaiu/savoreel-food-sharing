@@ -2,6 +2,7 @@
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.savoreel.ui.component.CustomButton
 import kotlinx.coroutines.CoroutineScope
@@ -89,7 +91,7 @@ fun CameraFrame(
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
             val previewUseCase = Preview.Builder()
-//                .setTargetRotation(preview.display.rotation)
+                .setTargetRotation(preview.display.rotation)
                 .build()
                 .also {
                     it.setSurfaceProvider(preview.surfaceProvider)
@@ -99,7 +101,7 @@ fun CameraFrame(
                 .setFlashMode(
                     if (flashEnabled) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF
                 )
-//                .setTargetRotation(preview.display.rotation)
+                .setTargetRotation(preview.display.rotation)
                 .build()
 
             try {
@@ -131,7 +133,12 @@ fun CameraFrame(
                                     if (isFrontCamera) {
                                         mirrorImage(photoFile)
                                     }
-                                    onCapturePhoto(Uri.fromFile(photoFile))
+                                    val photoUri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.fileprovider",
+                                        photoFile
+                                    )
+                                    onCapturePhoto(photoUri)
                                     adjustScreenBrightness(context, WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE)
                                 }
                             }
@@ -189,7 +196,9 @@ fun RequestCameraPermission(
     onPermissionGranted: () -> Unit,
     onPermissionDenied: () -> Unit
 ) {
+    val context = LocalContext.current
     var hasRequested by remember { mutableStateOf(false) }
+    var isCheckingPermission by remember { mutableStateOf(true) }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -199,38 +208,51 @@ fun RequestCameraPermission(
         } else {
             onPermissionDenied()
         }
+        isCheckingPermission = false
     }
 
     LaunchedEffect(Unit) {
-        if (!hasRequested) {
+        val permissionStatus = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        )
+        if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
+            onPermissionGranted()
+            isCheckingPermission = false
+        } else if (!hasRequested) {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
             hasRequested = true
+        } else {
+            isCheckingPermission = false
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.background),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-
-    ) {
-        Text(
-            text = "Camera permission is required to use this feature.",
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 15.sp,
-            lineHeight = 20.sp,
+    // Show UI only if permission hasn't been granted or is being checked
+    if (!isCheckingPermission && hasRequested) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-        )
-        CustomButton(
-            text = "Grant Permission",
-            enabled = true,
-            onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }
-        )
+                .fillMaxSize()
+                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+
+        ) {
+            Text(
+                text = "Camera permission is required to use this feature.",
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 15.sp,
+                lineHeight = 20.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+            CustomButton(
+                text = "Grant Permission",
+                enabled = true,
+                onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }
+            )
+        }
     }
 }

@@ -20,17 +20,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.savoreel.ui.theme.SavoreelTheme
-import kotlinx.coroutines.launch
+
 
 @Composable
 fun EditOptionsOverlay(
@@ -53,12 +49,6 @@ fun EditOptionsOverlay(
     options: List<Pair<String, Int>>,
     onSelect: (String) -> Unit
 ) {
-//    val options = listOf(
-//        "Hashtag" to R.drawable.ic_hashtag,
-//        "Location" to R.drawable.ic_location,
-//        "Download" to R.drawable.ic_download,
-//        "Share" to R.drawable.ic_share2
-//    )
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.secondary),
@@ -166,7 +156,7 @@ fun EditableField(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onStartEdit() }
-            .padding(8.dp),
+            .padding(5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         ic?.let { painterResource(id = it) }?.let {
@@ -221,144 +211,12 @@ fun sharePhoto(context: Context, photoUri: Uri?) {
         Toast.makeText(context, "No photo to share", Toast.LENGTH_SHORT).show()
     }
 }
-//
-//@Composable
-//fun LocationPickerOverlay(
-//    onLocationSelected: (String) -> Unit,
-//    onDismiss: () -> Unit
-//) {
-//    val context = LocalContext.current
-//    val fusedLocationClient: FusedLocationProviderClient =
-//        remember { LocationServices.getFusedLocationProviderClient(context) }
-//
-//    val cameraPositionState = rememberCameraPositionState()
-//    var currentLocation by remember { mutableStateOf(LatLng(37.7749, -122.4194)) }
-//    var searchText by remember { mutableStateOf(TextFieldValue("")) }
-//    val coroutineScope = rememberCoroutineScope()
-//
-//    // Get Current GPS Location
-//    LaunchedEffect(Unit) {
-//        try {
-//            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-//                location?.let {
-//                    currentLocation = LatLng(it.latitude, it.longitude)
-//                    coroutineScope.launch {
-//                        cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-//                    }
-//                }
-//            }
-//        } catch (e: SecurityException) {
-//            Log.e("LocationPicker", "Location permission not granted: ${e.message}")
-//        }
-//    }
-//
-//    Box(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(Color.Black.copy(alpha = 0.7f))
-//    ) {
-//        GoogleMap(
-//            modifier = Modifier.fillMaxSize(),
-//            cameraPositionState = cameraPositionState,
-//            properties = MapProperties(isMyLocationEnabled = true),
-//            uiSettings = MapUiSettings(myLocationButtonEnabled = true)
-//        ) {
-//            Marker(
-//                state = MarkerState(position = currentLocation),
-//                title = "Selected Location"
-//            )
-//        }
-//
-//        Column(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(16.dp)
-//                .background(Color.White)
-//        ) {
-//            // Search Bar
-//            OutlinedTextField(
-//                value = searchText,
-//                onValueChange = { searchText = it },
-//                label = { Text("Search Location") },
-//                modifier = Modifier.fillMaxWidth()
-//            )
-//            Button(
-//                onClick = {
-//                    coroutineScope.launch {
-//                        val geocoder = Geocoder(context, Locale.getDefault())
-//                        try {
-//                            val results = geocoder.getFromLocationName(searchText.text, 1)
-//                            if (!results.isNullOrEmpty()) {
-//                                val searchedLocation = results.first()
-//                                currentLocation = LatLng(
-//                                    searchedLocation.latitude,
-//                                    searchedLocation.longitude
-//                                )
-//                                cameraPositionState.animate(
-//                                    CameraUpdateFactory.newLatLngZoom(currentLocation, 15f)
-//                                )
-//                            } else {
-//                                Log.e("LocationPicker", "No results found for search")
-//                            }
-//                        } catch (e: Exception) {
-//                            Log.e("LocationPicker", "Error during search: ${e.message}")
-//                        }
-//                    }
-//                },
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Text("Search")
-//            }
-//
-//            Button(
-//                onClick = {
-//                    val address = getAddressFromLatLng(context, currentLocation)
-//                    onLocationSelected(address)
-//                },
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Text("Confirm Location")
-//            }
-//
-//            Button(
-//                onClick = onDismiss,
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Text("Cancel")
-//            }
-//        }
-//    }
-//}
-//
-//fun getAddressFromLatLng(context: Context, latLng: LatLng): String {
-//    return try {
-//        val geocoder = Geocoder(context, Locale.getDefault())
-//        val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
-//        addresses?.firstOrNull()?.getAddressLine(0) ?: "Unknown Location"
-//    } catch (e: Exception) {
-//        Log.e("LocationPicker", "Geocoder Error: ${e.message}")
-//        "Unknown Location"
-//    }
-//}
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun EditPreview() {
-
     SavoreelTheme() {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        val scope = rememberCoroutineScope()
-        ModalBottomSheet(
-            onDismissRequest = { scope.launch { sheetState.hide() } },
-            sheetState = sheetState
-        ) {
-//            EditOptionsOverlay(
-//                onDismiss = { scope.launch { sheetState.hide() } },
-//                onSelect = {}
-//            )
-        }
+
     }
 }
 
