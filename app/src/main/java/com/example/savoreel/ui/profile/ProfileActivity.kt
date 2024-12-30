@@ -47,6 +47,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -175,12 +177,14 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                     ) {
                         if (!isRowVisible) {
                             NavButton(
-                                painter = painterResource(R.drawable.default_avatar),
+                                painter = null,
                                 onClickAction = {
                                     CoroutineScope(Dispatchers.Main).launch {
                                         listState.scrollToItem(0)
                                     }},
-                                isChecked = true
+                                isChecked = true,
+                                url = imgUrl,
+                                name = name
                             )
                             Text(
                                 text = name,
@@ -213,12 +217,12 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                         Column(
                             modifier = Modifier.weight(1f)
                         ) {
-                            UserAvatar(
-                                userId = uid,
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(RoundedCornerShape(50))
-                            )
+                            if (imgUrl.isNotEmpty()) {
+                                UserAvatar(imgUrl, 100.dp)
+                            } else {
+                                UserWithOutAvatar(name, 60.sp, 100.dp)
+                            }
+
                             Text(
                                 text = name,
                                 fontFamily = nunitoFontFamily,
@@ -336,7 +340,7 @@ fun CalendarWithImages(
         ) {
             posts.forEach { post ->
                 PostImage(
-                    url = post.imageRes.toString(),
+                    url = post.imageRes,
                     modifier = Modifier
                         .size(60.dp)
                         .aspectRatio(1f)
@@ -352,62 +356,42 @@ fun CalendarWithImages(
 }
 
 @Composable
-fun UserAvatar(
-    userId: String,
-    modifier: Modifier = Modifier
-) {
-    var avatarUrl by remember { mutableStateOf<String?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var name by remember { mutableStateOf<String?>(null) }
-    val userViewModel: UserViewModel = viewModel()
-
-    LaunchedEffect(userId) {
-        if (userId.isBlank()) return@LaunchedEffect
-
-        try {
-            userViewModel.getUserById(
-                userId = userId,
-                onSuccess = { user ->
-                    avatarUrl = user?.avatarUrl.toString()
-                    name = user?.name.toString()
-                    error = null
-                },
-                onFailure = { errorMsg ->
-                    error = errorMsg
-                    avatarUrl = null
-                }
-            )
-        } catch (e: Exception) {
-            error = e.message
-            avatarUrl = null
-        }
-    }
-
+fun UserAvatar(avatarUrl: String, size: Dp) {
     Box(
-        modifier = modifier
+        modifier = Modifier
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.secondaryContainer)
+            .size(size)
     ) {
-        if (avatarUrl != null) {
-            AsyncImage(
-                model = avatarUrl,
-                contentDescription = "User avatar",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            Box(
-                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.secondary),
-                contentAlignment = Alignment.Center,
-            ) {
-                name?.take(1)?.let {
-                    Text(
-                        text = it.uppercase(),
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
+        val secureUrl = remember(avatarUrl) {
+            avatarUrl.replace("http://", "https://")
         }
+
+        AsyncImage(
+            model = secureUrl,
+            contentDescription = "User avatar",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
     }
 }
+
+@Composable
+fun UserWithOutAvatar(name: String, sizeText: TextUnit, sizeBox: Dp) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .size(sizeBox)
+            .background(MaterialTheme.colorScheme.secondary)
+    ) {
+        Text(
+            text = name.take(1).uppercase(),
+            fontFamily = nunitoFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = sizeText,
+            color = MaterialTheme.colorScheme.onSecondary,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
+}
+

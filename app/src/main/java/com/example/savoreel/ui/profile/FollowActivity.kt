@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -196,14 +195,14 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
                 }
             }
 
-            if (!isDataLoaded) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center).padding(20.dp)
-                    )
-                }
-            } else {
-                if (selectedTab == 0) {
+            if (selectedTab == 0) {
+                if (!isDataLoaded) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center).padding(20.dp)
+                        )
+                    }
+                } else {
                     if (followingList.isNotEmpty()) {
                         LazyColumn(modifier = Modifier.fillMaxSize().padding(10.dp)) {
                             items(followingList) { userId ->
@@ -218,6 +217,14 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
                             fontFamily = nunitoFontFamily,
                             color = MaterialTheme.colorScheme.onBackground,
                             textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            } else {
+                if (!isDataLoaded) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center).padding(20.dp)
                         )
                     }
                 } else {
@@ -271,10 +278,12 @@ fun UserItem(userId: String, onUserClick: (String) -> Unit) {
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        UserAvatar(
-            userId = userId,
-            modifier = Modifier.size(48.dp)
-        )
+        if (avatar.isNotEmpty()) {
+            UserAvatar(avatar, 48.dp)
+        } else {
+            UserWithOutAvatar(name, 24.sp, 48.dp)
+        }
+
         Text(
             text = name,
             fontSize = 20.sp,

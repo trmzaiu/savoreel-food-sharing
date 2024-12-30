@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,7 +38,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +58,7 @@ import com.example.savoreel.ui.onboarding.OnboardingActivity
 import com.example.savoreel.ui.onboarding.PasswordActivity
 import com.example.savoreel.ui.onboarding.SignInActivity
 import com.example.savoreel.ui.profile.UserAvatar
+import com.example.savoreel.ui.profile.UserWithOutAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.google.firebase.auth.FirebaseAuth
@@ -227,13 +226,11 @@ fun SettingTheme(
                             .fillMaxWidth()
                             .align(Alignment.CenterHorizontally)
                     ) {
-                        UserAvatar(
-                            userId = uid,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .clickable { showModal = true }
-                                .size(150.dp),
-                        )
+                        if (imgRes.isNotEmpty()) {
+                            UserAvatar(imgRes, 150.dp)
+                        } else {
+                            UserWithOutAvatar(name, 100.sp, 150.dp)
+                        }
                     }
 
                     if (showModal) {

@@ -72,6 +72,7 @@ import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.model.postss
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.profile.UserAvatar
+import com.example.savoreel.ui.profile.UserWithOutAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
@@ -480,7 +481,6 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
 
 @Composable
 fun SearchResultItem(user: User, isFollow: Boolean, isLoading: Boolean, onFollowClick: (User) -> Unit, onUserClick: (String) -> Unit){
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -494,12 +494,12 @@ fun SearchResultItem(user: User, isFollow: Boolean, isLoading: Boolean, onFollow
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        UserAvatar(
-            userId = user.userId.toString(),
-            modifier = Modifier
-                .size(40.dp)
-                .clip(MaterialTheme.shapes.extraLarge)
-        )
+        if (user.avatarUrl.toString().isNotEmpty()) {
+            UserAvatar(user.avatarUrl.toString(), 40.dp)
+        } else {
+            UserWithOutAvatar(user.name.toString(), 24.sp, 40.dp)
+        }
+
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = user.name.toString(),

@@ -106,9 +106,9 @@ class UserViewModel : ViewModel() {
                                         Log.d("CreateAccount", "User ID retrieved: $userId")
                                         val newUser = User(
                                             userId = userId,
-                                            name = null,
+                                            name = "",
                                             email = email,
-                                            avatarUrl = null,
+                                            avatarUrl = "",
                                             darkModeEnabled = false,
                                             following = emptyList(),
                                             followers = emptyList(),

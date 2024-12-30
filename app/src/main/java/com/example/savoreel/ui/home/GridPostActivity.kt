@@ -16,16 +16,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -34,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,6 +46,7 @@ import com.example.savoreel.ui.component.ImageCustom
 import com.example.savoreel.ui.component.PostTopBar
 import com.example.savoreel.ui.profile.FollowActivity
 import com.example.savoreel.ui.profile.UserAvatar
+import com.example.savoreel.ui.profile.UserWithOutAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
@@ -77,10 +76,31 @@ fun GridPost(userID: String) {
 
     var name by remember { mutableStateOf("") }
     var uid by remember { mutableStateOf("") }
+    var avatarUrl by remember { mutableStateOf("") }
     var numberOfFollower by remember { mutableIntStateOf(0) }
     var numberOfFollowing by remember { mutableIntStateOf(0) }
+    var currentUserName by remember { mutableStateOf("") }
+    var currentUserAvatar by remember { mutableStateOf("") }
 
     isRowVisible = userID != "Everyone"
+
+    val currentUser by userViewModel.user.collectAsState()
+
+    LaunchedEffect(currentUser) {
+        userViewModel.getUser(
+            onSuccess = { currentUser ->
+                if (currentUser != null) {
+                    currentUserName = currentUser.name.toString()
+                    currentUserAvatar = currentUser.avatarUrl.toString()
+                } else {
+                    Log.e("ProfileScreen", "User data not found")
+                }
+            },
+            onFailure = { error ->
+                Log.e("NameTheme", "Error retrieving user: $error")
+            }
+        )
+    }
 
     LaunchedEffect(Unit) {
         userViewModel.getUserById(
@@ -89,6 +109,7 @@ fun GridPost(userID: String) {
                 if (user != null) {
                     name = user.name.toString()
                     uid = user.userId.toString()
+                    avatarUrl = user.avatarUrl.toString()
                     numberOfFollower = user.followers.size
                     numberOfFollowing = user.following.size
                 } else {
@@ -107,7 +128,7 @@ fun GridPost(userID: String) {
             .background(color = MaterialTheme.colorScheme.background)
     ) {
         Column {
-            PostTopBar()
+            PostTopBar(currentUserAvatar, currentUserName)
 
             if (isRowVisible) {
                 Row(
@@ -121,12 +142,11 @@ fun GridPost(userID: String) {
                     val context = LocalContext.current
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        UserAvatar(
-                            userId = uid,
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(RoundedCornerShape(50))
-                        )
+                        if (avatarUrl.isNotEmpty()) {
+                            UserAvatar(avatarUrl, 100.dp)
+                        } else {
+                            UserWithOutAvatar(name, 60.sp, 100.dp)
+                        }
                         Text(
                             text = name,
                             fontFamily = nunitoFontFamily,

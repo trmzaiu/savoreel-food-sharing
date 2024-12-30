@@ -1,7 +1,8 @@
-@file:Suppress("DEPRECATION")
+@file:Suppress("DEPRECATION", "UNUSED_EXPRESSION")
 
 package com.example.savoreel.ui.component
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import androidx.compose.animation.core.animateDpAsState
@@ -59,8 +60,8 @@ import com.example.savoreel.ui.home.NotificationActivity
 import com.example.savoreel.ui.home.SearchActivity
 import com.example.savoreel.ui.profile.ProfileActivity
 import com.example.savoreel.ui.profile.UserAvatar
+import com.example.savoreel.ui.profile.UserWithOutAvatar
 import com.example.savoreel.ui.theme.nunitoFontFamily
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun CustomInputField(
@@ -302,6 +303,7 @@ fun ImageCustom(
 }
 
 
+@SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 fun CustomSwitch(
     checked: Boolean,
@@ -355,9 +357,10 @@ fun NavButton(
     painter: Painter?,
     onClickAction: () -> Unit,
     modifier: Modifier = Modifier,
-    isChecked: Boolean = false
+    isChecked: Boolean = false,
+    url: String = "",
+    name: String = ""
 ) {
-    val currentUser = FirebaseAuth.getInstance().currentUser
     IconButton(
         onClick = {
             onClickAction()
@@ -370,21 +373,18 @@ fun NavButton(
         )
     ) {
         if (isChecked){
-            if (currentUser != null) {
-                UserAvatar(
-                    userId = currentUser.uid,
-                    modifier = modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(50)),
-                )
+            if (url.isNotEmpty()) {
+                UserAvatar(url, 32.dp)
+            } else {
+                UserWithOutAvatar(name, 20.sp, 32.dp)
             }
         } else {
             if (painter != null) {
                 Icon(
                     painter = painter,
                     contentDescription = null,
-                    modifier = modifier.scale(0.8f),
-                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 1f),
+                    modifier = modifier.scale(0.7f),
+                    tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
         }
@@ -392,7 +392,7 @@ fun NavButton(
 }
 
 @Composable
-fun PostTopBar() {
+fun PostTopBar(url: String, name: String) {
     val context = LocalContext.current
     val navigateToProfile = {
         val intent = Intent(context, ProfileActivity::class.java)
@@ -418,7 +418,9 @@ fun PostTopBar() {
             NavButton(
                 painter = null,
                 onClickAction = { navigateToProfile() },
-                isChecked = true
+                isChecked = true,
+                url = url,
+                name = name
             )
         }
         Row {
@@ -435,52 +437,3 @@ fun PostTopBar() {
     }
 }
 
-//
-//@Composable
-//fun UserProfileImage(modifier: Modifier = Modifier) {
-//    val photoUrl = getCurrentUserPhotoUrl() ?: "https://sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png"
-//
-//    val painter = rememberAsyncImagePainter(
-//        model = ImageRequest.Builder(LocalContext.current)
-//            .data(photoUrl)
-//            .crossfade(true) // Hiệu ứng mờ dần
-//            .size(Size.ORIGINAL)
-//            .build()
-//    )
-//
-//    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-//        when (painter.state) {
-//            is AsyncImagePainter.State.Loading -> {
-//                Image(
-//                    painter = painterResource(R.drawable.avatar_loading),
-//                    contentDescription = "Loading",
-//                    modifier = Modifier.fillMaxSize(),
-//                    contentScale = ContentScale.Crop
-//                )
-//            }
-//            is AsyncImagePainter.State.Error -> {
-//                Image(
-//                    painter = painterResource(R.drawable.avatar_error),
-//                    contentDescription = "Error loading image",
-//                    modifier = Modifier.fillMaxSize(),
-//                    contentScale = ContentScale.Crop
-//                )
-//            }
-//            else -> {
-//                AsyncImage(
-//                    model = photoUrl,
-//                    contentDescription = "User Profile Image",
-//                    contentScale = ContentScale.Crop,
-//                    modifier = Modifier.fillMaxSize()
-//                )
-//            }
-//        }
-//    }
-//}
-//
-//fun getCurrentUserPhotoUrl(): String? {
-//    val currentUser = FirebaseAuth.getInstance().currentUser
-//    return currentUser?.photoUrl?.toString()
-//}
-//
-//

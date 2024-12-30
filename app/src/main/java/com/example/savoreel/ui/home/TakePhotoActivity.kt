@@ -93,6 +93,7 @@ fun HomeScreen() {
     val currentState by postViewModel.currentState
 
     var name by remember { mutableStateOf("") }
+    var url by remember { mutableStateOf("") }
 
     val photoUri by postViewModel.photoUri
     val editingField by postViewModel.editingField
@@ -130,6 +131,7 @@ fun HomeScreen() {
             onSuccess = { currentUser ->
                 if (currentUser != null) {
                     name = currentUser.name.toString()
+                    url = currentUser.avatarUrl.toString()
                 } else {
                     Log.e("TakePhotoActivity", "User data not found")
                 }
@@ -147,7 +149,7 @@ fun HomeScreen() {
                 onPermissionDenied = { permissionGranted.value = true }
             )
         } else {
-            PostTopBar()
+            PostTopBar(url, name)
             Column(modifier = Modifier.padding(5.dp, 130.dp, 5.dp, 15.dp)) {
                 if (currentState != PhotoState.PhotoTaken) {
                     VerticalPager(
