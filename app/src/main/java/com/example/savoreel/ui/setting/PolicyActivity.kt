@@ -172,9 +172,9 @@ private suspend fun fetchPolicyContent(policyContent: MutableState<String>, isLo
             val response = client.newCall(request).execute()
             if (response.isSuccessful) {
                 val html = response.body?.string()
-                val document = Jsoup.parse(html)
+                val document = html?.let { Jsoup.parse(it) }
 
-                val content = document.body()?.html() ?: ""
+                val content = document?.body()?.html() ?: ""
 
                 withContext(Dispatchers.Main) {
                     policyContent.value = content

@@ -56,11 +56,13 @@ class PostModel : ViewModel() {
             return
         }
 
+        val hashtagsList = hashtag?.split(" ")?.map { it.trim() }?.filter { it.startsWith("#") } ?: emptyList()
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Upload to Cloudinary
-                val imageUrl = suspendCoroutine<String> { continuation ->
-                    val requestId = MediaManager.get()
+                val imageUrl = suspendCoroutine { continuation ->
+                    MediaManager.get()
                         .upload(photoData)
                         .option("folder", "app_uploads")
                         .callback(object : UploadCallback {
@@ -97,7 +99,7 @@ class PostModel : ViewModel() {
                         userId = userId,
                         name = name,
                         title = title.toString(),
-                        hashtag = hashtag.toString(),
+                        hashtag = hashtagsList,
                         location = location.toString(),
                         photoUri = imageUrl,
                         date = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date()),
@@ -241,6 +243,45 @@ class PostModel : ViewModel() {
                 onFailure(errorMessage)
             }
     }
+
+    fun searchPostByHashtag(hashtag: String, onSuccess: (List<Post>) -> Unit, onFailure: (String) -> Unit) {
+        db.collection("posts")
+            .whereArrayContains("hashtag", hashtag)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val posts = mutableListOf<Post>()
+                for (document in querySnapshot) {
+                    val post = document.toObject(Post::class.java)
+                    posts.add(post)
+                }
+                onSuccess(posts)
+            }
+            .addOnFailureListener { e ->
+                Log.e("SearchPost", "Error getting posts", e)
+                onFailure("Failed to retrieve posts: ${e.message}")
+            }
+    }
+
+    fun searchPostByTitle(title: String, onSuccess: (List<Post>) -> Unit, onFailure: (String) -> Unit) {
+        val titleQuery = db.collection("posts")
+            .whereGreaterThanOrEqualTo("title", title)
+
+        titleQuery.get()
+            .addOnSuccessListener { result ->
+                val posts = mutableListOf<Post>()
+                for (document in result) {
+                    val post = document.toObject(Post::class.java)
+                    posts.add(post)
+                }
+                onSuccess(posts)
+            }
+            .addOnFailureListener { e ->
+                Log.e("SearchPost", "Error searching posts by title", e)
+                onFailure("Failed to retrieve posts: ${e.message}")
+            }
+    }
+
+
 
 }
 

@@ -171,9 +171,9 @@ private suspend fun fetchTermsContent(termsContent: MutableState<String>, isLoad
             val response = client.newCall(request).execute()
             if (response.isSuccessful) {
                 val html = response.body?.string()
-                val document = Jsoup.parse(html)
+                val document = html?.let { Jsoup.parse(it) }
 
-                val content = document.body()?.html() ?: ""
+                val content = document?.body()?.html() ?: ""
 
                 withContext(Dispatchers.Main) {
                     termsContent.value = content

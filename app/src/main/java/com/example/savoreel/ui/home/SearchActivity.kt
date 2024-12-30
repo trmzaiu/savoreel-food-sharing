@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package com.example.savoreel.ui.home
 
 import android.content.Intent
@@ -112,6 +114,7 @@ class SearchActivity: ComponentActivity() {
 @Composable
 fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (String) -> Unit) {
     val userViewModel: UserViewModel = viewModel()
+    val postModel: PostModel = viewModel()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
@@ -122,10 +125,10 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
     val tabs = listOf("All", "People", "Post")
 
     var persons by remember { mutableStateOf(emptyList<User>()) }
+    var postsWithHashtag by remember { mutableStateOf(emptyList<Post>()) }
+    var postsWithTitle by remember { mutableStateOf(emptyList<Post>()) }
     var loadingFollowStatus by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
 
-    val postModel = PostModel()
-    var lisOfPost by remember { mutableStateOf(emptyList<Post>()) }
     // Fetch recent search history
     LaunchedEffect(Unit) {
         userViewModel.getSearchHistory(
@@ -138,7 +141,6 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
         )
     }
 
-    // Launch effect when searchQuery changes
     LaunchedEffect(searchQuery) {
         if (searchQuery.isNotEmpty()) {
             userViewModel.getAllUsersByNameKeyword(
@@ -152,19 +154,47 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                     Log.e("Search", "Failed to fetch users: $error")
                 }
             )
+
+            postModel.searchPostByHashtag(
+                searchQuery,
+                onSuccess = { posts ->
+                    val filteredPosts = posts.filter { post ->
+                        post.hashtag?.any { hashtag -> hashtag == searchQuery } == true
+                    }
+                    postsWithHashtag = filteredPosts
+                    Log.d("Search", "Posts with hashtag: ${filteredPosts.size}")
+                },
+                onFailure = { error ->
+                    Log.e("Search", "Failed to fetch posts by hashtag: $error")
+                }
+            )
+
+            postModel.searchPostByTitle(
+                searchQuery,
+                onSuccess = { posts ->
+                    postsWithTitle = posts.filter { post ->
+                        post.title?.contains(searchQuery, ignoreCase = true) == true
+                    }
+                    Log.d("Search", "Posts with title: ${postsWithTitle.size}")
+                },
+                onFailure = { error ->
+                    Log.e("Search", "Failed to fetch posts by title: $error")
+                }
+            )
         } else {
             persons = emptyList()
+            postsWithHashtag = emptyList()
+            postsWithTitle = emptyList()
         }
     }
 
-    LaunchedEffect(Unit) {
-        postModel.getPostsFromCurrentUser(
-            onSuccess = { posts ->
-                lisOfPost = posts
-            },
-            onFailure = {  }
-        )
-        Log.e("ProfileActivity", "$lisOfPost")
+    // Gộp bài viết từ hashtag và tiêu đề
+    val posts = remember(postsWithHashtag, postsWithTitle) {
+        (postsWithHashtag + postsWithTitle).distinctBy { it.postId }
+    }
+
+    LaunchedEffect(posts) {
+        Log.d("Search", "Total combined posts: ${posts.size}")
     }
 
     Box(
@@ -379,7 +409,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                         }
 
                     "Post" -> GridImage(
-                        posts = lisOfPost,
+                        posts = posts,
                         onClick = {},
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
@@ -474,7 +504,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                 modifier = Modifier.padding(vertical = 8.dp),
                                 color = MaterialTheme.colorScheme.onSecondary
                             )
-                            GridImage(posts = lisOfPost.take(9), onClick = {})
+                            GridImage(posts = posts.take(9), onClick = {})
                             Text(
                                 text = "See more",
                                 modifier = Modifier

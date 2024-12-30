@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.savoreel.ui.onboarding
 
 import android.app.Activity
@@ -53,7 +55,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 
-@Suppress("DEPRECATION")
 class SignInActivity : ComponentActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
     private val userViewModel: UserViewModel by viewModels()

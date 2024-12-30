@@ -6,14 +6,22 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.suspendCoroutine
 
 @Suppress("DEPRECATION")
 class UserViewModel : ViewModel() {
@@ -314,7 +322,7 @@ class UserViewModel : ViewModel() {
     }
 
     // Function to update the user's avatar
-    fun updateUserAvatar(avatarUrl: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+    fun removeUserAvatar(avatarUrl: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         val userId = getCurrentUserId()?: return
         db.collection("users").document(userId)
             .update("avatar", avatarUrl)
@@ -325,6 +333,74 @@ class UserViewModel : ViewModel() {
             .addOnFailureListener {
                 onFailure(it.localizedMessage ?: "Error updating avatar.")
             }
+    }
+
+    fun uploadUserAvatar(
+        photoData: ByteArray,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val userId = getCurrentUserId()?: return
+
+        if (photoData.isEmpty()) {
+            onFailure("Photo data is required.")
+            return
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Upload to Cloudinary
+                val avatarUrl = suspendCoroutine { continuation ->
+                    MediaManager.get()
+                        .upload(photoData)
+                        .option("folder", "user_avatars")
+                        .callback(object : UploadCallback {
+                            override fun onStart(requestId: String) {
+                                Log.d("Cloudinary", "Avatar upload started")
+                            }
+
+                            override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {
+                                val progress = (bytes * 100) / totalBytes
+                                Log.d("Cloudinary", "Avatar upload progress: $progress%")
+                            }
+
+                            override fun onSuccess(requestId: String, resultData: Map<*, *>) {
+                                val imageUrl = resultData["url"] as String
+                                continuation.resumeWith(Result.success(imageUrl))
+                            }
+
+                            override fun onError(requestId: String, error: ErrorInfo) {
+                                continuation.resumeWith(Result.failure(Exception(error.description)))
+                            }
+
+                            override fun onReschedule(requestId: String, error: ErrorInfo) {
+                                Log.d("Cloudinary", "Avatar upload rescheduled")
+                            }
+                        })
+                        .dispatch()
+                }
+
+                withContext(Dispatchers.Main) {
+                    // Update user avatar URL in Firestore
+                    db.collection("users").document(userId)
+                        .update("avatarUrl", avatarUrl)
+                        .addOnSuccessListener {
+                            Log.d("UploadAvatar", "Avatar uploaded successfully")
+                            _user.value = _user.value?.copy(avatarUrl = avatarUrl)
+                            onSuccess()
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("UploadAvatar", "Error saving avatar", e)
+                            onFailure("Failed to save avatar: ${e.message}")
+                        }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.e("UploadAvatar", "Error uploading avatar", e)
+                    onFailure("Failed to upload avatar: ${e.message}")
+                }
+            }
+        }
     }
 
     // Function to send email to reset password
@@ -649,7 +725,7 @@ class UserViewModel : ViewModel() {
                         val user = doc.toObject(User::class.java)
                         if (doc.id != currentUserId) user else null
                     }.filter { user ->
-                        val nameKeywords = user.nameKeywords ?: emptyList()
+                        val nameKeywords = user.nameKeywords
                         nameKeywords.any { it == lowerCaseKeyword }
                     }
 

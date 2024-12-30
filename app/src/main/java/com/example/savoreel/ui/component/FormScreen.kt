@@ -16,63 +16,6 @@ import androidx.navigation.NavController
 
 @Composable
 fun CommonForm(
-    navController: NavController,
-    title: String,
-    placeholder: String,
-    buttonText: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    isPasswordField: Boolean = false,
-    isButtonEnabled: Boolean = true,
-    onClickButton: () -> Unit,
-    additionalContent: @Composable (() -> Unit)? = null
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        BackArrow(
-            modifier = Modifier.align(Alignment.TopStart).padding(start = 20.dp, top = 40.dp)
-        )
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(20.dp)
-        ) {
-            CustomTitle(
-                text = title
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Input Field
-            CustomInputField(
-                value = value,
-                onValueChange = onValueChange,
-                placeholder = placeholder,
-                isPasswordField = isPasswordField
-            )
-
-            Spacer(modifier = Modifier.height(159.dp))
-
-            // Continue Button
-            CustomButton(
-                text = buttonText,
-                enabled = isButtonEnabled,
-                onClick = onClickButton
-            )
-
-            Spacer(modifier = Modifier.height(78.dp))
-        }
-    }
-
-    additionalContent?.invoke()
-}
-
-@Composable
-fun CommonForm(
     title: String,
     placeholder: String,
     buttonText: String,

@@ -129,7 +129,7 @@ fun CustomButton(
             .width(360.dp)
             .height(50.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
+            containerColor = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
         )
     ) {
         Text(

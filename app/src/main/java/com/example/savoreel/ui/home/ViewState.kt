@@ -438,10 +438,12 @@ fun ViewPostScreen(
                                 isTitle = true,
                             )
                         }
-                        if (post.hashtag.isNotEmpty()) {
+                        if (post.hashtag?.isNotEmpty() == true) {
+                            val hashtagsList: List<String> = post.hashtag
+                            val hashtags = hashtagsList.joinToString(" ")
                             EditableField(
                                 label = "Add Hashtag",
-                                value = post.hashtag,
+                                value = hashtags,
                                 onStartEdit = {},
                                 ic = R.drawable.ic_hashtag
                             )

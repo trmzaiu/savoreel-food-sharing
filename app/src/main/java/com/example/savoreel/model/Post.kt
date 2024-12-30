@@ -5,7 +5,7 @@ data class Post(
     val userId: String = "",
     val name: String = "",
     val title: String = "",
-    val hashtag: String = "",
+    val hashtag: List<String>? = emptyList(),
     val location: String = "",
     val date: String = "",
     val photoUri: String = "",

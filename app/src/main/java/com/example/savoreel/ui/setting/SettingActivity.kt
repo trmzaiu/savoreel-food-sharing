@@ -1,13 +1,20 @@
 package com.example.savoreel.ui.setting
 
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,11 +24,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,13 +50,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.savoreel.R
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
@@ -62,6 +85,7 @@ import com.example.savoreel.ui.profile.UserWithOutAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.math.roundToInt
 
 @Suppress("DEPRECATION")
 class SettingActivity : ComponentActivity() {
@@ -157,6 +181,8 @@ fun SettingTheme(
     var show by remember { mutableStateOf("") }
     val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
     val currentUser by userViewModel.user.collectAsState()
+    var isLoading by remember { mutableStateOf(true) }
+
 
     LaunchedEffect(currentUser) {
         userViewModel.getUser(
@@ -164,8 +190,12 @@ fun SettingTheme(
                 name = currentUser?.name.toString()
                 uid = currentUser?.userId.toString()
                 imgRes = currentUser?.avatarUrl.toString()
-                        },
-            onFailure = { error -> Log.e("NameTheme", "Error retrieving user: $error") }
+                isLoading = false
+            },
+            onFailure = { error ->
+                Log.e("NameTheme", "Error retrieving user: $error")
+                isLoading = false
+            }
         )
     }
 
@@ -191,176 +221,185 @@ fun SettingTheme(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = MaterialTheme.colorScheme.background)
-            ) {
-                BackArrow(
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            Column(modifier = Modifier.fillMaxWidth()){
+                Box(
                     modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(start = 20.dp, top = 40.dp)
-                )
-
-                Text(
-                    text = "Setting",
-                    fontFamily = nunitoFontFamily,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 32.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(top = 40.dp, bottom = 10.dp)
-                )
-            }
-
-            LazyColumn(
-                modifier = Modifier.padding(horizontal = 35.dp)
-            ) {
-                item {
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    Box(
-                        contentAlignment = Alignment.Center,
+                        .fillMaxWidth()
+                        .background(color = MaterialTheme.colorScheme.background)
+                ) {
+                    BackArrow(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally)
-                    ) {
-                        if (imgRes.isNotEmpty()) {
-                            UserAvatar(imgRes, 150.dp)
-                        } else {
-                            UserWithOutAvatar(name, 100.sp, 150.dp)
-                        }
-                    }
-
-                    if (showModal) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.scrim)
-                        ) {
-                            ModalBottomSheet(
-                                onDismissRequest = { showModal = false },
-                                sheetState = rememberModalBottomSheetState(
-                                    skipPartiallyExpanded = true
-                                ),
-                                containerColor = MaterialTheme.colorScheme.secondary.copy(0.95f),
-                            ) {
-                                SheetContent(
-                                    onOptionClick = { option ->
-                                        showModal = false
-                                        show = option
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(15.dp))
-
-                    Text(
-                        text = name,
-                        fontFamily = nunitoFontFamily,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.fillMaxWidth()
+                            .align(Alignment.TopStart)
+                            .padding(start = 20.dp, top = 40.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(
+                        text = "Setting",
+                        fontFamily = nunitoFontFamily,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 32.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(top = 40.dp, bottom = 10.dp)
+                    )
+                }
 
-                    SettingsSection(title = "General", imageVector = ImageVector.vectorResource(R.drawable.ic_general)) {
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_name),
-                            text = "Edit name",
-                            onClick = { onChangeName() }
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_mail),
-                            text = "Change email",
-                            onClick = { onChangeEmail() }
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_key),
-                            text = "Change password",
-                            onClick = { onChangePassword() }
-                        )
-                    }
+                LazyColumn(
+                    modifier = Modifier.padding(horizontal = 35.dp)
+                ) {
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                    // Support Section
-                    SettingsSection(title = "Support", imageVector = ImageVector.vectorResource(R.drawable.ic_support)) {
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_darkmode),
-                            text = "Dark mode",
-                            changeMode = true,
-                            isChecked = isDarkModeEnabled,
-                            onCheckedChange = { themeViewModel.toggleDarkMode() }
-                        )
-
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_language),
-                            text = "Language",
-                            onClick = {}
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_noti),
-                            text = "Notifications",
-                            onClick = { onChangeNotification() }
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_report),
-                            text = "Report a problem",
-                            onClick = {}
-                        )
-                    }
-
-                    // About Section
-                    SettingsSection(title = "About", imageVector = ImageVector.vectorResource(R.drawable.ic_about)) {
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_share),
-                            text = "Share account",
-                            onClick = {}
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_term),
-                            text = "Terms and conditions",
-                            onClick = { navigateToTerm() }
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_privacy),
-                            text = "Policy privacy",
-                            onClick = { navigateToPolicy() }
-                        )
-                    }
-
-                    SettingsSection(title = "Danger Zone", imageVector = ImageVector.vectorResource(R.drawable.ic_danger)) {
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_delete),
-                            text = "Delete account",
-                            onClick = {
-                                errorMessage = "Are you want to delete your account? This action cannot be undone."
-                                showErrorDialog = true
-                                isSignOut = false
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) { showModal = true }
+                        ) {
+                            if (imgRes.isNotEmpty()) {
+                                UserAvatar(imgRes, 150.dp)
+                            } else {
+                                UserWithOutAvatar(name, 100.sp, 150.dp)
                             }
-                        )
-                        SettingItemWithNavigation(
-                            icon = ImageVector.vectorResource(R.drawable.ic_logout),
-                            text = "Sign out",
-                            onClick = {
-                                errorMessage = "Are you sure you want to sign out?"
-                                showErrorDialog = true
-                                isSignOut = true
+                        }
+
+                        if (showModal) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.scrim)
+                            ) {
+                                ModalBottomSheet(
+                                    onDismissRequest = { showModal = false },
+                                    sheetState = rememberModalBottomSheetState(
+                                        skipPartiallyExpanded = true
+                                    ),
+                                    containerColor = MaterialTheme.colorScheme.secondary.copy(0.95f),
+                                ) {
+                                    SheetContent(
+                                        onOptionClick = { option ->
+                                            showModal = false
+                                            show = option
+                                        }
+                                    )
+                                }
                             }
+                        }
+
+                        Spacer(modifier = Modifier.height(15.dp))
+
+                        Text(
+                            text = name,
+                            fontFamily = nunitoFontFamily,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.fillMaxWidth()
                         )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        SettingsSection(title = "General", imageVector = ImageVector.vectorResource(R.drawable.ic_general)) {
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_name),
+                                text = "Edit name",
+                                onClick = { onChangeName() }
+                            )
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_mail),
+                                text = "Change email",
+                                onClick = { onChangeEmail() }
+                            )
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_key),
+                                text = "Change password",
+                                onClick = { onChangePassword() }
+                            )
+                        }
+
+                        // Support Section
+                        SettingsSection(title = "Support", imageVector = ImageVector.vectorResource(R.drawable.ic_support)) {
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_darkmode),
+                                text = "Dark mode",
+                                changeMode = true,
+                                isChecked = isDarkModeEnabled,
+                                onCheckedChange = { themeViewModel.toggleDarkMode() }
+                            )
+
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_language),
+                                text = "Language",
+                                onClick = {}
+                            )
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_noti),
+                                text = "Notifications",
+                                onClick = { onChangeNotification() }
+                            )
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_report),
+                                text = "Report a problem",
+                                onClick = {}
+                            )
+                        }
+
+                        // About Section
+                        SettingsSection(title = "About", imageVector = ImageVector.vectorResource(R.drawable.ic_about)) {
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_share),
+                                text = "Share account",
+                                onClick = {}
+                            )
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_term),
+                                text = "Terms and conditions",
+                                onClick = { navigateToTerm() }
+                            )
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_privacy),
+                                text = "Policy privacy",
+                                onClick = { navigateToPolicy() }
+                            )
+                        }
+
+                        SettingsSection(title = "Danger Zone", imageVector = ImageVector.vectorResource(R.drawable.ic_danger)) {
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_delete),
+                                text = "Delete account",
+                                onClick = {
+                                    errorMessage = "Are you want to delete your account? This action cannot be undone."
+                                    showErrorDialog = true
+                                    isSignOut = false
+                                }
+                            )
+                            SettingItemWithNavigation(
+                                icon = ImageVector.vectorResource(R.drawable.ic_logout),
+                                text = "Sign out",
+                                onClick = {
+                                    errorMessage = "Are you sure you want to sign out?"
+                                    showErrorDialog = true
+                                    isSignOut = true
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
+
     }
 
     if (showErrorDialog) {
@@ -381,7 +420,7 @@ fun SettingTheme(
             }
         )
     }
-    handleAvatarOption(show)
+    HandleAvatarOption(show)
 }
 
 @Composable
@@ -509,22 +548,34 @@ fun SheetContent(onOptionClick: (String) -> Unit) {
 }
 
 @Composable
-fun handleAvatarOption(option: String) {
+fun HandleAvatarOption(option: String) {
     val userViewModel: UserViewModel = viewModel()
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var shouldLaunchGallery by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            selectedImageUri = uri
+            Log.d("Gallery", "Image selected: $uri")
+        } else {
+            Log.d("Gallery", "No image selected")
+        }
+        shouldLaunchGallery = false
+    }
+
+    LaunchedEffect(option) {
+        if (option == "Upload Image" && !shouldLaunchGallery) {
+            shouldLaunchGallery = true
+            galleryLauncher.launch("image/*")
+        }
+    }
 
     when (option) {
-        "Upload Image" -> {
-//            PickImageFromGallery(
-//                onSuccess = {
-//                },
-//                onError = { error ->
-//                    Log.e("Avatar", "Error: $error")
-//                }
-//            )
-        }
         "Remove Avatar" -> {
-            userViewModel.updateUserAvatar(
-                avatarUrl = "https://sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png",
+            userViewModel.removeUserAvatar(
+                avatarUrl = "",
                 onSuccess = {
                     Log.d("Avatar", "Successful")
                 },
@@ -535,37 +586,158 @@ fun handleAvatarOption(option: String) {
         }
         else -> { /* Handle other cases */ }
     }
+
+    selectedImageUri?.let { uri ->
+        val photoData = context.contentResolver.openInputStream(uri)?.readBytes() ?: byteArrayOf()
+        Box (
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AdjustableImagePreview(imageUri = uri)
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = {
+                            if (photoData.isNotEmpty()) {
+                                userViewModel.uploadUserAvatar(
+                                    photoData = photoData,
+                                    onSuccess = {
+                                        Log.d("Avatar", "Avatar uploaded successfully")
+                                        selectedImageUri = null
+                                    },
+                                    onFailure = { error ->
+                                        Log.e("Avatar", "Failed to upload avatar: $error")
+                                    }
+                                )
+                            } else {
+                                Log.e("Avatar", "Failed to convert URI to ByteArray.")
+                            }
+
+                            Log.d("Avatar", "Confirmed image: $uri")
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text(
+                            text = "Confirm",
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontFamily = nunitoFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            selectedImageUri = null
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Gray
+                        )
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontFamily = nunitoFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
-//
-//@Composable
-//fun PickImageFromGallery(
-//    onSuccess: () -> Unit,
-//    onError: (String) -> Unit
-//) {
-//    val userViewModel: UserViewModel = viewModel()
-//    val context = LocalContext.current
-//    val contentResolver = context.contentResolver
-//
-//    val pickImageLauncher = rememberLauncherForActivityResult(
-//        ActivityResultContracts.GetContent()
-//    ) { uri: Uri? ->
-//        uri?.let {
-//            try {
-//                // Check if the URI is valid and is an image
-//                contentResolver.getType(it)?.let { mimeType ->
-//                    if (mimeType.startsWith("image/")) {
-//                        userViewModel.uploadImageToImgur(context, it)
-//                    } else {
-//                        onError("Please select an image file")
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                onError(e.message ?: "Error processing image")
-//            }
-//        }
-//    }
-//
-//    LaunchedEffect(Unit) {
-//        pickImageLauncher.launch("image/*")
-//    }
-//}
+
+@Composable
+fun AdjustableImagePreview(imageUri: Uri) {
+    val context = LocalContext.current
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset(0f, 0f)) }
+    var imageDimensions by remember { mutableStateOf(Size(0f, 0f)) }
+
+    // To calculate aspect ratio (width / height)
+    val transformableState = rememberTransformableState { zoomChange, panChange, _ ->
+        scale *= zoomChange
+        offset += panChange
+    }
+
+    // Fetch the image dimensions to determine the aspect ratio
+    LaunchedEffect(imageUri) {
+
+        val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(imageUri))
+        imageDimensions = Size(bitmap.width.toFloat(), bitmap.height.toFloat())
+    }
+
+    Box(
+        modifier = Modifier
+            .size(400.dp) // Size of the circular image container
+            .clip(CircleShape) // Ensure the image is clipped to a circle
+            .background(MaterialTheme.colorScheme.surface),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(onDoubleTap = {
+                        // Reset scale and offset on double-tap
+                        scale = 1f
+                        offset = Offset(0f, 0f)
+                    })
+                }
+        ) {
+            AsyncImage(
+                model = imageUri,
+                contentDescription = "Adjustable Image",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset {
+                        val maxOffsetX = (scale - 1f) * 200f // Maximum offset based on scale
+                        val maxOffsetY = (scale - 1f) * 200f
+
+                        // Adjust offset based on aspect ratio
+                        val isLandscape = imageDimensions.width > imageDimensions.height
+                        val isPortrait = imageDimensions.width < imageDimensions.height
+
+                        val newOffsetX = if (isLandscape) {
+                            // Only allow horizontal movement for landscape images
+                            offset.x.coerceIn(-maxOffsetX, maxOffsetX)
+                        } else {
+                            0f // Disable horizontal movement for portrait images
+                        }
+
+                        val newOffsetY = if (isPortrait) {
+                            // Only allow vertical movement for portrait images
+                            offset.y.coerceIn(-maxOffsetY, maxOffsetY)
+                        } else {
+                            0f // Disable vertical movement for landscape images
+                        }
+
+                        IntOffset(newOffsetX.roundToInt(), newOffsetY.roundToInt())
+                    }
+                    .graphicsLayer(
+                        scaleX = scale.coerceIn(1f, 3f), // Limit zoom from 1x to 3x
+                        scaleY = scale.coerceIn(1f, 3f)
+                    )
+                    .transformable(transformableState),
+                contentScale = ContentScale.Crop // Ensure image is cropped inside the circle
+            )
+        }
+    }
+}

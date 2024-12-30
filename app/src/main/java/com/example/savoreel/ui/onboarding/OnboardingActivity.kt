@@ -302,8 +302,6 @@ fun Onboarding2Content() {
         animationSpec = tween(durationMillis = 1500)
     )
 
-    val resetKey = remember { mutableStateOf(0) }
-
     LaunchedEffect(scrollState) {
         triggerAnimation = false
         showHeart = false
