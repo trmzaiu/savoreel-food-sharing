@@ -549,30 +549,6 @@ class UserViewModel : ViewModel() {
         signInSuccess = onSuccess
     }
 
-    private fun createFollowNotification(
-        recipientId: String,
-        onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        val currentUser = auth.currentUser ?: run {
-            onFailure("User not logged in")
-            return
-        }
-
-        val notification = Notification(
-            notificationId = db.collection("notifications").document().id,
-            recipientId = recipientId,
-            senderId = currentUser.uid,
-            description = "has started following you.",
-            type = "follow"
-        )
-
-        db.collection("notifications").document(notification.notificationId)
-            .set(notification)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { onFailure(it.message ?: "Failed to create notification") }
-    }
-
     // Update toggleFollowStatus to include notification
     fun toggleFollowStatus(
         userId: String,
@@ -601,10 +577,6 @@ class UserViewModel : ViewModel() {
             }
             shouldFollow
         }.addOnSuccessListener { isFollowing ->
-            if (isFollowing) {
-                createFollowNotification(userId, {}, { error -> Log.e("Notification", error) })
-            }
-
             val updatedFollowingList = if (isFollowing) {
                 _user.value?.following?.plus(userId) ?: listOf(userId)
             } else {

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -104,6 +105,12 @@ fun NotificationScreen() {
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
     var numberOfUnreadNotifications by remember { mutableIntStateOf(0) }
+//
+//    var showSnackbar by remember { mutableStateOf(true) }
+//    var snackbarMessage by remember { mutableStateOf("aaaa") }
+//    var senderId by remember { mutableStateOf("") }
+//    var senderName by remember { mutableStateOf("") }
+
     LaunchedEffect(currentUser) {
         if (currentUser == null) {
             error = "Not logged in"
@@ -112,6 +119,7 @@ fun NotificationScreen() {
         }
 
         try {
+            // Initial notifications load
             notificationViewModel.getNotifications(
                 onSuccess = { notificationsList ->
                     notifications = notificationsList
@@ -122,6 +130,23 @@ fun NotificationScreen() {
                     loading = false
                 }
             )
+
+            // Set up real-time notification listener
+//            notificationViewModel.listenToNewNotifications { newNotification ->
+//                notifications = listOf(newNotification) + notifications
+//                userViewModel.getUserById(
+//                    userId = newNotification.senderId,
+//                    onSuccess = { user ->
+//                        if (user != null) {
+//                            snackbarMessage = "${user.name} ${newNotification.description}"
+//                            showSnackbar = true
+//                        }
+//                    },
+//                    onFailure = {}
+//                )
+//                numberOfUnreadNotifications++
+//            }
+
             notificationViewModel.countUnreadNotifications(
                 onSuccess = { size ->
                     numberOfUnreadNotifications = size
@@ -205,6 +230,8 @@ fun NotificationScreen() {
                                 skipPartiallyExpanded = true
                             ),
                             containerColor = MaterialTheme.colorScheme.secondary.copy(0.95f),
+                            dragHandle = { },
+                            windowInsets = WindowInsets(0,0,0,0),
                             content = {
                                 DropdownMenuItem(
                                     text = {
@@ -334,6 +361,23 @@ fun NotificationScreen() {
             }
         }
     }
+//    if (showSnackbar) {
+//        Snackbar(
+//            modifier = Modifier
+//                .padding(16.dp),
+//            action = {
+//                Text(
+//                    text = "Dismiss",
+//                    color = MaterialTheme.colorScheme.secondary,
+//                    modifier = Modifier.clickable {
+//                        showSnackbar = false
+//                    }
+//                )
+//            }
+//        ) {
+//            Text(text = snackbarMessage)
+//        }
+//    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

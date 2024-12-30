@@ -314,5 +314,29 @@ class PostModel : ViewModel() {
 
 
 
+    fun getPost(
+        postId: String,
+        onSuccess: (Post?) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        db.collection("posts")
+            .document(postId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val post = document.toObject(Post::class.java)
+                    onSuccess(post)
+                } else {
+                    onSuccess(null)
+                }
+            }
+            .addOnFailureListener { exception ->
+                val errorMessage = "Error fetching post with ID $postId: ${exception.localizedMessage}"
+                Log.e("Firebase", errorMessage)
+                onFailure(errorMessage)
+            }
+    }
+
+
 }
 

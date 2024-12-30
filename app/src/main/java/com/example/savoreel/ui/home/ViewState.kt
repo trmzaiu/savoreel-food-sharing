@@ -325,7 +325,7 @@ fun PhotoTakenScreen(scope: CoroutineScope,
                                         isLoading = false
                                     }
                                 )
-                                notificationViewModel.createNotification(
+                                notificationViewModel.createNotifications(
                                     recipientIds = listOfFollowers,
                                     type = "Upload",
                                     message = "uploaded new photo",
@@ -532,7 +532,7 @@ fun ViewPostScreen(
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    ImageButton(R.drawable.ic_download, "Show Grid") {
+                    ImageButton(R.drawable.ic_grid_image, "Show Grid", 40.dp) {
                     }
                     ImageButton(R.drawable.circle, "Back Home",45.dp) {
                         postViewModel.resetPhoto()
@@ -540,7 +540,7 @@ fun ViewPostScreen(
                             parentPagerState.animateScrollToPage(0)
                         }
                     }
-                    ImageButton(R.drawable.ic_edit, "More") {
+                    ImageButton(R.drawable.ic_more, "More") {
                         postViewModel.setcurrentSheetContent(SheetContent.OPTIONS)
                         scope.launch { sheetState.show() }
                     }

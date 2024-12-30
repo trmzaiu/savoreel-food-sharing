@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.R
 import com.example.savoreel.model.NotificationViewModel
+import com.example.savoreel.model.Post
 import com.example.savoreel.ui.home.NotificationActivity
 import com.example.savoreel.ui.home.PostImage
 import com.example.savoreel.ui.home.SearchActivity
@@ -294,13 +295,14 @@ fun IconTheme(
 @Composable
 fun ImageCustom(
     url: String,
-    onClick: () -> Unit
+    post: Post,
+    onClick: (Post) -> Unit
 ){
     Box(
         modifier = Modifier
             .aspectRatio(1f)
             .clip(MaterialTheme.shapes.medium)
-            .clickable { onClick },
+            .clickable { onClick(post) },
         contentAlignment = Alignment.BottomStart
     ) {
         PostImage(url = url)
