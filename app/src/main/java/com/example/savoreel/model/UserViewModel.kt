@@ -178,11 +178,11 @@ class UserViewModel : ViewModel() {
         return keywords.toList()
     }
 
-    fun updateHashtags(hashtag: String) {
-        val userId = getCurrentUserId()?: return
+    fun updateHashtags(hashtags: MutableSet<String>) {
+        val userId = getCurrentUserId() ?: return
         val userDocRef = db.collection("users").document(userId)
 
-        userDocRef.update("Hashtags", FieldValue.arrayUnion(hashtag))
+        userDocRef.update("hashtags", FieldValue.arrayUnion(*hashtags.toTypedArray()))
             .addOnSuccessListener {
                 println("Searched hashtags updated successfully.")
             }
@@ -487,7 +487,7 @@ class UserViewModel : ViewModel() {
             notificationId = db.collection("notifications").document().id,
             recipientId = recipientId,
             senderId = currentUser.uid,
-            description = "started following you",
+            description = "has started following you.",
             type = "follow"
         )
 

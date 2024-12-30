@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,15 +34,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import com.example.savoreel.R
 import com.example.savoreel.model.Post
+import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
-import com.example.savoreel.model.postss
 import com.example.savoreel.ui.component.ImageCustom
 import com.example.savoreel.ui.component.PostTopBar
 import com.example.savoreel.ui.profile.FollowActivity
@@ -71,6 +78,7 @@ class GridPostActivity: ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GridPost(userID: String) {
+    val postModel: PostModel = viewModel()
     val userViewModel: UserViewModel = viewModel()
     var isRowVisible by remember { mutableStateOf(false) }
 
@@ -81,6 +89,7 @@ fun GridPost(userID: String) {
     var numberOfFollowing by remember { mutableIntStateOf(0) }
     var currentUserName by remember { mutableStateOf("") }
     var currentUserAvatar by remember { mutableStateOf("") }
+    var listOfPost by remember { mutableStateOf(emptyList<Post>()) }
 
     isRowVisible = userID != "Everyone"
 
@@ -120,6 +129,17 @@ fun GridPost(userID: String) {
                 Log.e("GridPost", "Error retrieving user: $error")
             }
         )
+    }
+
+    LaunchedEffect(Unit) {
+        postModel.getPostsFromUserId(
+            userID,
+            onSuccess = { posts ->
+                listOfPost = posts
+            },
+            onFailure = {  }
+        )
+        Log.e("Lemon", "$listOfPost")
     }
 
     Box(
@@ -209,7 +229,7 @@ fun GridPost(userID: String) {
                 }
             }
 
-            GridImage(postss, {})
+            GridImage(listOfPost, {})
         }
     }
 }
@@ -224,12 +244,54 @@ fun GridImage(posts: List<Post>, onClick: (Post) -> Unit, modifier: Modifier = M
         modifier = modifier
     ) {
         items(posts) { post ->
+            Log.e("GridPost", "uri: $post")
             ImageCustom(
-                url = post.imageRes,
+                url = post.photoUri,
                 onClick = {
                     // doi chanh
                 }
             )
+        }
+    }
+}
+
+@Composable
+fun PostImage(
+    url: String,
+    modifier: Modifier = Modifier
+) {
+    val secureUrl = url.replace("http://", "https://") // Use the replaced URL
+    val context = LocalContext.current
+
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(context)
+            .data(secureUrl) // Pass the secure URL
+            .crossfade(true)
+            .build()
+    )
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
+        when (painter.state) {
+            is AsyncImagePainter.State.Error -> {
+                Image(
+                    painter = painterResource(R.drawable.avatar_error),
+                    contentDescription = "Error loading post",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            else -> {
+                Image(
+                    painter = painter,
+                    contentDescription = "Post image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
     }
 }

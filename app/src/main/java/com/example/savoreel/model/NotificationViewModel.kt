@@ -14,6 +14,47 @@ class NotificationViewModel: ViewModel() {
     private val _notifications = MutableLiveData<List<Notification>>()
     val notifications: LiveData<List<Notification>> = _notifications
 
+    fun createNotification(
+        recipientIds: List<String>,
+        type: String,
+        message: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUser = auth.currentUser ?: run {
+            onFailure("User not logged in")
+            return
+        }
+
+        if (recipientIds.isEmpty()) {
+            onFailure("Recipient list is empty")
+            return
+        }
+
+        val db = FirebaseFirestore.getInstance()
+        val batch = db.batch()
+
+        recipientIds.forEach { recipientId ->
+            val notificationId = db.collection("notifications").document().id
+            val notification = Notification(
+                notificationId = notificationId,
+                recipientId = recipientId,
+                senderId = currentUser.uid,
+                description = message,
+                type = type
+            )
+
+            val notificationRef = db.collection("notifications").document(notificationId)
+            batch.set(notificationRef, notification)
+        }
+
+        batch.commit()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { exception ->
+                onFailure(exception.message ?: "Failed to create notifications")
+            }
+    }
+
     fun getNotifications(onSuccess: (List<Notification>) -> Unit, onFailure: (String) -> Unit) {
         val currentUser = auth.currentUser ?: run {
             onFailure("Not logged in")
@@ -64,6 +105,25 @@ class NotificationViewModel: ViewModel() {
             }
             .addOnFailureListener { onFailure(it.message ?: "Error fetching notifications") }
     }
+
+    fun countUnreadNotifications(onSuccess: (Int) -> Unit, onFailure: (String) -> Unit) {
+        val currentUser = auth.currentUser ?: run {
+            onFailure("Not logged in")
+            return
+        }
+
+        db.collection("notifications")
+            .whereEqualTo("recipientId", currentUser.uid)
+            .whereEqualTo("read", false)
+            .get()
+            .addOnSuccessListener { documents ->
+                onSuccess(documents.size())
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception.message ?: "Error counting unread notifications")
+            }
+    }
+
 
     fun deleteNotification(notificationId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         db.collection("notifications")

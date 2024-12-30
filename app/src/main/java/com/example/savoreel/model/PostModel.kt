@@ -21,8 +21,8 @@ import kotlin.coroutines.suspendCoroutine
 
 class PostModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
-    private val _posts = MutableStateFlow<List<PostData>>(emptyList())
-    val posts: StateFlow<List<PostData>> get() = _posts
+    private val _posts = MutableStateFlow<List<Post>>(emptyList())
+    val posts: StateFlow<List<Post>> get() = _posts
 
     // Initialize Cloudinary in your Application class or MainActivity
     companion object {
@@ -92,7 +92,7 @@ class PostModel : ViewModel() {
                 withContext(Dispatchers.Main) {
                     val postId = db.collection("posts").document().id
 
-                    val newPost = PostData(
+                    val newPost = Post(
                         postId = postId,
                         userId = userId,
                         name = name,
@@ -130,9 +130,9 @@ class PostModel : ViewModel() {
         db.collection("posts")
             .get()
             .addOnSuccessListener { documents ->
-                val fetchedPosts = mutableListOf<PostData>()
+                val fetchedPosts = mutableListOf<Post>()
                 for (document in documents) {
-                    val post = document.toObject(PostData::class.java)
+                    val post = document.toObject(Post::class.java)
                     fetchedPosts.add(post)
                 }
                 _posts.value = fetchedPosts
@@ -188,12 +188,12 @@ class PostModel : ViewModel() {
             .whereIn("userId", userIds)
             .get()
             .addOnSuccessListener { documents ->
-                val fetchedPosts = mutableListOf<PostData>()
+                val fetchedPosts = mutableListOf<Post>()
                 for (document in documents) {
-                    val post = document.toObject(PostData::class.java)
+                    val post = document.toObject(Post::class.java)
                     fetchedPosts.add(post)
                 }
-                _posts.value += fetchedPosts // Append the fetched posts
+                _posts.value += fetchedPosts
             }
             .addOnFailureListener { exception ->
                 Log.e("Firebase", "Error fetching posts", exception)
@@ -219,12 +219,28 @@ class PostModel : ViewModel() {
             .addOnFailureListener { exception ->
                 val errorMessage = "Error fetching current user's posts: ${exception.localizedMessage}"
                 Log.e("Firebase", errorMessage)
-                onFailure(errorMessage) // Pass the error message to the failure callback
+                onFailure(errorMessage)
             }
     }
 
+    fun getPostsFromUserId(userId: String, onSuccess: (List<Post>) -> Unit, onFailure: (String) -> Unit) {
+        db.collection("posts")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val posts = mutableListOf<Post>()
+                for (document in querySnapshot) {
+                    val post = document.toObject(Post::class.java)
+                    posts.add(post)
+                }
+                onSuccess(posts)
+            }
+            .addOnFailureListener { exception ->
+                val errorMessage = "Error fetching current user's posts: ${exception.localizedMessage}"
+                Log.e("Firebase", errorMessage)
+                onFailure(errorMessage)
+            }
+    }
 
 }
-
-
 

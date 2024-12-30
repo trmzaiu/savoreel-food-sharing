@@ -34,8 +34,11 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,9 +57,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.R
-import com.example.savoreel.model.PostImage
+import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.ui.home.NotificationActivity
+import com.example.savoreel.ui.home.PostImage
 import com.example.savoreel.ui.home.SearchActivity
 import com.example.savoreel.ui.profile.ProfileActivity
 import com.example.savoreel.ui.profile.UserAvatar
@@ -392,6 +397,65 @@ fun NavButton(
 }
 
 @Composable
+fun BellButton(
+    onClickAction: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val notificationViewModel: NotificationViewModel = viewModel()
+    var numberOfUnreadNotifications by remember { mutableIntStateOf(0) }
+
+
+    LaunchedEffect(Unit){
+        notificationViewModel.countUnreadNotifications(
+            onSuccess = { size ->
+                numberOfUnreadNotifications = size
+            },
+            onFailure = {}
+        )
+    }
+
+    IconButton(
+        onClick = {
+            onClickAction()
+        },
+        modifier = modifier
+            .size(40.dp)
+            .clip(RoundedCornerShape(50)),
+        colors = IconButtonDefaults.filledIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f)
+        )
+    ) {
+        Box(
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                modifier = Modifier.size(30.dp),
+                painter = painterResource(id = R.drawable.ic_noti),
+                contentDescription = "More options",
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+
+            if (numberOfUnreadNotifications > 0) {
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .background(MaterialTheme.colorScheme.error, CircleShape)
+                        .align(Alignment.TopEnd),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = numberOfUnreadNotifications.toString(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onError,
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun PostTopBar(url: String, name: String) {
     val context = LocalContext.current
     val navigateToProfile = {
@@ -429,10 +493,8 @@ fun PostTopBar(url: String, name: String) {
                 onClickAction = { navigateToSearch() }
             )
             Spacer(modifier = Modifier.width(16.dp))
-            NavButton(
-                painter = painterResource(id = R.drawable.ic_noti),
-                onClickAction = { navigateToNoti() }
-            )
+
+            BellButton(navigateToNoti)
         }
     }
 }

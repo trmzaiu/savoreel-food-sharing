@@ -66,10 +66,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.R
+import com.example.savoreel.model.Post
+import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.User
 import com.example.savoreel.model.UserViewModel
-import com.example.savoreel.model.postss
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.profile.UserAvatar
 import com.example.savoreel.ui.profile.UserWithOutAvatar
@@ -123,6 +124,8 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
     var persons by remember { mutableStateOf(emptyList<User>()) }
     var loadingFollowStatus by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
 
+    val postModel = PostModel()
+    var lisOfPost by remember { mutableStateOf(emptyList<Post>()) }
     // Fetch recent search history
     LaunchedEffect(Unit) {
         userViewModel.getSearchHistory(
@@ -152,6 +155,16 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
         } else {
             persons = emptyList()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        postModel.getPostsFromCurrentUser(
+            onSuccess = { posts ->
+                lisOfPost = posts
+            },
+            onFailure = {  }
+        )
+        Log.e("ProfileActivity", "$lisOfPost")
     }
 
     Box(
@@ -364,8 +377,9 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                 }
                             }
                         }
+
                     "Post" -> GridImage(
-                        posts = postss,
+                        posts = lisOfPost,
                         onClick = {},
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
@@ -460,7 +474,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                 modifier = Modifier.padding(vertical = 8.dp),
                                 color = MaterialTheme.colorScheme.onSecondary
                             )
-                            GridImage(posts = postss.take(9), onClick = {})
+                            GridImage(posts = lisOfPost.take(9), onClick = {})
                             Text(
                                 text = "See more",
                                 modifier = Modifier

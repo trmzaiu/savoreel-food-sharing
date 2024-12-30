@@ -59,6 +59,7 @@ import coil.request.ImageRequest
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.savoreel.R
+import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.PostViewModel
 import com.example.savoreel.model.UserViewModel
@@ -106,7 +107,9 @@ fun TakePhotoScreen() {
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = name,
@@ -116,7 +119,9 @@ fun TakePhotoScreen() {
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(top = 60.dp, bottom = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 60.dp, bottom = 8.dp)
             )
             Box(modifier = Modifier
                 .fillMaxWidth()
@@ -152,9 +157,13 @@ fun TakePhotoScreen() {
                 }
             }
         }
-        Box(modifier = Modifier.align(Alignment.BottomEnd).background(MaterialTheme.colorScheme.background)){
+        Box(modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .background(MaterialTheme.colorScheme.background)){
             Row(
-                modifier = Modifier.fillMaxWidth().padding(0.dp, 20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 20.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -184,12 +193,14 @@ fun PhotoTakenScreen(scope: CoroutineScope,
 ) {
     val userViewModel: UserViewModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
+    val notificationViewModel: NotificationViewModel = viewModel()
     val postModel: PostModel = viewModel()
     val context = LocalContext.current
 
     val currentUser by userViewModel.user.collectAsState()
 
     var name by remember { mutableStateOf("") }
+    var listOfFollowers by remember { mutableStateOf(emptyList<String>()) }
     var isLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(currentUser) {
@@ -197,6 +208,7 @@ fun PhotoTakenScreen(scope: CoroutineScope,
             onSuccess = { currentUser ->
                 if (currentUser != null) {
                     name = currentUser.name.toString()
+                    listOfFollowers = currentUser.followers
                 } else {
                     Log.e("TakePhotoActivity", "User data not found")
                 }
@@ -208,7 +220,9 @@ fun PhotoTakenScreen(scope: CoroutineScope,
     }
 
     CallBackState()
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = name,
@@ -218,7 +232,9 @@ fun PhotoTakenScreen(scope: CoroutineScope,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(top = 60.dp, bottom = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 60.dp, bottom = 8.dp)
             )
             Box(
                 modifier = Modifier
@@ -308,6 +324,13 @@ fun PhotoTakenScreen(scope: CoroutineScope,
                                         isLoading = false
                                     }
                                 )
+                                notificationViewModel.createNotification(
+                                    recipientIds = listOfFollowers,
+                                    type = "Upload",
+                                    message = "uploaded new photo",
+                                    onSuccess = {},
+                                    onFailure = {},
+                                )
                             } else {
                                 Log.e("PhotoTakenScreen", "Failed to convert URI to ByteArray.")
                                 isLoading = false
@@ -355,14 +378,18 @@ fun ViewPostScreen(
     }
 
     CallBackState()
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
         if (posts.isNotEmpty()) {
             VerticalPager(
                 count = posts.size,
                 state = innerPagerState,
             ) { page ->
                 val post = posts[page]
-                Column(modifier = Modifier.fillMaxSize().padding(top = 30.dp)) {
+                Column(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 30.dp)) {
                     Text(
                         text = post.name,
                         fontSize = 20.sp,
@@ -371,7 +398,9 @@ fun ViewPostScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
                     )
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Box(
@@ -429,7 +458,9 @@ fun ViewPostScreen(
                 }
             }
         }
-        Box(modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 20.dp)){
+        Box(modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(bottom = 20.dp)){
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -441,7 +472,9 @@ fun ViewPostScreen(
                         .background(MaterialTheme.colorScheme.tertiary),
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -456,10 +489,12 @@ fun ViewPostScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_emoji),
                             contentDescription = "Emoji Picker",
-                            modifier = Modifier.size(30.dp).clickable {
-                                scope.launch { sheetState.show() }
-                                postViewModel.setcurrentSheetContent(SheetContent.EMOJI_PICKER)
-                            }
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clickable {
+                                    scope.launch { sheetState.show() }
+                                    postViewModel.setcurrentSheetContent(SheetContent.EMOJI_PICKER)
+                                }
                         )
                     }
 
@@ -598,7 +633,10 @@ fun ImageButtonWithBg(
         Icon(
             painter = painterResource(iconId),
             contentDescription = description,
-            modifier = Modifier.size(size).align(Alignment.Center).padding(end=padding),
+            modifier = Modifier
+                .size(size)
+                .align(Alignment.Center)
+                .padding(end = padding),
             tint = MaterialTheme.colorScheme.onBackground
         )
     }

@@ -55,19 +55,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.savoreel.R
 import com.example.savoreel.model.Post
-import com.example.savoreel.model.PostImage
+import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
-import com.example.savoreel.model.getMonthName
-import com.example.savoreel.model.posts
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.NavButton
+import com.example.savoreel.ui.home.PostImage
 import com.example.savoreel.ui.setting.SettingActivity
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ProfileActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
@@ -109,7 +111,9 @@ class ProfileActivity : ComponentActivity() {
 
 @Composable
 fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, String) -> Unit) {
+    val postModel: PostModel = viewModel()
     val userViewModel: UserViewModel = viewModel()
+
     val listState = rememberLazyListState()
     var isRowVisible by remember { mutableStateOf(true) }
     var numberOfFolower by remember { mutableIntStateOf(0) }
@@ -118,6 +122,8 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
     var imgUrl by remember { mutableStateOf("") }
     var uid by remember {mutableStateOf("")}
     var isLoading by remember { mutableStateOf(true) }
+    var lisOfPost by remember { mutableStateOf(emptyList<Post>()) }
+    var grouptedPosts by remember { mutableStateOf(emptyMap<String, List<Post>>()) }
 
     val currentUser by userViewModel.user.collectAsState()
 
@@ -142,10 +148,24 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
         )
     }
 
+    LaunchedEffect(Unit) {
+        postModel.getPostsFromCurrentUser(
+            onSuccess = { posts ->
+                lisOfPost = posts
+                grouptedPosts = groupPostsByMonthYear(lisOfPost)
+                Log.d("Postsss", "Posts fetched: $lisOfPost")
+                Log.d("Postsss", "Grouped Posts fetched: $grouptedPosts")
+            },
+            onFailure = {
+                Log.e("ProfileScreen", "Error fetching posts")
+            }
+        )
+    }
+
     LaunchedEffect(listState) {
-        snapshotFlow { listState.firstVisibleItemScrollOffset }
-            .collect { scrollOffset ->
-                isRowVisible = scrollOffset < 200
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collect { index ->
+                isRowVisible = index == 0
             }
     }
 
@@ -233,74 +253,76 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                             )
                         }
 
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    navigateToFollow("following", uid)
-                                }
-                        ) {
-                            Text(
-                                text = numberOfFollowing.toString(),
-                                fontFamily = nunitoFontFamily,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 20.sp,
-                                color = MaterialTheme.colorScheme.onBackground,
-                            )
-                            Text(
-                                text = "Following",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onBackground,
-                            )
-                        }
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        navigateToFollow("following", uid)
+                                    }
+                            ) {
+                                Text(
+                                    text = numberOfFollowing.toString(),
+                                    fontFamily = nunitoFontFamily,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 20.sp,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                                Text(
+                                    text = "Following",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                            }
 
-                        Spacer(modifier = Modifier.width(10.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
 
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    navigateToFollow("follower", uid)
-                                }
-                        ) {
-                            Text(
-                                text = numberOfFolower.toString(),
-                                fontFamily = nunitoFontFamily,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 20.sp,
-                                color = MaterialTheme.colorScheme.onBackground,
-                            )
-                            Text(
-                                text = "Followers",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onBackground,
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        navigateToFollow("follower", uid)
+                                    }
+                            ) {
+                                Text(
+                                    text = numberOfFolower.toString(),
+                                    fontFamily = nunitoFontFamily,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 20.sp,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                                Text(
+                                    text = "Followers",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                            }
                         }
                     }
-                }
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    posts.forEach { (key, groupedPosts) ->
-                        item {
-                            CalendarWithImages(
-                                posts = groupedPosts,
-                                title = "${getMonthName(key.second)}, ${key.first}"
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        grouptedPosts.forEach() { (title, posts) ->
+                            Log.e("GroupPostsss", "Size of GroupPost: ${grouptedPosts.size}")
+                            item(posts){
+                                Log.e("GroupPostsss", "GroupPost: $title: $posts")
+                                CalendarWithImages(
+                                    posts = posts,
+                                    title = title
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
                         }
                     }
                 }
             }
         }
-    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -310,46 +332,52 @@ fun CalendarWithImages(
     title: String,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.secondary)
-            .clip(MaterialTheme.shapes.medium)
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier.clip(RoundedCornerShape(15))
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.tertiary)
-                .height(50.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = modifier
+                .background(MaterialTheme.colorScheme.secondary)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 10.dp),
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-        FlowRow(
-            modifier = Modifier
-                .padding(5.dp, 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            posts.forEach { post ->
-                PostImage(
-                    url = post.imageRes,
-                    modifier = Modifier
-                        .size(60.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(15))
-                        .clickable {
-                            println("Clicked on post ID: ${post.postId}")
-                            //chanh à nếu m làm tới đây bạn sẽ thấy tôi đợi bạn
-                        }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.tertiary)
+                    .height(50.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 10.dp),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 16.sp
                 )
+            }
+            FlowRow(
+                modifier = Modifier
+                    .padding(10.dp, 10.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                posts.forEach { post ->
+                    Log.e("Post", "Post: $post")
+                    PostImage(
+                        url = post.photoUri,
+                        modifier = Modifier
+                            .size(60.dp)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(15))
+                            .clickable {
+                                println("Clicked on post ID: ${post.postId}")
+                                //chanh à nếu m làm tới đây bạn sẽ thấy tôi đợi bạn
+                            }
+                    )
+                }
             }
         }
     }
@@ -395,3 +423,11 @@ fun UserWithOutAvatar(name: String, sizeText: TextUnit, sizeBox: Dp) {
     }
 }
 
+fun groupPostsByMonthYear(posts: List<Post>): Map<String, List<Post>> {
+    val groupedPosts = posts.groupBy { post ->
+        val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        val date = sdf.parse(post.date) ?: Date()
+        SimpleDateFormat("MMMM, yyyy", Locale.getDefault()).format(date)
+    }
+    return groupedPosts
+}

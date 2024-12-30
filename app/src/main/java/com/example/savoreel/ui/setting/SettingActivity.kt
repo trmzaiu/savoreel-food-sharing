@@ -154,7 +154,7 @@ fun SettingTheme(
     var errorMessage by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
     var isSignOut by remember { mutableStateOf(false) }
-
+    var show by remember { mutableStateOf("") }
     val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
     val currentUser by userViewModel.user.collectAsState()
 
@@ -187,7 +187,9 @@ fun SettingTheme(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -198,7 +200,9 @@ fun SettingTheme(
                     .background(color = MaterialTheme.colorScheme.background)
             ) {
                 BackArrow(
-                    modifier = Modifier.align(Alignment.TopStart).padding(start = 20.dp, top = 40.dp)
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 20.dp, top = 40.dp)
                 )
 
                 Text(
@@ -236,7 +240,7 @@ fun SettingTheme(
                     if (showModal) {
                         Box(
                             modifier = Modifier
-                                .fillMaxSize()
+                                .fillMaxWidth()
                                 .background(MaterialTheme.colorScheme.scrim)
                         ) {
                             ModalBottomSheet(
@@ -244,12 +248,12 @@ fun SettingTheme(
                                 sheetState = rememberModalBottomSheetState(
                                     skipPartiallyExpanded = true
                                 ),
-                                containerColor = MaterialTheme.colorScheme.secondary
+                                containerColor = MaterialTheme.colorScheme.secondary.copy(0.95f),
                             ) {
                                 SheetContent(
                                     onOptionClick = { option ->
                                         showModal = false
-                                        handleAvatarOption(option)
+                                        show = option
                                     }
                                 )
                             }
@@ -268,7 +272,6 @@ fun SettingTheme(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    // General Section
                     Spacer(modifier = Modifier.height(20.dp))
 
                     SettingsSection(title = "General", imageVector = ImageVector.vectorResource(R.drawable.ic_general)) {
@@ -378,6 +381,7 @@ fun SettingTheme(
             }
         )
     }
+    handleAvatarOption(show)
 }
 
 @Composable
@@ -409,7 +413,10 @@ fun SettingsSection(title: String, imageVector: ImageVector? = null, content: @C
         }
         Column(
             modifier = Modifier
-                .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(20.dp))
+                .background(
+                    color = MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(20.dp)
+                )
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -480,42 +487,85 @@ fun SheetContent(onOptionClick: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 20.dp)
+            .padding(bottom = 20.dp)
     ) {
         val options = listOf("Upload Image", "Take Photo", "Remove Avatar", "Cancel")
 
         options.forEach { option ->
             Text(
                 text = option,
-                fontSize = 24.sp,
+                fontSize = 16.sp,
                 fontFamily = nunitoFontFamily,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onOptionClick(option) }
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 5.dp),
                 textAlign = TextAlign.Center,
-                color = if (option == "Remove Avatar") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
-
-                )
+                color = if (option == "Remove Avatar") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSecondary,
+            )
         }
     }
 }
 
+@Composable
 fun handleAvatarOption(option: String) {
+    val userViewModel: UserViewModel = viewModel()
+
     when (option) {
         "Upload Image" -> {
-
-        }
-        "Take Photo" -> {
-
+//            PickImageFromGallery(
+//                onSuccess = {
+//                },
+//                onError = { error ->
+//                    Log.e("Avatar", "Error: $error")
+//                }
+//            )
         }
         "Remove Avatar" -> {
-
+            userViewModel.updateUserAvatar(
+                avatarUrl = "https://sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png",
+                onSuccess = {
+                    Log.d("Avatar", "Successful")
+                },
+                onFailure = { error ->
+                    Log.e("Avatar", "Error: $error")
+                }
+            )
         }
-        "Cancel" -> {
-
-        }
+        else -> { /* Handle other cases */ }
     }
-
 }
+//
+//@Composable
+//fun PickImageFromGallery(
+//    onSuccess: () -> Unit,
+//    onError: (String) -> Unit
+//) {
+//    val userViewModel: UserViewModel = viewModel()
+//    val context = LocalContext.current
+//    val contentResolver = context.contentResolver
+//
+//    val pickImageLauncher = rememberLauncherForActivityResult(
+//        ActivityResultContracts.GetContent()
+//    ) { uri: Uri? ->
+//        uri?.let {
+//            try {
+//                // Check if the URI is valid and is an image
+//                contentResolver.getType(it)?.let { mimeType ->
+//                    if (mimeType.startsWith("image/")) {
+//                        userViewModel.uploadImageToImgur(context, it)
+//                    } else {
+//                        onError("Please select an image file")
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                onError(e.message ?: "Error processing image")
+//            }
+//        }
+//    }
+//
+//    LaunchedEffect(Unit) {
+//        pickImageLauncher.launch("image/*")
+//    }
+//}

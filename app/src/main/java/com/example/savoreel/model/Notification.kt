@@ -11,7 +11,7 @@ data class Notification(
     val recipientId: String = "",
     val senderId: String = "",
     val postId: String = "",
-    val date: com.google.firebase.Timestamp = com.google.firebase.Timestamp.now(),
+    val date: Timestamp = Timestamp.now(),
     val description: String = "",
     var read: Boolean = false,
     val type: String = ""
@@ -25,22 +25,26 @@ fun formatRelativeTime(timestamp: Timestamp): String {
     return when {
         diffInMillis < TimeUnit.MINUTES.toMillis(1) -> {
             val seconds = TimeUnit.MILLISECONDS.toSeconds(diffInMillis)
-            "${seconds}s"
+            if (seconds.toInt() == 1) "$seconds second"
+            else "$seconds seconds"
         }
 
         diffInMillis < TimeUnit.HOURS.toMillis(1) -> {
             val minutes = TimeUnit.MILLISECONDS.toMinutes(diffInMillis)
-            "${minutes}min"
+            if (minutes.toInt() == 1) "$minutes minute"
+            else "$minutes minutes"
         }
 
         diffInMillis < TimeUnit.DAYS.toMillis(1) -> {
             val hours = TimeUnit.MILLISECONDS.toHours(diffInMillis)
-            "${hours}h"
+            if (hours.toInt() == 1) "$hours hour"
+            else "$hours hours"
         }
 
         diffInMillis < TimeUnit.DAYS.toMillis(7) -> {
             val days = TimeUnit.MILLISECONDS.toDays(diffInMillis)
-            "${days} day"
+            if (days.toInt() == 1) "$days day"
+            else "$days days"
         }
 
         else -> {

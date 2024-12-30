@@ -1,5 +1,6 @@
 package com.example.savoreel.ui.onboarding
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -38,7 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.R
+import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.CustomButton
 import com.example.savoreel.ui.home.TakePhotoActivity
 import com.example.savoreel.ui.theme.SavoreelTheme
@@ -64,8 +67,10 @@ class HashTagActivity: ComponentActivity() {
     }
 }
 
+@SuppressLint("MutableCollectionMutableState")
 @Composable
 fun HashTagScreen(navigateToTakePhoto: () -> Unit) {
+    val userViewModel: UserViewModel = viewModel()
     var selectedTags by remember { mutableStateOf<MutableSet<String>>(mutableSetOf()) }
     var visibleHashtags by remember { mutableStateOf<List<String>>(emptyList()) }
     val allHashtags = listOf(
@@ -163,6 +168,7 @@ fun HashTagScreen(navigateToTakePhoto: () -> Unit) {
                 enabled = selectedTags.isNotEmpty(),
                 onClick = {
                     println("Selected hashtags: ${selectedTags.joinToString(", ")}")
+                    userViewModel.updateHashtags(selectedTags)
                     navigateToTakePhoto()
                 },
                 modifier = Modifier

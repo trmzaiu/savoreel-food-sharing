@@ -21,33 +21,41 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
@@ -83,6 +91,7 @@ class NotificationActivity: ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen() {
     val context = LocalContext.current
@@ -94,7 +103,7 @@ fun NotificationScreen() {
     var notifications by remember { mutableStateOf<List<Notification>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
-
+    var numberOfUnreadNotifications by remember { mutableIntStateOf(0) }
     LaunchedEffect(currentUser) {
         if (currentUser == null) {
             error = "Not logged in"
@@ -112,6 +121,12 @@ fun NotificationScreen() {
                     error = errorMessage
                     loading = false
                 }
+            )
+            notificationViewModel.countUnreadNotifications(
+                onSuccess = { size ->
+                    numberOfUnreadNotifications = size
+                },
+                onFailure = {}
             )
         } catch (e: Exception) {
             error = e.message ?: "An unexpected error occurred"
@@ -150,45 +165,92 @@ fun NotificationScreen() {
                 }
 
                 Box {
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More options",
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
+                    IconButton(
+                        modifier = Modifier.size(48.dp).clip(RoundedCornerShape(0)),
+                        onClick = { showMenu = true }
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(30.dp),
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More options",
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+
+                            if (numberOfUnreadNotifications > 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .background(MaterialTheme.colorScheme.error, CircleShape)
+                                        .align(Alignment.TopEnd),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = numberOfUnreadNotifications.toString(),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onError,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
                     }
 
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false },
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.secondary)
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Mark all as read") },
-                            onClick = {
-                                notificationViewModel.markAllAsRead(
-                                    onSuccess = {
-                                        notifications = notifications.map { it.copy(read = true) }
+                    if (showMenu){
+                        ModalBottomSheet(
+                            onDismissRequest = { showMenu = false },
+                            sheetState = rememberModalBottomSheetState(
+                                skipPartiallyExpanded = true
+                            ),
+                            containerColor = MaterialTheme.colorScheme.secondary.copy(0.95f),
+                            content = {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text ="Mark all as read",
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     },
-                                    onFailure = { /* Handle error */ }
-                                )
-                                showMenu = false
-                            },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete all") },
-                            onClick = {
-                                notificationViewModel.deleteAllNotifications(
-                                    onSuccess = {
-                                        notifications = emptyList()
+                                    onClick = {
+                                        notificationViewModel.markAllAsRead(
+                                            onSuccess = {
+                                                notifications = notifications.map { it.copy(read = true) }
+                                            },
+                                            onFailure = { /* Handle error */ }
+                                        )
+                                        showMenu = false
                                     },
-                                    onFailure = { /* Handle error */ }
+                                    modifier = Modifier.background(MaterialTheme.colorScheme.secondary).fillMaxWidth()
                                 )
-                                showMenu = false
-                            },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text ="Delete All",
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                   },
+                                    onClick = {
+                                        notificationViewModel.deleteAllNotifications(
+                                            onSuccess = {
+                                                notifications = emptyList()
+                                            },
+                                            onFailure = { /* Handle error */ }
+                                        )
+                                        showMenu = false
+                                    },
+                                    modifier = Modifier.background(MaterialTheme.colorScheme.secondary).fillMaxWidth()
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
                         )
                     }
                 }
@@ -240,7 +302,7 @@ fun NotificationScreen() {
                             key = { notifications[it].notificationId }
                         ) { index ->
                             val notification = notifications[index]
-                            SwipeableNotificationItem(
+                            NotificationItem(
                                 data = notification,
                                 userViewModel = userViewModel,
                                 onDelete = {
@@ -276,7 +338,7 @@ fun NotificationScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SwipeableNotificationItem(
+fun NotificationItem(
     data: Notification,
     userViewModel: UserViewModel,
     onDelete: () -> Unit,
@@ -389,7 +451,7 @@ fun SwipeableNotificationItem(
                                 fontSize = 14.sp,
                             )
                         ) {
-                            append(" ${formatRelativeTime(data.date)}")
+                            append("\n${formatRelativeTime(data.date)}")
                         }
                     },
                     fontSize = 14.sp,
