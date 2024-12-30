@@ -245,43 +245,40 @@ class PostModel : ViewModel() {
     }
 
     fun searchPostByHashtag(hashtag: String, onSuccess: (List<Post>) -> Unit, onFailure: (String) -> Unit) {
+        val searchTerm = hashtag.lowercase()
+
         db.collection("posts")
-            .whereArrayContains("hashtag", hashtag)
             .get()
             .addOnSuccessListener { querySnapshot ->
-                val posts = mutableListOf<Post>()
-                for (document in querySnapshot) {
-                    val post = document.toObject(Post::class.java)
-                    posts.add(post)
-                }
-                onSuccess(posts)
+                val filteredPosts = querySnapshot.toObjects(Post::class.java)
+                    .filter { post ->
+                        post.hashtag?.any { tag ->
+                            tag.lowercase().contains(searchTerm)
+                        } == true
+                    }
+                onSuccess(filteredPosts)
             }
             .addOnFailureListener { e ->
-                Log.e("SearchPost", "Error getting posts", e)
                 onFailure("Failed to retrieve posts: ${e.message}")
             }
     }
 
     fun searchPostByTitle(title: String, onSuccess: (List<Post>) -> Unit, onFailure: (String) -> Unit) {
-        val titleQuery = db.collection("posts")
-            .whereGreaterThanOrEqualTo("title", title)
+        // Convert search term to lowercase for case-insensitive search
+        val searchTerm = title.lowercase()
 
-        titleQuery.get()
-            .addOnSuccessListener { result ->
-                val posts = mutableListOf<Post>()
-                for (document in result) {
-                    val post = document.toObject(Post::class.java)
-                    posts.add(post)
-                }
-                onSuccess(posts)
+        db.collection("posts")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val filteredPosts = querySnapshot.toObjects(Post::class.java)
+                    .filter { post ->
+                        post.title?.lowercase()?.contains(searchTerm) == true
+                    }
+                onSuccess(filteredPosts)
             }
             .addOnFailureListener { e ->
-                Log.e("SearchPost", "Error searching posts by title", e)
                 onFailure("Failed to retrieve posts: ${e.message}")
             }
     }
-
-
-
 }
 

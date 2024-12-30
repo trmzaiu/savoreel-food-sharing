@@ -78,6 +78,8 @@ import com.example.savoreel.ui.profile.UserAvatar
 import com.example.savoreel.ui.profile.UserWithOutAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 
 class SearchActivity: ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
@@ -143,44 +145,54 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
 
     LaunchedEffect(searchQuery) {
         if (searchQuery.isNotEmpty()) {
-            userViewModel.getAllUsersByNameKeyword(
-                searchQuery,
-                onSuccess = { users ->
-                    persons = users.filter { user ->
-                        user.name?.contains(searchQuery, ignoreCase = true) == true
+            val usersDeferred = async {
+                userViewModel.getAllUsersByNameKeyword(
+                    searchQuery,
+                    onSuccess = { users ->
+                        // Filter users based on the search query
+                        persons = users.filter { user ->
+                            user.name?.contains(searchQuery, ignoreCase = true) == true
+                        }
+                    },
+                    onFailure = { error ->
+                        Log.e("Search", "Failed to fetch users: $error")
                     }
-                },
-                onFailure = { error ->
-                    Log.e("Search", "Failed to fetch users: $error")
-                }
-            )
+                )
+            }
 
-            postModel.searchPostByHashtag(
-                searchQuery,
-                onSuccess = { posts ->
-                    val filteredPosts = posts.filter { post ->
-                        post.hashtag?.any { hashtag -> hashtag == searchQuery } == true
+            val postsWithHashtagDeferred = async {
+                postModel.searchPostByHashtag(
+                    searchQuery,
+                    onSuccess = { posts ->
+                        // Filter posts by hashtag (case-insensitive)
+                        postsWithHashtag = posts.filter { post ->
+                            post.hashtag?.any { it.contains(searchQuery, ignoreCase = true) } == true
+                        }
+                        Log.d("Search", "Posts with hashtag: ${postsWithHashtag.size}")
+                    },
+                    onFailure = { error ->
+                        Log.e("Search", "Failed to fetch posts by hashtag: $error")
                     }
-                    postsWithHashtag = filteredPosts
-                    Log.d("Search", "Posts with hashtag: ${filteredPosts.size}")
-                },
-                onFailure = { error ->
-                    Log.e("Search", "Failed to fetch posts by hashtag: $error")
-                }
-            )
+                )
+            }
 
-            postModel.searchPostByTitle(
-                searchQuery,
-                onSuccess = { posts ->
-                    postsWithTitle = posts.filter { post ->
-                        post.title?.contains(searchQuery, ignoreCase = true) == true
+            val postsWithTitleDeferred = async {
+                postModel.searchPostByTitle(
+                    searchQuery,
+                    onSuccess = { posts ->
+                        // Filter posts by title (case-insensitive)
+                        postsWithTitle = posts.filter { post ->
+                            post.title?.contains(searchQuery, ignoreCase = true) == true
+                        }
+                        Log.d("Search", "Posts with title: ${postsWithTitle.size}")
+                    },
+                    onFailure = { error ->
+                        Log.e("Search", "Failed to fetch posts by title: $error")
                     }
-                    Log.d("Search", "Posts with title: ${postsWithTitle.size}")
-                },
-                onFailure = { error ->
-                    Log.e("Search", "Failed to fetch posts by title: $error")
-                }
-            )
+                )
+            }
+
+            awaitAll(usersDeferred, postsWithHashtagDeferred, postsWithTitleDeferred)
         } else {
             persons = emptyList()
             postsWithHashtag = emptyList()
@@ -408,11 +420,21 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                             }
                         }
 
-                    "Post" -> GridImage(
-                        posts = posts,
-                        onClick = {},
-                        modifier = Modifier.padding(horizontal = 20.dp)
-                    )
+                    "Post" ->
+                        if (posts.isEmpty()) {
+                            Text(
+                                text = "No results found",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(horizontal = 20.dp),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        } else {
+                            GridImage(
+                                posts = posts,
+                                onClick = {},
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            )
+                        }
                     "All" -> {
                         Column(modifier = Modifier
                             .fillMaxSize()
@@ -504,17 +526,29 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                 modifier = Modifier.padding(vertical = 8.dp),
                                 color = MaterialTheme.colorScheme.onSecondary
                             )
-                            GridImage(posts = posts.take(9), onClick = {})
-                            Text(
-                                text = "See more",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { selectedTab = 2 },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray,
-                                textDecoration = TextDecoration.Underline,
-                                textAlign = TextAlign.Center
-                            )
+                            if (posts.isEmpty()) {
+                                Text(
+                                    text = "No results found",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(horizontal = 20.dp),
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            } else {
+                                GridImage(posts = posts.take(9), onClick = {})
+
+                                if (posts.size > 3) {
+                                    Text(
+                                        text = "See more",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { selectedTab = 2 },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray,
+                                        textDecoration = TextDecoration.Underline,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
                         }
                     }
                 }
