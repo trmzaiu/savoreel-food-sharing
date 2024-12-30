@@ -11,5 +11,3 @@ data class Post(
     val photoUri: String = "",
     val reactions: Map<String, Int> = emptyMap(),
 )
-
-

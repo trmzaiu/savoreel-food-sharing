@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.PostViewModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
@@ -43,6 +45,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.VerticalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class TakePhotoActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
@@ -87,6 +90,7 @@ enum class SheetContent {
 fun HomeScreen() {
     val userViewModel: UserViewModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
+    val postModel: PostModel = viewModel()
 
     val currentUser by userViewModel.user.collectAsState()
 
@@ -101,15 +105,16 @@ fun HomeScreen() {
     val location by postViewModel.location
     val hashtag by postViewModel.hashtag
     val options by postViewModel.option
+    val postID by postViewModel.postID
 
     val currentSheetContent by postViewModel.currentSheetContent
 
-    var selectedEmoji by remember { mutableStateOf<String?>(null) }
+    var selectedEmoji by remember { mutableStateOf<String?>("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val outerPagerState = rememberPagerState()
-
+    val emojiList = remember { mutableStateListOf<FloatingEmoji>() }
 
     val permissionGranted = remember {
         mutableStateOf(
@@ -163,12 +168,28 @@ fun HomeScreen() {
                             }
 
                             1 -> {
-                                ViewPostScreen(scope, sheetState, outerPagerState)
+                                ViewPostScreen(
+                                    scope,
+                                    sheetState,
+                                    outerPagerState,
+                                    emojiList,
+                                    postModel,
+                                    postID
+                                )
                             }
                         }
                     }
                 } else {
-                    PhotoTakenScreen(scope, sheetState, photoUri, title, location, hashtag, editingField)
+                    PhotoTakenScreen(
+                        scope,
+                        sheetState,
+                        photoUri,
+                        title,
+                        location,
+                        hashtag,
+                        editingField,
+                        postModel
+                    )
                 }
             }
             if (sheetState.isVisible) {
@@ -193,9 +214,23 @@ fun HomeScreen() {
                             ) {
                                 EmojiPickerDialog(
                                     onEmojiSelected = { emoji ->
-                                        selectedEmoji = emoji
+                                        repeat(20) {
+                                            val randomX = Random.nextFloat() * 300f
+                                            val randomY = Random.nextFloat() * 1000f
+                                            emojiList.add(FloatingEmoji(emoji, randomX, randomY))
+                                        }
+                                        postModel.uploadEmojiReaction(
+                                            postId = postID,
+                                            emoji = emoji,
+                                            onSuccess = {
+                                                Log.d("Add Emoji", "Add to DB success")
+                                            },
+                                            onFailure = {
+                                                Log.d("Add Emoji", "Add to DB not success")
+                                            }
+                                        )
                                         scope.launch { sheetState.hide() }
-                                    }
+                                    },
                                 )
                             }
 
@@ -206,6 +241,7 @@ fun HomeScreen() {
                             context = context,
                             options = options
                         )
+
                         else -> {}
                     }
                 }
@@ -246,4 +282,10 @@ fun HomeScreen() {
             }
         }
     }
+    EmojiAnimationDisplay(
+        emojiList = emojiList,
+        onAnimationEnd = { emoji ->
+            emojiList.remove(emoji)
+        }
+    )
 }

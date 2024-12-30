@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
@@ -14,7 +15,7 @@ class NotificationViewModel: ViewModel() {
     private val _notifications = MutableLiveData<List<Notification>>()
     val notifications: LiveData<List<Notification>> = _notifications
 
-    fun createNotification(
+    fun createNotifications(
         recipientIds: List<String>,
         type: String,
         message: String,
@@ -53,6 +54,32 @@ class NotificationViewModel: ViewModel() {
             .addOnFailureListener { exception ->
                 onFailure(exception.message ?: "Failed to create notifications")
             }
+    }
+
+    fun createNotification(
+        recipientId: String,
+        type: String,
+        message: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUser = auth.currentUser ?: run {
+            onFailure("User not logged in")
+            return
+        }
+
+        val notification = Notification(
+            notificationId = db.collection("notifications").document().id,
+            recipientId = recipientId,
+            senderId = currentUser.uid,
+            description = message,
+            type = type
+        )
+
+        db.collection("notifications").document(notification.notificationId)
+            .set(notification)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it.message ?: "Failed to create notification") }
     }
 
     fun getNotifications(onSuccess: (List<Notification>) -> Unit, onFailure: (String) -> Unit) {
@@ -152,5 +179,23 @@ class NotificationViewModel: ViewModel() {
                     .addOnFailureListener { onFailure(it.message ?: "Error deleting notifications") }
             }
             .addOnFailureListener { onFailure(it.message ?: "Error fetching notifications") }
+    }
+
+    fun listenToNewNotifications(onNewNotification: (Notification) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        FirebaseFirestore.getInstance()
+            .collection("notifications")
+            .whereEqualTo("recipientId", currentUser)
+            .orderBy("date", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) return@addSnapshotListener
+
+                snapshot?.documentChanges?.forEach { change ->
+                    if (change.type == DocumentChange.Type.ADDED) {
+                        val notification = change.document.toObject(Notification::class.java)
+                        onNewNotification(notification)
+                    }
+                }
+            }
     }
 }

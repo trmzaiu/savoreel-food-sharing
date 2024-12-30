@@ -127,6 +127,37 @@ class PostModel : ViewModel() {
         }
     }
 
+    fun uploadEmojiReaction(
+        postId: String,
+        emoji: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val postRef = db.collection("posts").document(postId)
+
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(postRef)
+
+            if (!snapshot.exists()) {
+                throw Exception("Post not found")
+            }
+
+            val currentReactions = snapshot.get("reactions") as? Map<String, Long> ?: emptyMap()
+            val updatedReactions = currentReactions.toMutableMap()
+
+            val currentCount = updatedReactions[emoji] ?: 0
+            updatedReactions[emoji] = currentCount + 1
+
+            transaction.update(postRef, "reactions", updatedReactions)
+        }.addOnSuccessListener {
+            Log.d("Firebase", "Emoji reaction added successfully")
+            onSuccess()
+        }.addOnFailureListener { exception ->
+            Log.e("Firebase", "Failed to add emoji reaction", exception)
+            onFailure("Failed to add emoji reaction: ${exception.localizedMessage}")
+        }
+    }
+
     // Original getPostsFromFirebase remains the same
     fun getPostsFromFirebase() {
         db.collection("posts")
@@ -278,6 +309,29 @@ class PostModel : ViewModel() {
             }
             .addOnFailureListener { e ->
                 onFailure("Failed to retrieve posts: ${e.message}")
+            }
+    }
+
+    fun getPost(
+        postId: String,
+        onSuccess: (Post?) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        db.collection("posts")
+            .document(postId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val post = document.toObject(Post::class.java)
+                    onSuccess(post)
+                } else {
+                    onSuccess(null)
+                }
+            }
+            .addOnFailureListener { exception ->
+                val errorMessage = "Error fetching post with ID $postId: ${exception.localizedMessage}"
+                Log.e("Firebase", errorMessage)
+                onFailure(errorMessage)
             }
     }
 }

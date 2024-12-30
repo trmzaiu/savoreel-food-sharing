@@ -121,6 +121,11 @@
             android:exported="true"
             android:theme="@style/Theme.Savoreel">
         </activity>
+        <activity android:name=".ui.home.PostActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Savoreel">
+        </activity>
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

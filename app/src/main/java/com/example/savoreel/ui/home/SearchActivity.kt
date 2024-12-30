@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.R
+import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.Post
 import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.ThemeViewModel
@@ -102,12 +103,12 @@ class SearchActivity: ComponentActivity() {
                             }
                             startActivity(intent)
                         }
-                }){ userId ->
-                    val intent = Intent(this, GridPostActivity::class.java).apply {
-                        putExtra("USER_ID", userId)
+                    }){ userId ->
+                        val intent = Intent(this, GridPostActivity::class.java).apply {
+                            putExtra("USER_ID", userId)
+                        }
+                        startActivity(intent)
                     }
-                    startActivity(intent)
-                }
             }
         }
     }
@@ -117,6 +118,7 @@ class SearchActivity: ComponentActivity() {
 fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (String) -> Unit) {
     val userViewModel: UserViewModel = viewModel()
     val postModel: PostModel = viewModel()
+    val notificationViewModel: NotificationViewModel = viewModel()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
@@ -405,8 +407,14 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                                             it
                                                         }
                                                     }
-                                                    persons = updatedList // Update the persons list with modified follow status
-                                                    isFollow = isFollowing // Flip the follow status
+                                                    if (isFollowing) {
+                                                        person.userId?.let { it1 ->
+                                                            notificationViewModel.createNotification(
+                                                                it1, "Follow", "has started following you.", {}, { })
+                                                        }
+                                                    }
+                                                    persons = updatedList
+                                                    isFollow = isFollowing
                                                     Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
                                                 },
                                                 onFailure = { errorMessage ->

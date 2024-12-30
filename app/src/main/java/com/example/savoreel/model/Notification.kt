@@ -25,26 +25,22 @@ fun formatRelativeTime(timestamp: Timestamp): String {
     return when {
         diffInMillis < TimeUnit.MINUTES.toMillis(1) -> {
             val seconds = TimeUnit.MILLISECONDS.toSeconds(diffInMillis)
-            if (seconds.toInt() == 1) "$seconds second"
-            else "$seconds seconds"
+            "${seconds}s"
         }
 
         diffInMillis < TimeUnit.HOURS.toMillis(1) -> {
             val minutes = TimeUnit.MILLISECONDS.toMinutes(diffInMillis)
-            if (minutes.toInt() == 1) "$minutes minute"
-            else "$minutes minutes"
+            "${minutes}min"
         }
 
         diffInMillis < TimeUnit.DAYS.toMillis(1) -> {
             val hours = TimeUnit.MILLISECONDS.toHours(diffInMillis)
-            if (hours.toInt() == 1) "$hours hour"
-            else "$hours hours"
+            "${hours}h"
         }
 
         diffInMillis < TimeUnit.DAYS.toMillis(7) -> {
             val days = TimeUnit.MILLISECONDS.toDays(diffInMillis)
-            if (days.toInt() == 1) "$days day"
-            else "$days days"
+            "${days}d"
         }
 
         else -> {

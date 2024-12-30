@@ -90,6 +90,7 @@ fun GridPost(userID: String) {
     var currentUserName by remember { mutableStateOf("") }
     var currentUserAvatar by remember { mutableStateOf("") }
     var listOfPost by remember { mutableStateOf(emptyList<Post>()) }
+    val context = LocalContext.current
 
     isRowVisible = userID != "Everyone"
 
@@ -159,8 +160,6 @@ fun GridPost(userID: String) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val context = LocalContext.current
-
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         if (avatarUrl.isNotEmpty()) {
                             UserAvatar(avatarUrl, 100.dp)
@@ -229,7 +228,12 @@ fun GridPost(userID: String) {
                 }
             }
 
-            GridImage(listOfPost, {})
+            GridImage(posts = listOfPost, onClick = { post ->
+                val intent = Intent(context, PostActivity::class.java).apply {
+                    putExtra("POST_ID", post.postId)
+                }
+                context.startActivity(intent)
+            })
         }
     }
 }
@@ -244,12 +248,10 @@ fun GridImage(posts: List<Post>, onClick: (Post) -> Unit, modifier: Modifier = M
         modifier = modifier
     ) {
         items(posts) { post ->
-            Log.e("GridPost", "uri: $post")
             ImageCustom(
                 url = post.photoUri,
-                onClick = {
-                    // doi chanh
-                }
+                post = post,
+                onClick = onClick
             )
         }
     }
