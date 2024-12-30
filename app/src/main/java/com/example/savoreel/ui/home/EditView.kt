@@ -8,6 +8,7 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +38,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.savoreel.ui.theme.SavoreelTheme
 
 
 @Composable
@@ -121,7 +120,7 @@ fun BlurredInputOverlay(
                     if (text.isEmpty()) {
                         Text(
                             text = label,
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSecondary,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -135,7 +134,7 @@ fun BlurredInputOverlay(
             )
             Text(
                 text = "$characterCount characters remaining",
-                color = if (characterCount < 0) Color.Red else Color.Gray,
+                color = if (characterCount < 0) MaterialTheme.colorScheme.primary else Color.Gray,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -155,7 +154,10 @@ fun EditableField(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onStartEdit() }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { onStartEdit() }
             .padding(5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -169,7 +171,7 @@ fun EditableField(
         Spacer(modifier = Modifier.width(15.dp))
         Text(
             text = value.ifEmpty { label },
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = if(isTitle) FontWeight.Bold else FontWeight.Normal,
             textAlign = if(isTitle) TextAlign.Center else TextAlign.Justify,
             fontSize = if(isTitle) 22.sp else 18.sp,
@@ -209,14 +211,6 @@ fun sharePhoto(context: Context, photoUri: Uri?) {
         context.startActivity(Intent.createChooser(shareIntent, "Share Photo"))
     } else {
         Toast.makeText(context, "No photo to share", Toast.LENGTH_SHORT).show()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun EditPreview() {
-    SavoreelTheme() {
-
     }
 }
 

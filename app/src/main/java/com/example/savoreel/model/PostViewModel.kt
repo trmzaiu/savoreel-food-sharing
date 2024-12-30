@@ -1,13 +1,23 @@
-package com.example.savoreel.ui.home
+package com.example.savoreel.model
 
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.savoreel.ui.home.PhotoState
+import com.example.savoreel.ui.home.SheetContent
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class PostViewModel : ViewModel() {
     private val _currentState = mutableStateOf(PhotoState.None)
     val currentState : State<PhotoState> = _currentState
+
+    private val _isFrontCamera = MutableStateFlow(true)
+    val isFrontCamera: StateFlow<Boolean> = _isFrontCamera
+
+    private val _flashEnabled = MutableStateFlow(false)
+    val flashEnabled: StateFlow<Boolean> = _flashEnabled
 
     // Photo states
     private val _photoUri = mutableStateOf<Uri?>(null)
@@ -27,12 +37,6 @@ class PostViewModel : ViewModel() {
 
     private val _editingField = mutableStateOf<String?>(null) // Which field is being edited
     val editingField: State<String?> = _editingField
-
-    private val _isFrontCamera = mutableStateOf(false)
-    val isFrontCamera: State<Boolean> = _isFrontCamera
-
-    private val _flashEnabled = mutableStateOf(false)
-    val flashEnabled: State<Boolean> = _flashEnabled
 
     private val _option = mutableStateOf<List<Pair<String, Int>>>(emptyList())
     val option: State<List<Pair<String, Int>>> = _option
@@ -67,12 +71,12 @@ class PostViewModel : ViewModel() {
         _isPhotoTaken.value = value
     }
 
-    fun setisFrontCamera(value: Boolean) {
-        _isFrontCamera.value = value
+    fun setFrontCamera(isFront: Boolean) {
+        _isFrontCamera.value = isFront
     }
 
-    fun setisFlashEnabled(value: Boolean) {
-        _flashEnabled.value = value
+    fun setFlashEnabled(enabled: Boolean) {
+        _flashEnabled.value = enabled
     }
 
     fun resetPhoto() {

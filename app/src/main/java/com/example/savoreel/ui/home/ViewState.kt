@@ -11,18 +11,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,8 +33,8 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,19 +47,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.emoji2.emojipicker.EmojiPickerView
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.savoreel.R
 import com.example.savoreel.model.PostModel
-import com.example.savoreel.ui.theme.SavoreelTheme
-import com.example.savoreel.ui.theme.secondaryDarkColor
+import com.example.savoreel.model.PostViewModel
+import com.example.savoreel.model.UserViewModel
+import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.VerticalPager
@@ -65,98 +71,101 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun TakePhotoScreen(
-    postViewModel: PostViewModel,
-    isFrontCamera: Boolean,
-    flashEnabled: Boolean,
-    name: String
-) {
-    var takePhotoAction: (() -> Unit)? by remember { mutableStateOf(null) }
+fun TakePhotoScreen() {
+    val postViewModel: PostViewModel = viewModel()
+    val userViewModel: UserViewModel = viewModel()
 
+    val isFrontCamera by postViewModel.isFrontCamera.collectAsState()
+    val flashEnabled by postViewModel.flashEnabled.collectAsState()
+    val currentUser by userViewModel.user.collectAsState()
+
+    var takePhotoAction: (() -> Unit)? by remember { mutableStateOf(null) }
+    var name by remember { mutableStateOf("") }
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         postViewModel.setPhotoUri(uri)
-        if(uri != null) {
+        if (uri != null) {
             Log.e("PhotoTakenScreen", "Uri: $uri")
             postViewModel.navigateToState(PhotoState.PhotoTaken)
         }
     }
-    Column(
-        modifier = Modifier
-            .padding(10.dp, 0.dp, 10.dp, 15.dp),
-    ) {
-        Text(
-            text = name,
-            fontSize = 20.sp,
-            lineHeight = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = secondaryDarkColor,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 60.dp, bottom = 8.dp)
+
+    LaunchedEffect(currentUser) {
+        userViewModel.getUser(
+            onSuccess = { currentUser ->
+                if (currentUser != null) {
+                    name = currentUser.name.toString()
+                } else {
+                    Log.e("TakePhotoActivity", "User data not found")
+                }
+            },
+            onFailure = { error ->
+                Log.e("TakePhotoActivity", "Error retrieving user: $error")
+            }
         )
-        Column(
-            modifier = Modifier
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = name,
+                fontSize = 20.sp,
+                lineHeight = 20.sp,
+                fontFamily = nunitoFontFamily,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 60.dp, bottom = 8.dp)
+            )
+            Box(modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(30.dp))
             ) {
+                CameraFrame(
+                    isFrontCamera = isFrontCamera,
+                    onCapturePhoto = { uri ->
+                        postViewModel.setPhotoUri(uri)
+                        postViewModel.setisPhotoTaken(true)
+                        postViewModel.navigateToState(PhotoState.PhotoTaken)
+                    },
+                    onTakePhoto = { action -> takePhotoAction = action },
+                    flashEnabled = flashEnabled,
+                )
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(30.dp))
-                        .background(Color.Gray)
+                        .align(Alignment.TopStart)
+                        .padding(8.dp)
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f))
+                        .clickable { postViewModel.setFlashEnabled(!flashEnabled) },
+                    contentAlignment = Alignment.Center
                 ) {
-                    CameraFrame(
-                        isFrontCamera = isFrontCamera,
-                        onCapturePhoto = { uri ->
-                            postViewModel.setPhotoUri(uri)
-                            postViewModel.setisPhotoTaken(true)
-                            postViewModel.navigateToState(PhotoState.PhotoTaken)
-                        },
-                        onTakePhoto = { action -> takePhotoAction = action },
-                        flashEnabled = flashEnabled,
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_flash),
+                        contentDescription = "Toggle Flash",
+                        tint = MaterialTheme.colorScheme.onTertiary.copy(alpha = if (flashEnabled) 1f else 0.3f),
+                        modifier = Modifier.size(24.dp)
                     )
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(8.dp)
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .clickable { postViewModel.setisFlashEnabled(!flashEnabled) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_flash),
-                            contentDescription = "Toggle Flash",
-                            tint = Color.White.copy(alpha = if (flashEnabled) 1f else 0.3f),
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
                 }
             }
+        }
+        Box(modifier = Modifier.align(Alignment.BottomEnd).background(MaterialTheme.colorScheme.background)){
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp, 20.dp),
+                modifier = Modifier.fillMaxWidth().padding(0.dp, 20.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                ImageButton(R.drawable.ic_upload, "Upload", 40.dp) {
+                ImageButton(R.drawable.ic_upload, "Upload") {
                     galleryLauncher.launch("image/*")
                 }
-                ImageButton(R.drawable.ic_camera, "Take Photo", 75.dp) {
+                ImageButtonWithBg(R.drawable.circle, "Take Photo", 70.dp, 0.dp) {
                     takePhotoAction?.invoke()
                 }
-                ImageButton(R.drawable.ic_camflip, "Swap Camera", 35.dp) {
-                    postViewModel.setisFrontCamera(!isFrontCamera)
+                ImageButton(R.drawable.ic_camflip, "Swap Camera") {
+                    postViewModel.setFrontCamera(!isFrontCamera)
                 }
             }
         }
@@ -165,84 +174,92 @@ fun TakePhotoScreen(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
-fun PhotoTakenScreen(
-    padding : PaddingValues,
-    postViewModel: PostViewModel,
-    postModel: PostModel,
-    scope: CoroutineScope,
+fun PhotoTakenScreen(scope: CoroutineScope,
     sheetState: SheetState,
     photoUri: Uri?,
     title:  String,
     location: String,
     hashtag: String,
     editingField: String?,
-    name: String,
 ) {
+    val userViewModel: UserViewModel = viewModel()
+    val postViewModel: PostViewModel = viewModel()
+    val postModel: PostModel = viewModel()
     val context = LocalContext.current
 
-    CallBackState(postViewModel)
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .padding(10.dp, 0.dp, 10.dp, 15.dp),
-    ) {
-        Text(
-            text = name,
-            fontSize = 20.sp,
-            lineHeight = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = secondaryDarkColor,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 60.dp, bottom = 8.dp)
+    val currentUser by userViewModel.user.collectAsState()
+
+    var name by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+
+    LaunchedEffect(currentUser) {
+        userViewModel.getUser(
+            onSuccess = { currentUser ->
+                if (currentUser != null) {
+                    name = currentUser.name.toString()
+                } else {
+                    Log.e("TakePhotoActivity", "User data not found")
+                }
+            },
+            onFailure = { error ->
+                Log.e("TakePhotoActivity", "Error retrieving user: $error")
+            }
         )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(30.dp))
-                        .background(Color.Gray)
-                ) {
-                    GlideImage(
-                        model = photoUri,
-                        contentDescription = "Captured Photo",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                EditableField(
-                    label = "Add Title",
-                    value = title,
-                    onStartEdit = { postViewModel.startEditingField("title") },
-                    isTitle = true,
+    }
+
+    CallBackState()
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = name,
+                fontSize = 20.sp,
+                lineHeight = 20.sp,
+                fontFamily = nunitoFontFamily,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 60.dp, bottom = 8.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(30.dp))
+                    .background(Color.Gray)
+            ) {
+                GlideImage(
+                    model = photoUri,
+                    contentDescription = "Captured Photo",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
-                if (hashtag.isNotEmpty() || editingField == "Hashtag") {
-                    EditableField(
-                        label = "Add Hashtag",
-                        value = hashtag,
-                        onStartEdit = { postViewModel.startEditingField("hashtag") },
-                        ic = R.drawable.ic_hashtag
-                    )
-                }
-                if (location.isNotEmpty() || editingField == "Location") {
-                    EditableField(
-                        label = "Add Location",
-                        value = location,
-                        onStartEdit = { postViewModel.startEditingField("location") },
-                        ic = R.drawable.ic_location
-                    )
-                }
+            }
+            Spacer(modifier = Modifier.height(3.dp))
+            EditableField(
+                label = "Add Title",
+                value = title,
+                onStartEdit = { postViewModel.startEditingField("title") },
+                isTitle = true,
+            )
+            if (hashtag.isNotEmpty() || editingField == "Hashtag") {
+                EditableField(
+                    label = "Add Hashtag",
+                    value = hashtag,
+                    onStartEdit = { postViewModel.startEditingField("hashtag") },
+                    ic = R.drawable.ic_hashtag
+                )
+            }
+            if (location.isNotEmpty() || editingField == "Location") {
+                EditableField(
+                    label = "Add Location",
+                    value = location,
+                    onStartEdit = { postViewModel.startEditingField("location") },
+                    ic = R.drawable.ic_location
+                )
             }
 
+        }
+        Box(modifier = Modifier.align(Alignment.BottomEnd)){
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -250,37 +267,58 @@ fun PhotoTakenScreen(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                ImageButton(R.drawable.ic_discard, "Discard", 40.dp) {
+                ImageButton(R.drawable.ic_discard, "Discard") {
                     postViewModel.resetPhoto()
                     postViewModel.navigateToState(PhotoState.TakePhoto)
                 }
-                ImageButton(R.drawable.ic_send, "Post", 75.dp) {
-                    if (photoUri != null && photoUri != Uri.EMPTY) {
-                        val inputStream = context.contentResolver.openInputStream(photoUri)
-                        val photoData = inputStream?.readBytes() ?: byteArrayOf()
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.tertiary)
+                            .size(75.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(40.dp),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                } else {
+                    ImageButtonWithBg(R.drawable.ic_send, "Post", 40.dp, 5.dp) {
+                        isLoading = true
+                        if (photoUri != null && photoUri != Uri.EMPTY) {
+                            val inputStream = context.contentResolver.openInputStream(photoUri)
+                            val photoData = inputStream?.readBytes() ?: byteArrayOf()
 
-                        if (photoData.isNotEmpty()) {
-                            postModel.uploadPost(
-                                name = name,
-                                title = title,
-                                hashtag = hashtag,
-                                location = location,
-                                photoData = photoData,
-                                onSuccess = {
-                                    postViewModel.navigateToState(PhotoState.TakePhoto)
-                                },
-                                onFailure = { errorMessage ->
-                                    Log.e("PhotoTakenScreen", "Post upload failed: $errorMessage")
-                                }
-                            )
+                            if (photoData.isNotEmpty()) {
+                                postModel.uploadPost(
+                                    name = name,
+                                    title = title,
+                                    hashtag = hashtag,
+                                    location = location,
+                                    photoData = photoData,
+                                    onSuccess = {
+                                        postViewModel.navigateToState(PhotoState.TakePhoto)
+                                        isLoading = false
+                                    },
+                                    onFailure = { errorMessage ->
+                                        Log.e("PhotoTakenScreen", "Post upload failed: $errorMessage")
+                                        isLoading = false
+                                    }
+                                )
+                            } else {
+                                Log.e("PhotoTakenScreen", "Failed to convert URI to ByteArray.")
+                                isLoading = false
+                            }
                         } else {
-                            Log.e("PhotoTakenScreen", "Failed to convert URI to ByteArray.")
+                            Log.e("PhotoTakenScreen", "Photo URI is invalid. Cannot upload post.")
+                            isLoading = false
                         }
-                    } else {
-                        Log.e("PhotoTakenScreen", "Photo URI is invalid. Cannot upload post.")
                     }
                 }
-                    ImageButton(R.drawable.ic_edit, "Edit", 35.dp) {
+                ImageButton(R.drawable.ic_edit, "Edit") {
                     postViewModel.setcurrentSheetContent(SheetContent.OPTIONS)
                     scope.launch { sheetState.show() }
                 }
@@ -297,156 +335,155 @@ fun PhotoTakenScreen(
     )
 }
 
-@OptIn(ExperimentalGlideComposeApi::class, ExperimentalMaterial3Api::class,
-    ExperimentalPagerApi::class
-)
+@OptIn(ExperimentalGlideComposeApi::class, ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
 fun ViewPostScreen(
-    postViewModel: PostViewModel,
-    postModel: PostModel,
     scope: CoroutineScope,
     sheetState: SheetState,
-    photoUri: Uri?,
-    title:  String,
-    location: String,
-    hashtag: String,
     parentPagerState: PagerState
 ) {
-    val postsListPagerState  = rememberPagerState()
-    val posts by postModel.posts.observeAsState(emptyList())
+    val postViewModel: PostViewModel = viewModel()
+    val postModel: PostModel = viewModel()
+    val innerPagerState = rememberPagerState()
+    val posts by postModel.posts.collectAsState(emptyList())
+    val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        postModel.getPostsFromFirebase()
+    LaunchedEffect(posts) {
+        if (posts.isEmpty()) {
+            postModel.getFollowingUserIds()
+        }
     }
 
-    CallBackState(postViewModel)
-        Column(
-            modifier = Modifier
-                .padding(10.dp, 0.dp, 10.dp, 15.dp),
-        ) {
+    CallBackState()
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        if (posts.isNotEmpty()) {
             VerticalPager(
                 count = posts.size,
-                state = postsListPagerState
+                state = innerPagerState,
             ) { page ->
                 val post = posts[page]
-
-                Text(
-                    text = post.name,
-                    fontSize = 20.sp,
-                    lineHeight = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = secondaryDarkColor,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 60.dp, bottom = 8.dp)
-                )
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(30.dp))
-                            .background(Color.Gray)
-                    ) {
-                        GlideImage(
-                            model = photoUri,
-                            contentDescription = "Captured Photo",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    if (post.title?.isNotEmpty() == true) {
-                        EditableField(
-                            label = "Add Title",
-                            value = title,
-                            onStartEdit = { },
-                            isTitle = true,
-                        )
-                    }
-                    if (post.hashtag?.isNotEmpty() == true) {
-                        EditableField(
-                            label = "Add Hashtag",
-                            value = hashtag,
-                            onStartEdit = {},
-                            ic = R.drawable.ic_hashtag
-                        )
-                    }
-                    if (post.location?.isNotEmpty() == true) {
-                        EditableField(
-                            label = "Add Location",
-                            value = location,
-                            onStartEdit = {},
-                            ic = R.drawable.ic_location
-                        )
-                    }
-                }
-            }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(0.dp, 20.dp),
-                        verticalArrangement = Arrangement.Bottom
-                    ) {
+                Column(modifier = Modifier.fillMaxSize().padding(top = 30.dp)) {
+                    Text(
+                        text = post.name,
+                        fontSize = 20.sp,
+                        lineHeight = 20.sp,
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                    )
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(10.dp, 0.dp, 10.dp, 10.dp)
+                                .aspectRatio(1f)
                                 .clip(RoundedCornerShape(30.dp))
-                                .background(Color.LightGray),
+                                .background(Color.Gray)
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(5.dp),
-                                horizontalArrangement = Arrangement.SpaceAround,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                listOf("😀", "😍", "😂", "❤️", "🔥").forEach { emoji ->
-                                    Text(
-                                        text = emoji,
-                                        fontSize = 25.sp,
-                                        modifier = Modifier.clickable {
-                                            //                    postViewModel.addEmojiToPost(emoji)
-                                        }
-                                    )
-                                }
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_emoji),
-                                    contentDescription = "Emoji Picker",
-                                    modifier = Modifier.size(30.dp).clickable {
-                                        scope.launch { sheetState.show() }
-                                        postViewModel.setcurrentSheetContent(SheetContent.EMOJI_PICKER)
-                                    }
-                                )
+                            val secureUrl = remember(post.photoUri) {
+                                post.photoUri.replace("http://", "https://")
                             }
 
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            ImageButton(R.drawable.ic_download, "Show Grid", 40.dp) {
+                            // Debug logging
+                            LaunchedEffect(secureUrl) {
+                                Log.d("ViewPostScreen", "Loading image from: $secureUrl")
                             }
-                            ImageButton(R.drawable.ic_camera, "Back Home", 75.dp) {
-                                postViewModel.resetPhoto()
-                                scope.launch {
-                                    parentPagerState.animateScrollToPage(0)
+
+                            AsyncImage(
+                                model = ImageRequest.Builder(context)
+                                    .data(secureUrl)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Post Photo",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop,
+                            )
+
+                        }
+                        if (post.title.isNotEmpty()) {
+                            EditableField(
+                                label = "Add Title",
+                                value = post.title,
+                                onStartEdit = { },
+                                isTitle = true,
+                            )
+                        }
+                        if (post.hashtag.isNotEmpty()) {
+                            EditableField(
+                                label = "Add Hashtag",
+                                value = post.hashtag,
+                                onStartEdit = {},
+                                ic = R.drawable.ic_hashtag
+                            )
+                        }
+                        if (post.location.isNotEmpty()) {
+                            EditableField(
+                                label = "Add Location",
+                                value = post.location,
+                                onStartEdit = {},
+                                ic = R.drawable.ic_location
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        Box(modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 20.dp)){
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp, 0.dp, 10.dp, 10.dp)
+                        .clip(RoundedCornerShape(30.dp))
+                        .background(MaterialTheme.colorScheme.tertiary),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        listOf("😀", "😍", "😂", "❤️", "🔥").forEach { emoji ->
+                            Text(
+                                text = emoji,
+                                fontSize = 25.sp,
+                                modifier = Modifier.clickable {
                                 }
-    //                            postViewModel.navigateToState(PhotoState.TakePhoto)
-                            }
-                            ImageButton(R.drawable.ic_edit, "More", 35.dp) {
-                                postViewModel.setcurrentSheetContent(SheetContent.OPTIONS)
-                                scope.launch { sheetState.show() }
-                            }
+                            )
                         }
-//            }
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_emoji),
+                            contentDescription = "Emoji Picker",
+                            modifier = Modifier.size(30.dp).clickable {
+                                scope.launch { sheetState.show() }
+                                postViewModel.setcurrentSheetContent(SheetContent.EMOJI_PICKER)
+                            }
+                        )
+                    }
+
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    ImageButton(R.drawable.ic_download, "Show Grid") {
+                    }
+                    ImageButton(R.drawable.circle, "Back Home",45.dp) {
+                        postViewModel.resetPhoto()
+                        scope.launch {
+                            parentPagerState.animateScrollToPage(0)
+                        }
+                    }
+                    ImageButton(R.drawable.ic_edit, "More") {
+                        postViewModel.setcurrentSheetContent(SheetContent.OPTIONS)
+                        scope.launch { sheetState.show() }
+                    }
+                }
+            }
         }
     }
     postViewModel.setOption(
@@ -462,8 +499,6 @@ fun ViewPostScreen(
 @Composable
 fun EmojiPickerDialog(
     onEmojiSelected: (String) -> Unit,
-//    scope: CoroutineScope,
-//    emojiSheetState: SheetState
 ) {
     AndroidView(
         factory = { context ->
@@ -482,87 +517,106 @@ fun EmojiPickerDialog(
 fun BottomSheet(
     scope: CoroutineScope,
     sheetState: SheetState,
-    postViewModel: PostViewModel,
     photoUri: Uri?,
     context: Context,
     options: List<Pair<String, Int>>
 ){
+    val postViewModel: PostViewModel = viewModel()
     var currentEditOption by remember { mutableStateOf("") }
 
-//    ModalBottomSheet(
-//        onDismissRequest = { scope.launch { sheetState.hide() } },
-//        sheetState = sheetState
-//    ) {
-        EditOptionsOverlay(
-            onDismiss = { scope.launch { sheetState.hide() } },
-            options = options,
-            onSelect = { option ->
-                when (option.lowercase()) {
-                    "hashtag" -> {
-                        currentEditOption = "hashtag"
-                        postViewModel.startEditingField("hashtag")
-                    }
-                    "location" -> {
-                        currentEditOption = "location"
-                        postViewModel.startEditingField("location")
-                    }
-                    "download" -> {
-                        photoUri?.let {
-                            downloadPhoto(context, it)
-                        }
-                    }
-                    "share" -> {
-                        photoUri?.let {
-                            sharePhoto(context, it)
-                        }
+    EditOptionsOverlay(
+        onDismiss = { scope.launch { sheetState.hide() } },
+        options = options,
+        onSelect = { option ->
+            when (option.lowercase()) {
+                "hashtag" -> {
+                    currentEditOption = "hashtag"
+                    postViewModel.startEditingField("hashtag")
+                }
+                "location" -> {
+                    currentEditOption = "location"
+                    postViewModel.startEditingField("location")
+                }
+                "download" -> {
+                    photoUri?.let {
+                        downloadPhoto(context, it)
                     }
                 }
-                scope.launch { sheetState.hide() }
+                "share" -> {
+                    photoUri?.let {
+                        sharePhoto(context, it)
+                    }
+                }
             }
-        )
-//    }
+            scope.launch { sheetState.hide() }
+        }
+    )
 }
 
 @Composable
 fun ImageButton(
     @DrawableRes iconId: Int,
     description: String,
-    size : Dp = 40.dp,
+    size: Dp = 35.dp,
     onClick: () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     Icon(
         painter = painterResource(iconId),
         contentDescription = description,
         modifier = Modifier
             .size(size)
-            .clickable { onClick() },
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
         tint = MaterialTheme.colorScheme.onBackground
     )
 }
 
 @Composable
-fun CallBackState(
-    postViewModel: PostViewModel
-    ){
+fun ImageButtonWithBg(
+    @DrawableRes iconId: Int,
+    description: String,
+    size: Dp = 40.dp,
+    padding: Dp = 0.dp,
+    onClick: () -> Unit,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.tertiary)
+            .size(75.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+    ) {
+        Icon(
+            painter = painterResource(iconId),
+            contentDescription = description,
+            modifier = Modifier.size(size).align(Alignment.Center).padding(end=padding),
+            tint = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+@Composable
+fun CallBackState(){
+    val postViewModel: PostViewModel = viewModel()
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
-//    val backPressedCallback = rememberUpdatedState {
-//        postViewModel.navigateToState(PhotoState.TakePhoto)
-//    }
+    // Register a custom back press callback
     backDispatcher?.addCallback(
         LocalLifecycleOwner.current,
         object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                // Ensure the navigation logic is properly triggered
                 postViewModel.navigateToState(PhotoState.TakePhoto)
             }
         }
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SavoreelTheme() {
-    }
 }

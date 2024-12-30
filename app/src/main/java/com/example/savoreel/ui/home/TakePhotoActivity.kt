@@ -8,18 +8,21 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.savoreel.model.PostModel
+import com.example.savoreel.model.PostViewModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.PostTopBar
@@ -43,6 +46,7 @@ import kotlinx.coroutines.launch
 
 class TakePhotoActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,9 +57,17 @@ class TakePhotoActivity : ComponentActivity() {
             val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
 
             SavoreelTheme(darkTheme = isDarkMode) {
-                TakePhotoScreen()
+                HomeScreen()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        userViewModel.getUser(
+            onSuccess = { user -> userViewModel.setUser(user) },
+            onFailure = { error -> Log.e("TakePhotoActivity", "Error retrieving user: $error") }
+        )
     }
 }
 
@@ -63,7 +75,6 @@ enum class PhotoState {
     None,
     TakePhoto,
     PhotoTaken,
-    ViewPost
 }
 enum class SheetContent {
     NONE,
@@ -73,31 +84,31 @@ enum class SheetContent {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
-fun TakePhotoScreen(
-) {
+fun HomeScreen() {
     val userViewModel: UserViewModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
-    val postModel: PostModel = viewModel()
+
+    val currentUser by userViewModel.user.collectAsState()
 
     val currentState by postViewModel.currentState
+
     var name by remember { mutableStateOf("") }
 
-//    val permissionGranted by postViewModel.isPermissionGranted
     val photoUri by postViewModel.photoUri
     val editingField by postViewModel.editingField
     val title by postViewModel.title
     val location by postViewModel.location
     val hashtag by postViewModel.hashtag
     val options by postViewModel.option
-    val isFrontCamera by postViewModel.isFrontCamera
-    val flashEnabled by postViewModel.flashEnabled
+
     val currentSheetContent by postViewModel.currentSheetContent
 
     var selectedEmoji by remember { mutableStateOf<String?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val pagerState = rememberPagerState()
+    val outerPagerState = rememberPagerState()
+
 
     val permissionGranted = remember {
         mutableStateOf(
@@ -107,179 +118,130 @@ fun TakePhotoScreen(
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
+
     LaunchedEffect(currentState) {
         if (currentState == PhotoState.PhotoTaken) {
-            pagerState.scrollToPage(0)
+            outerPagerState.scrollToPage(0)
         }
     }
 
-    LaunchedEffect(Unit) {
-        userViewModel.getUser(onSuccess = { user ->
-            if (user != null) {
-                name = user.name ?: ""
-            } else {
-                Log.e("NameTheme", "User data not found")
+    LaunchedEffect(currentUser) {
+        userViewModel.getUser(
+            onSuccess = { currentUser ->
+                if (currentUser != null) {
+                    name = currentUser.name.toString()
+                } else {
+                    Log.e("TakePhotoActivity", "User data not found")
+                }
+            },
+            onFailure = { error ->
+                Log.e("TakePhotoActivity", "Error retrieving user: $error")
             }
-        }, onFailure = { error ->
-            Log.e("NameTheme", "Error retrieving user: $error")
-        })
+        )
     }
 
-    if (!permissionGranted.value) {
-        RequestCameraPermission(
-            onPermissionGranted = { permissionGranted.value = true },
-            onPermissionDenied = { permissionGranted.value = false },
-        )
-    } else {
-        Scaffold(
-            topBar = { PostTopBar() },
-            content = { padding ->
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        if (!permissionGranted.value) {
+            RequestCameraPermission(
+                onPermissionGranted = { permissionGranted.value = true },
+                onPermissionDenied = { permissionGranted.value = true }
+            )
+        } else {
+            PostTopBar()
+            Column(modifier = Modifier.padding(5.dp, 130.dp, 5.dp, 15.dp)) {
                 if (currentState != PhotoState.PhotoTaken) {
                     VerticalPager(
                         count = 2,
-                        state = pagerState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding)
-                    ) { page ->
-                        when (page) {
+                        state = outerPagerState,
+                        modifier = Modifier.fillMaxSize().padding()
+                    ) { outerPage ->
+                        when (outerPage) {
                             0 -> {
-                                TakePhotoScreen(
-                                    postViewModel,
-                                    isFrontCamera,
-                                    flashEnabled,
-                                    name
-                                )
+                                TakePhotoScreen()
                             }
 
                             1 -> {
-                                ViewPostScreen(
-                                    postViewModel,
-                                    postModel,
-                                    scope,
-                                    sheetState,
-                                    photoUri,
-                                    title,
-                                    location,
-                                    hashtag,
-                                    parentPagerState = pagerState
-                                )
+                                ViewPostScreen(scope, sheetState, outerPagerState)
                             }
                         }
                     }
                 } else {
-//                    when (currentState) {
-//                        PhotoState.TakePhoto -> TakePhotoScreen(
-//                            postViewModel,
-//                            isFrontCamera,
-//                            flashEnabled,
-//                            name
-//                        )
-
-                     PhotoTakenScreen(
-                        padding,
-                        postViewModel,
-                        postModel,
-                        scope,
-                        sheetState,
-                        photoUri,
-                        title,
-                        location,
-                        hashtag,
-                        editingField,
-                        name
-                    )
-
-//                        PhotoState.ViewPost -> ViewPostScreen(
-//                            postViewModel,
-//                            postModel,
-//                            scope,
-//                            sheetState,
-//                            photoUri,
-//                            title,
-//                            location,
-//                            hashtag
-//                        )
-//
-//                        else -> {}
-//                    }
+                    PhotoTakenScreen(scope, sheetState, photoUri, title, location, hashtag, editingField)
                 }
             }
-        )
-    }
-    if (sheetState.isVisible) {
-        ModalBottomSheet(
-            onDismissRequest = {
-                postViewModel.setcurrentSheetContent(SheetContent.NONE)
-                scope.launch { sheetState.hide() }
-            },
-            sheetState = sheetState,
-            modifier =
-            when (currentSheetContent) {
-                SheetContent.EMOJI_PICKER -> Modifier.height(400.dp)
-                else -> Modifier
-            }
-        ) {
-            when (currentSheetContent) {
-                SheetContent.EMOJI_PICKER ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        EmojiPickerDialog(
-                            onEmojiSelected = { emoji ->
-                                selectedEmoji = emoji
-//                        postViewModel.addEmojiToPost(emoji)
-                                scope.launch { sheetState.hide() }
-                            }
-                        )
-                    }
-
-                SheetContent.OPTIONS -> BottomSheet(
-                    scope = scope,
+            if (sheetState.isVisible) {
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        postViewModel.setcurrentSheetContent(SheetContent.NONE)
+                        scope.launch { sheetState.hide() }
+                    },
                     sheetState = sheetState,
-                    postViewModel = postViewModel,
-                    photoUri = photoUri,
-                    context = context,
-                    options = options
+                    modifier =
+                    when (currentSheetContent) {
+                        SheetContent.EMOJI_PICKER -> Modifier.height(400.dp)
+                        else -> Modifier
+                    }
+                ) {
+                    when (currentSheetContent) {
+                        SheetContent.EMOJI_PICKER ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState())
+                            ) {
+                                EmojiPickerDialog(
+                                    onEmojiSelected = { emoji ->
+                                        selectedEmoji = emoji
+                                        scope.launch { sheetState.hide() }
+                                    }
+                                )
+                            }
+
+                        SheetContent.OPTIONS -> BottomSheet(
+                            scope = scope,
+                            sheetState = sheetState,
+                            photoUri = photoUri,
+                            context = context,
+                            options = options
+                        )
+                        else -> {}
+                    }
+                }
+            }
+            editingField?.let { field ->
+                BlurredInputOverlay(
+                    label = when (field) {
+                        "title" -> "Enter Title"
+                        "location" -> "Enter Location"
+                        "hashtag" -> "Add Hashtags (e.g., #Food)"
+                        else -> ""
+                    },
+                    initialValue = when (field) {
+                        "title" -> title
+                        "location" -> location
+                        "hashtag" -> hashtag
+                        else -> ""
+                    },
+                    onValueChange = { newValue ->
+                        if (field == "hashtag") {
+                            val filteredValue = newValue
+                                .split(" ")
+                                .filter { it.startsWith("#") }
+                                .joinToString(" ")
+                            postViewModel.updateFieldValue(field, filteredValue)
+                        } else {
+                            postViewModel.updateFieldValue(field, newValue)
+                        }
+                    },
+                    onDone = { postViewModel.stopEditingField() },
+                    maxCharacters = when (field) {
+                        "title" -> 28
+                        "location" -> 60
+                        "hashtag" -> 30
+                        else -> 0
+                    }
                 )
-                else -> {}
             }
         }
-    }
-    editingField?.let { field ->
-        BlurredInputOverlay(
-            label = when (field) {
-                "title" -> "Enter Title"
-                "location" -> "Enter Location"
-                "hashtag" -> "Add Hashtags (e.g., #Food)"
-                else -> ""
-            },
-            initialValue = when (field) {
-                "title" -> title
-                "location" -> location
-                "hashtag" -> hashtag
-                else -> ""
-            },
-            onValueChange = { newValue ->
-                if (field == "hashtag") {
-                    val filteredValue = newValue
-                        .split(" ")
-                        .filter { it.startsWith("#") }
-                        .joinToString(" ")
-                    postViewModel.updateFieldValue(field, filteredValue)
-                } else {
-                    postViewModel.updateFieldValue(field, newValue)
-                }
-            },
-            onDone = { postViewModel.stopEditingField() },
-            maxCharacters = when (field) {
-                "title" -> 28
-                "location" -> 60
-                "hashtag" -> 30
-                else -> 0
-            }
-        )
     }
 }
