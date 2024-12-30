@@ -47,6 +47,12 @@ class PostViewModel : ViewModel() {
     private val _selectedEmoji = mutableStateOf<String?>(null)
     val selectedEmoji: State<String?> = _selectedEmoji
 
+    private val _postID = mutableStateOf("")
+    val postID: State<String> = _postID
+
+    fun setPostID(id: String) {
+        _postID.value = id
+    }
     fun setcurrentSheetContent(state: SheetContent) {
         _currentSheetContent.value = state
     }

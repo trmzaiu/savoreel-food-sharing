@@ -127,6 +127,37 @@ class PostModel : ViewModel() {
         }
     }
 
+    fun uploadEmojiReaction(
+        postId: String,
+        emoji: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val postRef = db.collection("posts").document(postId)
+
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(postRef)
+
+            if (!snapshot.exists()) {
+                throw Exception("Post not found")
+            }
+
+            val currentReactions = snapshot.get("reactions") as? Map<String, Long> ?: emptyMap()
+            val updatedReactions = currentReactions.toMutableMap()
+
+            val currentCount = updatedReactions[emoji] ?: 0
+            updatedReactions[emoji] = currentCount + 1
+
+            transaction.update(postRef, "reactions", updatedReactions)
+        }.addOnSuccessListener {
+            Log.d("Firebase", "Emoji reaction added successfully")
+            onSuccess()
+        }.addOnFailureListener { exception ->
+            Log.e("Firebase", "Failed to add emoji reaction", exception)
+            onFailure("Failed to add emoji reaction: ${exception.localizedMessage}")
+        }
+    }
+
     // Original getPostsFromFirebase remains the same
     fun getPostsFromFirebase() {
         db.collection("posts")

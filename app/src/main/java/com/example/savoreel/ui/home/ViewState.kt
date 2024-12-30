@@ -70,6 +70,7 @@ import com.google.accompanist.pager.VerticalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 @Composable
 fun TakePhotoScreen() {
@@ -190,11 +191,11 @@ fun PhotoTakenScreen(scope: CoroutineScope,
     location: String,
     hashtag: String,
     editingField: String?,
+    postModel: PostModel
 ) {
     val userViewModel: UserViewModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
     val notificationViewModel: NotificationViewModel = viewModel()
-    val postModel: PostModel = viewModel()
     val context = LocalContext.current
 
     val currentUser by userViewModel.user.collectAsState()
@@ -363,10 +364,12 @@ fun PhotoTakenScreen(scope: CoroutineScope,
 fun ViewPostScreen(
     scope: CoroutineScope,
     sheetState: SheetState,
-    parentPagerState: PagerState
+    parentPagerState: PagerState,
+    emojiList: MutableList<FloatingEmoji>,
+    postModel: PostModel,
+    postID: String
 ) {
     val postViewModel: PostViewModel = viewModel()
-    val postModel: PostModel = viewModel()
     val innerPagerState = rememberPagerState()
     val posts by postModel.posts.collectAsState(emptyList())
     val context = LocalContext.current
@@ -387,6 +390,7 @@ fun ViewPostScreen(
                 state = innerPagerState,
             ) { page ->
                 val post = posts[page]
+
                 Column(modifier = Modifier
                     .fillMaxSize()
                     .padding(top = 30.dp)) {
@@ -480,11 +484,32 @@ fun ViewPostScreen(
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val currentPage = innerPagerState.currentPage
+                        val currentPostId = posts.getOrNull(currentPage)?.postId
+                        if (currentPostId != null) {
+                            postViewModel.setPostID(currentPostId)
+                        }
+
                         listOf("😀", "😍", "😂", "❤️", "🔥").forEach { emoji ->
                             Text(
                                 text = emoji,
                                 fontSize = 25.sp,
                                 modifier = Modifier.clickable {
+                                    repeat(20){
+                                        val randomX = Random.nextFloat() * 350f
+                                        val randomY = 1200f
+                                        emojiList.add(FloatingEmoji(emoji, randomX, randomY))
+                                    }
+                                    postModel.uploadEmojiReaction(
+                                        postId = postID,
+                                        emoji = emoji,
+                                        onSuccess = {
+                                            Log.d("Add Emoji", "Add to DB success")
+                                        },
+                                        onFailure = { error ->
+                                            Log.d("Add Emoji", "Add to DB not success")
+                                        }
+                                    )
                                 }
                             )
                         }
@@ -541,7 +566,9 @@ fun EmojiPickerDialog(
         factory = { context ->
             EmojiPickerView(context).apply{
                 setOnEmojiPickedListener { emoji ->
-                    onEmojiSelected(emoji.toString())
+                    val emojiCharacter = emoji.emoji
+                    onEmojiSelected(emojiCharacter)
+
                 }
             }
         },
