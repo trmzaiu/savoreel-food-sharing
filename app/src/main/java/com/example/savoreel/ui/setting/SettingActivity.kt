@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.savoreel.R
+import com.example.savoreel.model.PostViewModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
@@ -175,6 +176,7 @@ fun SettingTheme(
 ) {
     val themeViewModel: ThemeViewModel = viewModel()
     val userViewModel: UserViewModel = viewModel()
+    val postViewModel: PostViewModel = viewModel()
 
     var uid by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -187,6 +189,7 @@ fun SettingTheme(
     val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.collectAsState()
     val currentUser by userViewModel.user.collectAsState()
     var isLoading by remember { mutableStateOf(true) }
+    val isChosen by postViewModel.isChosen
 
     LaunchedEffect(currentUser) {
         userViewModel.getUser(
@@ -230,7 +233,7 @@ fun SettingTheme(
                 modifier = Modifier.align(Alignment.Center)
             )
         } else {
-            Column(modifier = Modifier.fillMaxWidth()){
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -295,6 +298,7 @@ fun SettingTheme(
                                         onOptionClick = { option ->
                                             showModal = false
                                             show = option
+                                            postViewModel.setIsChosen(true)
                                         }
                                     )
                                 }
@@ -315,7 +319,10 @@ fun SettingTheme(
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        SettingsSection(title = "General", imageVector = ImageVector.vectorResource(R.drawable.ic_general)) {
+                        SettingsSection(
+                            title = "General",
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_general)
+                        ) {
                             SettingItemWithNavigation(
                                 icon = ImageVector.vectorResource(R.drawable.ic_name),
                                 text = "Edit name",
@@ -334,7 +341,10 @@ fun SettingTheme(
                         }
 
                         // Support Section
-                        SettingsSection(title = "Support", imageVector = ImageVector.vectorResource(R.drawable.ic_support)) {
+                        SettingsSection(
+                            title = "Support",
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_support)
+                        ) {
                             SettingItemWithNavigation(
                                 icon = ImageVector.vectorResource(R.drawable.ic_darkmode),
                                 text = "Dark mode",
@@ -361,7 +371,10 @@ fun SettingTheme(
                         }
 
                         // About Section
-                        SettingsSection(title = "About", imageVector = ImageVector.vectorResource(R.drawable.ic_about)) {
+                        SettingsSection(
+                            title = "About",
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_about)
+                        ) {
                             SettingItemWithNavigation(
                                 icon = ImageVector.vectorResource(R.drawable.ic_share),
                                 text = "Share account",
@@ -379,12 +392,16 @@ fun SettingTheme(
                             )
                         }
 
-                        SettingsSection(title = "Danger Zone", imageVector = ImageVector.vectorResource(R.drawable.ic_danger)) {
+                        SettingsSection(
+                            title = "Danger Zone",
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_danger)
+                        ) {
                             SettingItemWithNavigation(
                                 icon = ImageVector.vectorResource(R.drawable.ic_delete),
                                 text = "Delete account",
                                 onClick = {
-                                    errorMessage = "Are you want to delete your account? This action cannot be undone."
+                                    errorMessage =
+                                        "Are you want to delete your account? This action cannot be undone."
                                     showErrorDialog = true
                                     isSignOut = false
                                 }
@@ -424,7 +441,9 @@ fun SettingTheme(
             }
         )
     }
-    HandleAvatarOption(show)
+    if (isChosen){
+        HandleAvatarOption(show, postViewModel)
+    }
 }
 
 @Composable
@@ -552,7 +571,7 @@ fun SheetContent(onOptionClick: (String) -> Unit) {
 }
 
 @Composable
-fun HandleAvatarOption(option: String) {
+fun HandleAvatarOption(option: String, postViewModel: PostViewModel) {
     val userViewModel: UserViewModel = viewModel()
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var shouldLaunchGallery by remember { mutableStateOf(false) }
@@ -567,6 +586,7 @@ fun HandleAvatarOption(option: String) {
             Log.d("Gallery", "No image selected")
         }
         shouldLaunchGallery = false
+        postViewModel.setIsChosen(false)
     }
 
     LaunchedEffect(option) {
@@ -587,6 +607,7 @@ fun HandleAvatarOption(option: String) {
                     Log.e("Avatar", "Error: $error")
                 }
             )
+            postViewModel.setIsChosen(false)
         }
         else -> { /* Handle other cases */ }
     }

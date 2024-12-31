@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,9 +72,6 @@ import com.google.accompanist.pager.VerticalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlin.random.Random
 
 @Composable
@@ -375,31 +371,27 @@ fun ViewPostScreen(
     emojiList: MutableList<FloatingEmoji>,
     postID: String,
 ) {
+    val userViewModel: UserViewModel = viewModel()
     val postModel: PostModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
     val notificationViewModel: NotificationViewModel = viewModel()
     val innerPagerState = rememberPagerState()
-    val posts by postModel.posts.collectAsState(emptyList())
+    val posts by postModel.posts.collectAsState()
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(true) }
     var emo by remember {mutableStateOf("")}
     var status by remember {mutableStateOf(false)}
+    var name by remember { mutableStateOf("") }
 
     LaunchedEffect(posts) {
-        if (posts.isEmpty()) {
-            postModel.getFollowingUserIds()
-        }
-        isLoading = false
+        postModel.getPostsFromFirebase(
+            onSuccess = { },
+            onFailure = {}
+        )
     }
-
-    fun parseDate(dateString: String): Date? {
-        val format = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        return try {
-            format.parse(dateString)
-        } catch (e: Exception) {
-            Log.e("Date Parsing", "Failed to parse date: $dateString", e)
-            null
-        }
+    LaunchedEffect(posts) {
+        postModel.getFollowingUserIds()
+        isLoading = false
     }
 
     CallBackState()
@@ -421,8 +413,18 @@ fun ViewPostScreen(
                     Column(modifier = Modifier
                         .fillMaxSize()
                         .padding(top = 15.dp)) {
+                        userViewModel.getUserById(
+                            postID,
+                            onSuccess = { user ->
+                                if (user != null) {
+                                    name = user.name.toString()
+                                }
+                            },
+                            onFailure = {}
+                        )
                         Text(
-                            text = post.name,
+
+                            text = name,
                             fontSize = 20.sp,
                             lineHeight = 20.sp,
                             fontFamily = nunitoFontFamily,

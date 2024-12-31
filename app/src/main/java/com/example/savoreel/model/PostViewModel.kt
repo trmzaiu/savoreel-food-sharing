@@ -50,6 +50,13 @@ class PostViewModel : ViewModel() {
     private val _postID = mutableStateOf("")
     val postID: State<String> = _postID
 
+    private val _isChosen = mutableStateOf(false)
+    val isChosen: State<Boolean> = _isChosen
+
+    fun setIsChosen(value: Boolean) {
+        _isChosen.value = value
+    }
+
     fun setPostID(id: String) {
         _postID.value = id
     }
