@@ -139,7 +139,15 @@ fun PostScreen(postId: String){
             onFailure = { isLoading = false }
         )
     }
-
+    userViewModel.getUserById(
+        post.userId,
+        onSuccess = { user ->
+            if (user != null) {
+                name = user.name.toString()
+            }
+        },
+        onFailure = {}
+    )
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)){
         if (isLoading) {
             CircularProgressIndicator(

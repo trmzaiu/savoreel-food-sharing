@@ -371,15 +371,17 @@ fun ViewPostScreen(
     emojiList: MutableList<FloatingEmoji>,
     postID: String,
 ) {
+    val userViewModel: UserViewModel = viewModel()
     val postModel: PostModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
     val notificationViewModel: NotificationViewModel = viewModel()
     val innerPagerState = rememberPagerState()
-    val posts by postModel.posts.collectAsState(emptyList())
+    val posts by postModel.posts.collectAsState()
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(true) }
     var emo by remember {mutableStateOf("")}
     var status by remember {mutableStateOf(false)}
+    var name by remember { mutableStateOf("") }
 
     LaunchedEffect(posts) {
         if (posts.isEmpty()) {
