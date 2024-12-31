@@ -1,12 +1,10 @@
 package com.example.savoreel.ui.profile
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -76,15 +74,6 @@ class ProfileActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
 
-    private val settingsLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // Theme settings were changed
-            themeViewModel.loadUserSettings()
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -97,7 +86,7 @@ class ProfileActivity : ComponentActivity() {
                 ProfileScreen(
                     navigateToSetting = {
                         val intent = Intent(this, SettingActivity::class.java)
-                        settingsLauncher.launch(intent)
+                        startActivity(intent)
                     },
                     navigateToFollow = { tab, userId ->
                         val intent = Intent(this, FollowActivity::class.java)
@@ -112,6 +101,7 @@ class ProfileActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        themeViewModel.loadUserSettings()
         userViewModel.getUser(
             onSuccess = { user -> userViewModel.setUser(user) },
             onFailure = { error -> Log.e("ProfileActivity", "Error retrieving user: $error") }
