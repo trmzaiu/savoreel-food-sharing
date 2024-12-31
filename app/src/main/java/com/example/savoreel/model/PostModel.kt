@@ -8,11 +8,11 @@ import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -222,7 +222,7 @@ class PostModel : ViewModel() {
     private fun fetchPostsForChunk(userIds: List<String>) {
         db.collection("posts")
             .whereIn("userId", userIds)
-            .orderBy("date", Query.Direction.DESCENDING)
+//            .orderBy("date", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 val fetchedPosts = mutableListOf<Post>()
@@ -230,7 +230,11 @@ class PostModel : ViewModel() {
                     val post = document.toObject(Post::class.java)
                     fetchedPosts.add(post)
                 }
-                _posts.value += fetchedPosts
+                _posts.update { currentPosts ->
+                    (currentPosts + fetchedPosts)
+                        .distinctBy { it.postId }
+                        .sortedBy { it.date }
+                }
             }
             .addOnFailureListener { exception ->
                 Log.e("Firebase", "Error fetching posts", exception)

@@ -30,7 +30,7 @@ fun formatRelativeTime(timestamp: Timestamp): String {
 
         diffInMillis < TimeUnit.HOURS.toMillis(1) -> {
             val minutes = TimeUnit.MILLISECONDS.toMinutes(diffInMillis)
-            "${minutes}min"
+            "${minutes}m"
         }
 
         diffInMillis < TimeUnit.DAYS.toMillis(1) -> {
@@ -44,7 +44,7 @@ fun formatRelativeTime(timestamp: Timestamp): String {
         }
 
         else -> {
-            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
             dateFormat.format(Date(eventTime))
         }
     }

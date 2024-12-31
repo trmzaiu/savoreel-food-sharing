@@ -47,7 +47,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -150,33 +149,30 @@ fun PostScreen(postId: String){
             PostTopBar(url,name)
             Box(modifier = Modifier.padding(5.dp, 130.dp, 5.dp, 15.dp)) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 30.dp)
+                    modifier = Modifier.fillMaxSize().padding(top = 30.dp)
                 ) {
-                    Text(
-                        text = post.name,
-                        fontSize = 20.sp,
-                        lineHeight = 20.sp,
-                        fontFamily = nunitoFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        textAlign = TextAlign.Center,
+                    Row(
                         modifier = Modifier
-                            .fillMaxWidth()
                             .padding(bottom = 8.dp)
-                    )
-                    Text(
-                        text = formatRelativeTime(post.date),
-                        fontSize = 16.sp,
-                        fontFamily = nunitoFontFamily,
-                        fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onSecondary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
+                            .align(Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = post.name,
+                            fontSize = 20.sp,
+                            fontFamily = nunitoFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Text(
+                            text = formatRelativeTime(post.date),
+                            fontSize = 20.sp,
+                            fontFamily = nunitoFontFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSecondary,
+                        )
+                    }
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Box(
                             modifier = Modifier

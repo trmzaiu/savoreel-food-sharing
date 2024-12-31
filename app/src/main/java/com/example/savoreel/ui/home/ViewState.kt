@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,9 +72,6 @@ import com.google.accompanist.pager.VerticalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlin.random.Random
 
 @Composable
@@ -392,16 +388,6 @@ fun ViewPostScreen(
         isLoading = false
     }
 
-    fun parseDate(dateString: String): Date? {
-        val format = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        return try {
-            format.parse(dateString)
-        } catch (e: Exception) {
-            Log.e("Date Parsing", "Failed to parse date: $dateString", e)
-            null
-        }
-    }
-
     CallBackState()
     Box(modifier = Modifier
         .fillMaxSize()
@@ -421,30 +407,28 @@ fun ViewPostScreen(
                     Column(modifier = Modifier
                         .fillMaxSize()
                         .padding(top = 15.dp)) {
-                        Text(
-                            text = post.name,
-                            fontSize = 20.sp,
-                            lineHeight = 20.sp,
-                            fontFamily = nunitoFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            textAlign = TextAlign.Center,
+                        Row(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 4.dp)
-                        )
-
-                        Text(
-                            text = formatRelativeTime(post.date),
-                            fontSize = 16.sp,
-                            fontFamily = nunitoFontFamily,
-                            fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.onSecondary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
                                 .padding(bottom = 8.dp)
-                        )
+                                .align(Alignment.CenterHorizontally),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = post.name,
+                                fontSize = 20.sp,
+                                fontFamily = nunitoFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                            Text(
+                                text = formatRelativeTime(post.date),
+                                fontSize = 20.sp,
+                                fontFamily = nunitoFontFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSecondary,
+                            )
+                        }
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Box(
                                 modifier = Modifier

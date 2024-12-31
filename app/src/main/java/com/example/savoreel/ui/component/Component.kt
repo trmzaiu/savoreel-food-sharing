@@ -5,7 +5,6 @@ package com.example.savoreel.ui.component
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -35,7 +34,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -425,14 +423,6 @@ fun BellButton(
     val unreadCount by notificationViewModel.unreadCount.collectAsState()
 
     val badgeText = if (unreadCount > 99) "99+" else unreadCount.toString()
-//    var numberOfUnreadNotifications by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(Unit) {
-        notificationViewModel.countUnreadNotifications(
-            onSuccess = {},
-            onFailure = { Log.e("BellButton", "Failed to fetch notifications") }
-        )
-    }
 
     Box(modifier = modifier.size(43.dp)) {
         IconButton(

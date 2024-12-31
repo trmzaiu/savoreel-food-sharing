@@ -234,7 +234,7 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         ) {
                             if (imgUrl.isNotEmpty()) {
                                 UserAvatar(imgUrl, 100.dp)

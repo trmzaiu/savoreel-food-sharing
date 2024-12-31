@@ -30,6 +30,29 @@ class NotificationViewModel: ViewModel() {
         Log.d("NotificationViewModel", message)
     }
 
+    init {
+        observeUnreadNotifications()
+    }
+
+    private fun observeUnreadNotifications() {
+        val currentUser = auth.currentUser ?: run {
+            return
+        }
+        db.collection("notifications")
+            .whereEqualTo("recipientId", currentUser.uid)
+            .whereEqualTo("read", false)
+            .addSnapshotListener { snapshots, error ->
+                if (error != null) {
+                    Log.e("NotificationViewModel", "Error observing notifications", error)
+                    return@addSnapshotListener
+                }
+
+                snapshots?.let {
+                    _unreadCount.value = it.size()
+                }
+            }
+    }
+
     fun startObservingNotifications(onError: (String) -> Unit) {
         val currentUser = auth.currentUser ?: run {
             return
@@ -197,9 +220,8 @@ class NotificationViewModel: ViewModel() {
             .addOnFailureListener { onFailure(it.message ?: "Error fetching notifications") }
     }
 
-    fun countUnreadNotifications(onSuccess: (Int) -> Unit, onFailure: (String) -> Unit) {
+    fun countUnreadNotifications() {
         val currentUser = auth.currentUser ?: run {
-            onFailure("Not logged in")
             return
         }
 
@@ -208,11 +230,10 @@ class NotificationViewModel: ViewModel() {
             .whereEqualTo("read", false)
             .get()
             .addOnSuccessListener { documents ->
-                _unreadCount.value = documents.size()
-                onSuccess(documents.size())
+                val count = documents.size()
+                _unreadCount.value = count
             }
-            .addOnFailureListener { exception ->
-                onFailure(exception.message ?: "Error counting unread notifications")
+            .addOnFailureListener {
             }
     }
 

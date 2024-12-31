@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.PostViewModel
 import com.example.savoreel.model.ThemeViewModel
@@ -51,11 +52,15 @@ import kotlin.random.Random
 class TakePhotoActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
+    private val postModel: PostModel by viewModels()
+    private val notificationViewModel: NotificationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         themeViewModel.loadUserSettings()
+        postModel.getFollowingUserIds()
+        notificationViewModel.countUnreadNotifications()
 
         setContent {
             val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
@@ -73,6 +78,8 @@ class TakePhotoActivity : ComponentActivity() {
             onSuccess = { user -> userViewModel.setUser(user) },
             onFailure = { error -> Log.e("TakePhotoActivity", "Error retrieving user: $error") }
         )
+        postModel.getFollowingUserIds()
+        notificationViewModel.countUnreadNotifications()
     }
 }
 

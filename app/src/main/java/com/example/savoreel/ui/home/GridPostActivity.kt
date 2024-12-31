@@ -44,6 +44,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.savoreel.R
+import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.Post
 import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.ThemeViewModel
@@ -58,11 +59,15 @@ import com.example.savoreel.ui.theme.nunitoFontFamily
 
 class GridPostActivity: ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
+    private val postModel: PostModel by viewModels()
+    private val notificationViewModel: NotificationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         themeViewModel.loadUserSettings()
+        postModel.getFollowingUserIds()
+        notificationViewModel.countUnreadNotifications()
 
         setContent {
             val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
