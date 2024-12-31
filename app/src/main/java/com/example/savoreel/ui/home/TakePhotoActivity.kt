@@ -183,7 +183,6 @@ fun HomeScreen() {
                                         sheetState,
                                         outerPagerState,
                                         emojiList,
-                                        postModel,
                                         postID
                                     )
                             }
