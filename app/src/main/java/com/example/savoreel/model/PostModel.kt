@@ -8,6 +8,7 @@ import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import kotlin.coroutines.suspendCoroutine
 
@@ -102,7 +102,6 @@ class PostModel : ViewModel() {
                         hashtag = hashtagsList,
                         location = location.toString(),
                         photoUri = imageUrl,
-                        date = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date()),
                         reactions = emptyMap()
                     )
 
@@ -223,6 +222,7 @@ class PostModel : ViewModel() {
     private fun fetchPostsForChunk(userIds: List<String>) {
         db.collection("posts")
             .whereIn("userId", userIds)
+            .orderBy("date", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 val fetchedPosts = mutableListOf<Post>()

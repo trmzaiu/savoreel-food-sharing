@@ -407,15 +407,16 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                                             it
                                                         }
                                                     }
+                                                    persons = updatedList
+                                                    isFollow = isFollowing
+                                                    Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
+
                                                     if (isFollowing) {
                                                         person.userId?.let { it1 ->
                                                             notificationViewModel.createNotification(
                                                                 it1, "Follow", "has started following you.", {}, { })
                                                         }
                                                     }
-                                                    persons = updatedList
-                                                    isFollow = isFollowing
-                                                    Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
                                                 },
                                                 onFailure = { errorMessage ->
                                                     Log.e("SearchScreen", "Failed to follow/unfollow: $errorMessage")

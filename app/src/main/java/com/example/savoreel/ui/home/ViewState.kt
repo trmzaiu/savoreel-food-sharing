@@ -65,6 +65,7 @@ import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.PostViewModel
 import com.example.savoreel.model.UserViewModel
+import com.example.savoreel.model.formatRelativeTime
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
@@ -372,9 +373,9 @@ fun ViewPostScreen(
     sheetState: SheetState,
     parentPagerState: PagerState,
     emojiList: MutableList<FloatingEmoji>,
-    postModel: PostModel,
-    postID: String
+    postID: String,
 ) {
+    val postModel: PostModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
     val notificationViewModel: NotificationViewModel = viewModel()
     val innerPagerState = rememberPagerState()
@@ -401,31 +402,21 @@ fun ViewPostScreen(
         }
     }
 
-    val sortedPosts = posts.sortedByDescending { post ->
-        val postDate = parseDate(post.date)
-        postDate ?: Date(0)
-    }
-
-    BackHandler {
-        scope.launch {
-            parentPagerState.animateScrollToPage(0)
-        }
-    }
-
+    CallBackState()
     Box(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-        if (sortedPosts.isNotEmpty()) {
+        if (posts.isNotEmpty()) {
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
                 VerticalPager(
-                    count = sortedPosts.size,
+                    count = posts.size,
                     state = innerPagerState,
                 ) { page ->
-                    val post = sortedPosts[page]
+                    val post = posts[page]
 
                     Column(modifier = Modifier
                         .fillMaxSize()
@@ -442,11 +433,9 @@ fun ViewPostScreen(
                                 .fillMaxWidth()
                                 .padding(bottom = 4.dp)
                         )
-                        val timeAgo = remember(post.date) {
-                            postModel.getTimeAgo(post.date)
-                        }
+
                         Text(
-                            text = timeAgo,
+                            text = formatRelativeTime(post.date),
                             fontSize = 16.sp,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Normal,

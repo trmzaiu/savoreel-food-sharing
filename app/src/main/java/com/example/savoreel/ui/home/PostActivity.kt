@@ -60,6 +60,7 @@ import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.PostViewModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
+import com.example.savoreel.model.formatRelativeTime
 import com.example.savoreel.ui.component.PostTopBar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
@@ -165,11 +166,8 @@ fun PostScreen(postId: String){
                             .fillMaxWidth()
                             .padding(bottom = 8.dp)
                     )
-                    val timeAgo = remember(post.date) {
-                        postModel.getTimeAgo(post.date)
-                    }
                     Text(
-                        text = timeAgo,
+                        text = formatRelativeTime(post.date),
                         fontSize = 16.sp,
                         fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Normal,

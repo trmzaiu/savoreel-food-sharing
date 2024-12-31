@@ -137,21 +137,13 @@ fun GridPost(userID: String) {
                 onFailure = {
                 }
             )
-        } else{
-            if (posts.isEmpty()) {
-                postModel.getPostsFromFirebase(
-                    onSuccess = { firebasePosts ->
-                        listOfPost = firebasePosts
-                    },
-                    onFailure = {
-                        Log.e("GridPost", "Error retrieving posts from Firebase")
-                    }
-                )
-            } else {
-                listOfPost = posts
-            }
-            Log.e("Post", "GridPost: $posts")
         }
+    }
+    LaunchedEffect(posts) {
+        if (posts.isEmpty()) {
+            postModel.getFollowingUserIds()
+        }
+        listOfPost = posts
     }
 
     Box(
