@@ -7,8 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,10 +37,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.ThemeViewModel
+import com.example.savoreel.model.User
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.home.GridPostActivity
+import com.example.savoreel.ui.home.UserItem
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 
@@ -86,16 +87,18 @@ class FollowActivity: ComponentActivity() {
 @Composable
 fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> Unit)  {
     val userViewModel: UserViewModel = viewModel()
+    val notificationViewModel: NotificationViewModel = viewModel()
 
     var selectedTab by remember { mutableIntStateOf(if (initialTab == "following") 0 else 1) }
-    var followingList by remember { mutableStateOf<List<String>>(emptyList()) }
-    var followerList by remember { mutableStateOf<List<String>>(emptyList()) }
+    var followingList by remember { mutableStateOf<List<User>>(emptyList()) }
+    var followerList by remember { mutableStateOf<List<User>>(emptyList()) }
     var name by remember { mutableStateOf("") }
-
+    var currentuid by remember {mutableStateOf("")}
     val tabs = listOf("Following", "Followers")
 
     // Track whether data has been loaded
     var isDataLoaded by remember { mutableStateOf(false) }
+    var loadingFollowStatus by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
 
     LaunchedEffect(userId) {
         if (userId != null) {
@@ -108,14 +111,31 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
         }
     }
 
+    val currentUser by userViewModel.user.collectAsState()
+
+    LaunchedEffect(currentUser) {
+        userViewModel.getUser(
+            onSuccess = { currentUser ->
+                if (currentUser != null) {
+                    currentuid = currentUser.userId.toString()
+                } else {
+                    Log.e("ProfileScreen", "User data not found")
+                }
+            },
+            onFailure = { error ->
+                Log.e("NameTheme", "Error retrieving user: $error")
+            }
+        )
+    }
+
     // When tab changes, load the corresponding data
     LaunchedEffect(selectedTab) {
         if (selectedTab == 0 && userId != null) {
             userViewModel.getFollowing(userId,
-                onSuccess = { followingIds ->
-                    followingList = followingIds.toMutableList()
+                onSuccess = { following ->
+                    followingList = following
                     isDataLoaded = true
-                    Log.d("FollowScreen", "Following list: $followingIds, $followingList")
+                    Log.d("FollowScreen", "Following list: $following, $followingList")
                 },
                 onFailure = { error ->
                     Log.e("FollowScreen", "Error fetching following: $error")
@@ -124,10 +144,10 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
             )
         } else if (selectedTab == 1 && userId != null) {
             userViewModel.getFollowers(userId,
-                onSuccess = { followersIds ->
-                    followerList = followersIds.toMutableList()
+                onSuccess = { followers ->
+                    followerList = followers
                     isDataLoaded = true
-                    Log.d("FollowScreen", "Followers list: $followersIds, $followerList")
+                    Log.d("FollowScreen", "Followers list: $followers, $followerList")
                 },
                 onFailure = { error ->
                     Log.e("FollowScreen", "Error fetching followers: $error")
@@ -206,8 +226,69 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
                 } else {
                     if (followingList.isNotEmpty()) {
                         LazyColumn(modifier = Modifier.fillMaxSize().padding(10.dp)) {
-                            items(followingList) { userId ->
-                                UserItem(userId, onUserClick)
+                            items(followingList) { person ->
+                                var isFollow by remember { mutableStateOf(false) }
+                                val isLoading = loadingFollowStatus[person.userId.toString()] ?: false
+
+                                LaunchedEffect(person.userId) {
+                                    if (!loadingFollowStatus.containsKey(person.userId.toString())) {
+                                        loadingFollowStatus = loadingFollowStatus + (person.userId.toString() to true)
+                                        userViewModel.isFollowing(person.userId.toString(),
+                                            onSuccess = { isFollowing ->
+                                                isFollow = isFollowing
+                                                loadingFollowStatus = loadingFollowStatus - person.userId.toString()
+                                            },
+                                            onFailure = { error ->
+                                                Log.e("SearchScreen", "Failed to fetch follow status: $error")
+                                                loadingFollowStatus = loadingFollowStatus - person.userId.toString()
+                                            }
+                                        )
+                                    }
+                                }
+                                UserItem(
+                                    user = person,
+                                    isFollow = isFollow,
+                                    isLoading = isLoading,
+                                    onFollowClick = {
+                                        userViewModel.toggleFollowStatus(
+                                            userId = person.userId.toString(),
+                                            onSuccess = { isFollowing ->
+                                                if (!isFollowing) {
+                                                    followingList = followingList.filter { it.userId != person.userId }
+                                                } else {
+                                                    val updatedList = followingList.map {
+                                                        if (it.userId == person.userId) {
+                                                            it.copy(following = (if (isFollowing) it.following - person.userId else it.following + person.userId) as List<String>)
+                                                        } else {
+                                                            it
+                                                        }
+                                                    }
+                                                    followingList = updatedList
+                                                }
+                                                isFollow = isFollowing
+                                                Log.d(
+                                                    "SearchScreen",
+                                                    "Follow status updated for ${person.name}: $isFollowing"
+                                                )
+                                                if (isFollowing) {
+                                                    notificationViewModel.createNotification(
+                                                        person.userId.toString(),
+                                                        "Follow",
+                                                        "has started following you.",
+                                                        {},
+                                                        {})
+                                                }
+                                            },
+                                            onFailure = { errorMessage ->
+                                                Log.e(
+                                                    "SearchScreen",
+                                                    "Failed to follow/unfollow: $errorMessage"
+                                                )
+                                            },
+                                        )
+                                    },
+                                    onUserClick
+                                )
                             }
                         }
                     } else {
@@ -231,8 +312,61 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
                 } else {
                     if (followerList.isNotEmpty()) {
                         LazyColumn(modifier = Modifier.fillMaxSize().padding(10.dp)) {
-                            items(followerList) { userId ->
-                                UserItem(userId, onUserClick)
+                            items(followerList) { person ->
+                                var isFollow by remember { mutableStateOf(false) }
+                                val isLoading = loadingFollowStatus[person.userId.toString()] ?: false
+
+                                LaunchedEffect(person.userId) {
+                                    if (!loadingFollowStatus.containsKey(person.userId.toString())) {
+                                        loadingFollowStatus = loadingFollowStatus + (person.userId.toString() to true)
+                                        userViewModel.isFollowing(person.userId.toString(),
+                                            onSuccess = { isFollowing ->
+                                                isFollow = isFollowing
+                                                loadingFollowStatus = loadingFollowStatus - person.userId.toString()
+                                            },
+                                            onFailure = { error ->
+                                                Log.e("SearchScreen", "Failed to fetch follow status: $error")
+                                                loadingFollowStatus = loadingFollowStatus - person.userId.toString()
+                                            }
+                                        )
+                                    }
+                                }
+
+                                UserItem(
+                                    user = person,
+                                    isFollow = isFollow,
+                                    isLoading = isLoading,
+                                    onFollowClick = {
+                                        userViewModel.toggleFollowStatus(
+                                            userId = person.userId.toString(),
+                                            onSuccess = { isFollowing ->
+                                                val updatedList = followerList.map {
+                                                    if (it.userId == person.userId) {
+                                                        it.copy(following = (if (isFollowing) it.following - person.userId else it.following + person.userId) as List<String>)
+                                                    } else {
+                                                        it
+                                                    }
+                                                }
+                                                followerList = updatedList
+                                                isFollow = isFollowing
+                                                Log.d("FollowScreen", "Follow status updated for ${person.name}: $isFollowing")
+                                                if (isFollowing) {
+                                                    notificationViewModel.createNotification(
+                                                        person.userId.toString(),
+                                                        "Follow",
+                                                        "has started following you.",
+                                                        {},
+                                                        {}
+                                                    )
+                                                }
+                                            },
+                                            onFailure = { errorMessage ->
+                                                Log.e("FollowScreen", "Failed to follow/unfollow: $errorMessage")
+                                            },
+                                        )
+                                    },
+                                    onUserClick
+                                )
                             }
                         }
                     } else {
@@ -248,52 +382,5 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
                 }
             }
         }
-    }
-}
-
-@Composable
-fun UserItem(userId: String, onUserClick: (String) -> Unit) {
-    val userViewModel: UserViewModel = viewModel()
-    var name by remember { mutableStateOf("") }
-    var avatar by remember { mutableStateOf("") }
-
-    LaunchedEffect(userId) {
-        userViewModel.getUserById(userId,
-            onSuccess = { user ->
-                name = user?.name.toString()
-                avatar = user?.avatarUrl.toString()
-            },
-            onFailure = { error -> Log.e("UserList", "Error: $error") }
-        )
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {
-                onUserClick(userId)
-            }
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (avatar.isNotEmpty()) {
-            UserAvatar(avatar, 48.dp)
-        } else {
-            UserWithOutAvatar(name, 24.sp, 48.dp)
-        }
-
-        Text(
-            text = name,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Normal,
-            fontFamily = nunitoFontFamily,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        )
     }
 }

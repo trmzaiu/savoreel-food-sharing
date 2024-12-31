@@ -390,7 +390,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                         }
                                     }
 
-                                    SearchResultItem(
+                                    UserItem(
                                         user = person,
                                         isFollow = isFollow,
                                         isLoading = isLoading,
@@ -479,7 +479,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                             }
                                         }
 
-                                        SearchResultItem(
+                                        UserItem(
                                             user = person,
                                             isFollow = isFollow,
                                             isLoading = isLoading,
@@ -572,7 +572,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
 }
 
 @Composable
-fun SearchResultItem(user: User, isFollow: Boolean, isLoading: Boolean, onFollowClick: (User) -> Unit, onUserClick: (String) -> Unit){
+fun UserItem(user: User, isFollow: Boolean, isLoading: Boolean, onFollowClick: (User) -> Unit, onUserClick: (String) -> Unit){
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -582,7 +582,7 @@ fun SearchResultItem(user: User, isFollow: Boolean, isLoading: Boolean, onFollow
                 indication = null
             ) {
                 onUserClick(user.userId.toString())
-                Log.d("SearchResultItem", "User clicked: ${user.name}")
+                Log.d("UserItem", "User clicked: ${user.name}")
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -605,7 +605,7 @@ fun SearchResultItem(user: User, isFollow: Boolean, isLoading: Boolean, onFollow
             Button(
                 onClick = {
                     onFollowClick(user)
-                    Log.d("SearchResultItem", "Follow button clicked for: ${user.name}")
+                    Log.d("UserItem", "Follow button clicked for: ${user.name}")
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = if(isFollow) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary)
             ) {
