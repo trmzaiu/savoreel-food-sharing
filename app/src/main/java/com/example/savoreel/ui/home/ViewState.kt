@@ -381,7 +381,6 @@ fun ViewPostScreen(
     var isLoading by remember { mutableStateOf(true) }
     var emo by remember {mutableStateOf("")}
     var status by remember {mutableStateOf(false)}
-    var name by remember { mutableStateOf("") }
 
     LaunchedEffect(posts) {
         if (posts.isEmpty()) {
@@ -416,8 +415,14 @@ fun ViewPostScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            var name by remember { mutableStateOf("") }
+                            userViewModel.getUserById(
+                                post.userId,
+                                onSuccess = { user -> name = user?.name ?: "" },
+                                onFailure = {}
+                            )
                             Text(
-                                text = post.name,
+                                text = name,
                                 fontSize = 20.sp,
                                 fontFamily = nunitoFontFamily,
                                 fontWeight = FontWeight.Bold,
