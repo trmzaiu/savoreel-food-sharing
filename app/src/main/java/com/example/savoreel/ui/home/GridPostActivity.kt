@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,7 +65,7 @@ class GridPostActivity: ComponentActivity() {
         themeViewModel.loadUserSettings()
 
         setContent {
-            val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+            val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
             val userID = intent.getStringExtra("USER_ID") ?: "Everyone"
             SavoreelTheme(darkTheme = isDarkMode) {
                 GridPost(userID = userID)

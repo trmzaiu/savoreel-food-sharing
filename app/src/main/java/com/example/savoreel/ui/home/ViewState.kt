@@ -70,6 +70,9 @@ import com.google.accompanist.pager.VerticalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.random.Random
 
 @Composable
@@ -359,7 +362,7 @@ fun PhotoTakenScreen(scope: CoroutineScope,
     )
 }
 
-@OptIn(ExperimentalGlideComposeApi::class, ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
 fun ViewPostScreen(
     scope: CoroutineScope,
@@ -373,92 +376,129 @@ fun ViewPostScreen(
     val innerPagerState = rememberPagerState()
     val posts by postModel.posts.collectAsState(emptyList())
     val context = LocalContext.current
+    var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(posts) {
         if (posts.isEmpty()) {
             postModel.getFollowingUserIds()
         }
+        isLoading = false
+    }
+
+    fun parseDate(dateString: String): Date? {
+        val format = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        return try {
+            format.parse(dateString)
+        } catch (e: Exception) {
+            Log.e("Date Parsing", "Failed to parse date: $dateString", e)
+            null
+        }
+    }
+
+    val sortedPosts = posts.sortedByDescending { post ->
+        val postDate = parseDate(post.date)
+        postDate ?: Date(0)
     }
 
     CallBackState()
     Box(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-        if (posts.isNotEmpty()) {
-            VerticalPager(
-                count = posts.size,
-                state = innerPagerState,
-            ) { page ->
-                val post = posts[page]
+        if (sortedPosts.isNotEmpty()) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else {
+                VerticalPager(
+                    count = sortedPosts.size,
+                    state = innerPagerState,
+                ) { page ->
+                    val post = sortedPosts[page]
 
-                Column(modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 30.dp)) {
-                    Text(
-                        text = post.name,
-                        fontSize = 20.sp,
-                        lineHeight = 20.sp,
-                        fontFamily = nunitoFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Box(
+                    Column(modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 15.dp)) {
+                        Text(
+                            text = post.name,
+                            fontSize = 20.sp,
+                            lineHeight = 20.sp,
+                            fontFamily = nunitoFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(30.dp))
-                                .background(Color.Gray)
-                        ) {
-                            val secureUrl = remember(post.photoUri) {
-                                post.photoUri.replace("http://", "https://")
+                                .padding(bottom = 4.dp)
+                        )
+                        val timeAgo = remember(post.date) {
+                            postModel.getTimeAgo(post.date)
+                        }
+                        Text(
+                            text = timeAgo,
+                            fontSize = 16.sp,
+                            fontFamily = nunitoFontFamily,
+                            fontWeight = FontWeight.Normal,
+                            color = MaterialTheme.colorScheme.onSecondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                        )
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(30.dp))
+                                    .background(Color.Gray)
+                            ) {
+                                val secureUrl = remember(post.photoUri) {
+                                    post.photoUri.replace("http://", "https://")
+                                }
+
+                                // Debug logging
+                                LaunchedEffect(secureUrl) {
+                                    Log.d("ViewPostScreen", "Loading image from: $secureUrl")
+                                }
+
+                                AsyncImage(
+                                    model = ImageRequest.Builder(context)
+                                        .data(secureUrl)
+                                        .crossfade(true)
+                                        .build(),
+                                    contentDescription = "Post Photo",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                )
+
                             }
-
-                            // Debug logging
-                            LaunchedEffect(secureUrl) {
-                                Log.d("ViewPostScreen", "Loading image from: $secureUrl")
+                            if (post.title.isNotEmpty()) {
+                                EditableField(
+                                    label = "Add Title",
+                                    value = post.title,
+                                    onStartEdit = { },
+                                    isTitle = true,
+                                )
                             }
-
-                            AsyncImage(
-                                model = ImageRequest.Builder(context)
-                                    .data(secureUrl)
-                                    .crossfade(true)
-                                    .build(),
-                                contentDescription = "Post Photo",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop,
-                            )
-
-                        }
-                        if (post.title.isNotEmpty()) {
-                            EditableField(
-                                label = "Add Title",
-                                value = post.title,
-                                onStartEdit = { },
-                                isTitle = true,
-                            )
-                        }
-                        if (post.hashtag?.isNotEmpty() == true) {
-                            val hashtagsList: List<String> = post.hashtag
-                            val hashtags = hashtagsList.joinToString(" ")
-                            EditableField(
-                                label = "Add Hashtag",
-                                value = hashtags,
-                                onStartEdit = {},
-                                ic = R.drawable.ic_hashtag
-                            )
-                        }
-                        if (post.location.isNotEmpty()) {
-                            EditableField(
-                                label = "Add Location",
-                                value = post.location,
-                                onStartEdit = {},
-                                ic = R.drawable.ic_location
-                            )
+                            if (post.hashtag?.isNotEmpty() == true) {
+                                val hashtagsList: List<String> = post.hashtag
+                                val hashtags = hashtagsList.joinToString(" ")
+                                EditableField(
+                                    label = "Add Hashtag",
+                                    value = hashtags,
+                                    onStartEdit = {},
+                                    ic = R.drawable.ic_hashtag
+                                )
+                            }
+                            if (post.location.isNotEmpty()) {
+                                EditableField(
+                                    label = "Add Location",
+                                    value = post.location,
+                                    onStartEdit = {},
+                                    ic = R.drawable.ic_location
+                                )
+                            }
                         }
                     }
                 }

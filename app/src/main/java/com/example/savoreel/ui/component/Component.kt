@@ -5,6 +5,7 @@ package com.example.savoreel.ui.component
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -35,10 +36,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -236,14 +236,12 @@ fun CustomTitle(
 @Composable
 fun BackArrow(
     modifier: Modifier = Modifier,
+    onBackClick: (() -> Unit)? = null
 ) {
-    val context = LocalContext.current
+    val defaultBackHandler = BackNavigation.rememberBackNavigationHandler()
 
     IconButton(
-        onClick = {
-            val activity = context as? Activity
-            activity?.onBackPressed()
-        },
+        onClick = { onBackClick?.invoke() ?: defaultBackHandler.invoke() },
         modifier = modifier.size(50.dp),
         content = {
             Icon(
@@ -253,6 +251,26 @@ fun BackArrow(
             )
         },
     )
+}
+
+object BackNavigation {
+    // Extension function cho Activity để handle animation
+    private fun Activity.finishWithAnimation() {
+        finish()
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+    }
+
+    // Composable để handle back navigation
+    @Composable
+    fun rememberBackNavigationHandler(): () -> Unit {
+        val context = LocalContext.current
+
+        return remember(context) {
+            {
+                (context as? Activity)?.finishWithAnimation()
+            }
+        }
+    }
 }
 
 @Composable
@@ -404,54 +422,52 @@ fun BellButton(
     modifier: Modifier = Modifier,
 ) {
     val notificationViewModel: NotificationViewModel = viewModel()
-    var numberOfUnreadNotifications by remember { mutableIntStateOf(0) }
+    val unreadCount by notificationViewModel.unreadCount.collectAsState()
 
+    val badgeText = if (unreadCount > 99) "99+" else unreadCount.toString()
+//    var numberOfUnreadNotifications by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         notificationViewModel.countUnreadNotifications(
-            onSuccess = { size ->
-                numberOfUnreadNotifications = size
-            },
-            onFailure = {}
+            onSuccess = {},
+            onFailure = { Log.e("BellButton", "Failed to fetch notifications") }
         )
     }
 
-    IconButton(
-        onClick = {
-            onClickAction()
-        },
-        modifier = modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(50)),
-        colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f)
-        )
-    ) {
-        Box(
-            contentAlignment = Alignment.Center
+    Box(modifier = modifier.size(43.dp)) {
+        IconButton(
+            onClick = {
+                onClickAction()
+            },
+            modifier = modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(50)),
+            colors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f)
+            )
         ) {
             Icon(
-                modifier = Modifier.size(30.dp),
+                modifier = Modifier.size(24.dp),
                 painter = painterResource(id = R.drawable.ic_noti),
                 contentDescription = "More options",
                 tint = MaterialTheme.colorScheme.onBackground
             )
 
-            if (numberOfUnreadNotifications > 0) {
-                Box(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .background(MaterialTheme.colorScheme.error, CircleShape)
-                        .align(Alignment.TopEnd),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = numberOfUnreadNotifications.toString(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onError,
-                        maxLines = 1
-                    )
-                }
+        }
+        if (unreadCount > 0) {
+            Box(
+                modifier = Modifier
+                    .size(16.dp)
+                    .background(MaterialTheme.colorScheme.error, CircleShape)
+                    .align(Alignment.TopEnd),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = badgeText,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onError,
+                    maxLines = 1
+                )
             }
         }
     }
@@ -494,7 +510,7 @@ fun PostTopBar(url: String, name: String) {
                 painter = painterResource(id = R.drawable.ic_search),
                 onClickAction = { navigateToSearch() }
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             BellButton(navigateToNoti)
         }

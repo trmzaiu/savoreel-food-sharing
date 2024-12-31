@@ -68,10 +68,11 @@ class SignInActivity : ComponentActivity() {
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        userViewModel.setSignInSuccessListener {
-            val intent = Intent(this, SuccessActivity::class.java)
-            startActivity(intent)
-            finish()
+        userViewModel.signInResult.observe(this) { result ->
+            when (result) {
+                UserViewModel.SignInResult.NewUser -> navigateToSuccessActivity()
+                UserViewModel.SignInResult.ExistingUser -> navigateToTakePhotoActivity()
+            }
         }
 
         setContent {
@@ -115,6 +116,18 @@ class SignInActivity : ComponentActivity() {
             val signInIntent = googleSignInClient.signInIntent
             googleSignInLauncher.launch(signInIntent)
         }
+    }
+
+    private fun navigateToTakePhotoActivity() {
+        val intent = Intent(this, TakePhotoActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun navigateToSuccessActivity() {
+        val intent = Intent(this, SuccessActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }
 

@@ -1,5 +1,6 @@
 package com.example.savoreel.ui.setting
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -44,7 +45,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -95,10 +95,12 @@ class SettingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        themeViewModel.loadUserSettings()
-
         setContent {
-            val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+            val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
+
+            LaunchedEffect(isDarkMode) {
+                setResult(Activity.RESULT_OK)
+            }
 
             SavoreelTheme(darkTheme = isDarkMode) {
                 SettingTheme(
@@ -179,10 +181,9 @@ fun SettingTheme(
     var showErrorDialog by remember { mutableStateOf(false) }
     var isSignOut by remember { mutableStateOf(false) }
     var show by remember { mutableStateOf("") }
-    val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+    val isDarkModeEnabled by themeViewModel.isDarkModeEnabled.collectAsState()
     val currentUser by userViewModel.user.collectAsState()
     var isLoading by remember { mutableStateOf(true) }
-
 
     LaunchedEffect(currentUser) {
         userViewModel.getUser(

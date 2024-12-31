@@ -1,18 +1,18 @@
 package com.example.savoreel.model
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class ThemeViewModel : ViewModel() {
-    private val _isDarkModeEnabled = MutableLiveData(false)
-    val isDarkModeEnabled: LiveData<Boolean> get() = _isDarkModeEnabled
+    private val _isDarkModeEnabled = MutableStateFlow(false)
+    val isDarkModeEnabled: StateFlow<Boolean> get() = _isDarkModeEnabled
 
     /**
      * Load user settings from Firestore
@@ -55,7 +55,7 @@ class ThemeViewModel : ViewModel() {
         val db = FirebaseFirestore.getInstance()
 
         viewModelScope.launch {
-            val newMode = _isDarkModeEnabled.value?.not() ?: false
+            val newMode = _isDarkModeEnabled.value.not()
             _isDarkModeEnabled.value = newMode
 
             try {

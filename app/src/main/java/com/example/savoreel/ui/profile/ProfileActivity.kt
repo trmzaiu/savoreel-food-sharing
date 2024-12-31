@@ -1,10 +1,12 @@
 package com.example.savoreel.ui.profile
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,19 +76,28 @@ class ProfileActivity : ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
 
+    private val settingsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Theme settings were changed
+            themeViewModel.loadUserSettings()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         themeViewModel.loadUserSettings()
 
         setContent {
-            val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+            val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
 
             SavoreelTheme(darkTheme = isDarkMode) {
                 ProfileScreen(
                     navigateToSetting = {
                         val intent = Intent(this, SettingActivity::class.java)
-                        startActivity(intent)
+                        settingsLauncher.launch(intent)
                     },
                     navigateToFollow = { tab, userId ->
                         val intent = Intent(this, FollowActivity::class.java)
@@ -116,14 +126,14 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
 
     val listState = rememberLazyListState()
     var isRowVisible by remember { mutableStateOf(true) }
-    var numberOfFolower by remember { mutableIntStateOf(0) }
+    var numberOfFollower by remember { mutableIntStateOf(0) }
     var numberOfFollowing by remember { mutableIntStateOf(0) }
     var name by remember { mutableStateOf("") }
     var imgUrl by remember { mutableStateOf("") }
     var uid by remember {mutableStateOf("")}
     var isLoading by remember { mutableStateOf(true) }
     var lisOfPost by remember { mutableStateOf(emptyList<Post>()) }
-    var grouptedPosts by remember { mutableStateOf(emptyMap<String, List<Post>>()) }
+    var groupedPosts by remember { mutableStateOf(emptyMap<String, List<Post>>()) }
 
     val currentUser by userViewModel.user.collectAsState()
 
@@ -134,7 +144,7 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                     uid = currentUser.userId.toString()
                     name = currentUser.name.toString()
                     imgUrl = currentUser.avatarUrl.toString()
-                    numberOfFolower = currentUser.followers.size
+                    numberOfFollower = currentUser.followers.size
                     numberOfFollowing = currentUser.following.size
                 } else {
                     Log.e("ProfileScreen", "User data not found")
@@ -152,9 +162,9 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
         postModel.getPostsFromCurrentUser(
             onSuccess = { posts ->
                 lisOfPost = posts
-                grouptedPosts = groupPostsByMonthYear(lisOfPost)
+                groupedPosts = groupPostsByMonthYear(lisOfPost)
                 Log.d("Postsss", "Posts fetched: $lisOfPost")
-                Log.d("Postsss", "Grouped Posts fetched: $grouptedPosts")
+                Log.d("Postsss", "Grouped Posts fetched: $groupedPosts")
             },
             onFailure = {
                 Log.e("ProfileScreen", "Error fetching posts")
@@ -172,7 +182,7 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         if (isLoading) {
             CircularProgressIndicator(
@@ -290,7 +300,7 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                                     }
                             ) {
                                 Text(
-                                    text = numberOfFolower.toString(),
+                                    text = numberOfFollower.toString(),
                                     fontFamily = nunitoFontFamily,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 20.sp,
@@ -308,8 +318,8 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                         state = listState,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        grouptedPosts.forEach() { (title, posts) ->
-                            Log.e("GroupPostsss", "Size of GroupPost: ${grouptedPosts.size}")
+                        groupedPosts.forEach() { (title, posts) ->
+                            Log.e("GroupPostsss", "Size of GroupPost: ${groupedPosts.size}")
                             item(posts){
                                 Log.e("GroupPostsss", "GroupPost: $title: $posts")
                                 CalendarWithImages(

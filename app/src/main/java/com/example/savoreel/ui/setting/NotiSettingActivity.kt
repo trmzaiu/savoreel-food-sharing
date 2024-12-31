@@ -15,8 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -37,7 +37,7 @@ class NotiSettingActivity: ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val themeViewModel: ThemeViewModel = viewModel()
-            val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+            val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
             SavoreelTheme(darkTheme = isDarkMode) {
                 NotiSettingScreen()
             }

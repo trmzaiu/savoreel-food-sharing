@@ -13,16 +13,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -55,7 +56,7 @@ class PostActivity: ComponentActivity() {
         themeViewModel.loadUserSettings()
 
         setContent {
-            val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+            val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
             val postId = intent.getStringExtra("POST_ID") ?: ""
             Log.d("PostActivity", "Received POST_ID: $postId")
 
@@ -79,6 +80,7 @@ fun PostScreen(postId: String){
 
     var post by remember { mutableStateOf(Post()) }
     val context = LocalContext.current
+    var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(currentUser) {
         userViewModel.getUser(
@@ -103,13 +105,18 @@ fun PostScreen(postId: String){
                 if (it != null) {
                     post = it
                 }
+                isLoading = false
             },
-            onFailure = {  }
+            onFailure = { isLoading = false }
         )
     }
 
-    Box(){
-        Column(){
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)){
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
             PostTopBar(url,name)
             Column(modifier = Modifier.padding(5.dp, 130.dp, 5.dp, 15.dp)){
                 Column(modifier = Modifier
@@ -122,6 +129,20 @@ fun PostScreen(postId: String){
                         fontFamily = nunitoFontFamily,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 4.dp)
+                    )
+                    val timeAgo = remember(post.date) {
+                        postModel.getTimeAgo(post.date)
+                    }
+                    Text(
+                        text = timeAgo,
+                        fontSize = 16.sp,
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.onSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -163,10 +184,12 @@ fun PostScreen(postId: String){
                                 isTitle = true,
                             )
                         }
-                        if (post.hashtag.isNotEmpty()) {
+                        if (post.hashtag?.isNotEmpty() == true) {
+                            val hashtagsList: List<String> = post.hashtag!!
+                            val hashtags = hashtagsList.joinToString(" ")
                             EditableField(
                                 label = "Add Hashtag",
-                                value = post.hashtag,
+                                value = hashtags,
                                 onStartEdit = {},
                                 ic = R.drawable.ic_hashtag
                             )

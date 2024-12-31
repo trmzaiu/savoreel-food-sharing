@@ -35,7 +35,8 @@ class UserViewModel : ViewModel() {
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> get() = _error
 
-    private var signInSuccess: (() -> Unit)? = null
+    private val _signInResult = MutableLiveData<SignInResult>()
+    val signInResult: LiveData<SignInResult> get() = _signInResult
 
     private fun getCurrentUserId(): String? {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return null
@@ -528,14 +529,15 @@ class UserViewModel : ViewModel() {
                             userDocRef.set(newUser)
                                 .addOnSuccessListener {
                                     Log.d("CreateAccount", "User data saved to Firestore successfully.")
-                                    signInSuccess?.invoke()
+                                    _signInResult.postValue(SignInResult.NewUser)
+
                                 }
                                 .addOnFailureListener { e ->
                                     Log.e("CreateAccount", "Failed to save user data: ${e.message}")
                                 }
                         } else {
                             Log.d("CreateAccount", "User data already exists in Firestore.")
-                            signInSuccess?.invoke()
+                            _signInResult.postValue(SignInResult.ExistingUser)
                         }
                     }
                 }
@@ -545,8 +547,9 @@ class UserViewModel : ViewModel() {
         }
     }
 
-    fun setSignInSuccessListener(onSuccess: () -> Unit) {
-        signInSuccess = onSuccess
+    sealed class SignInResult {
+        object NewUser : SignInResult()
+        object ExistingUser : SignInResult()
     }
 
     // Update toggleFollowStatus to include notification

@@ -41,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,14 +75,12 @@ class OnboardingActivity : ComponentActivity() {
         themeViewModel.loadUserSettings()
 
         setContent {
-            val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
-
             val sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)
             val editor = sharedPreferences.edit()
             editor.putBoolean("onboarding_completed", true)
             editor.apply()
 
-            SavoreelTheme(darkTheme = isDarkMode) {
+            SavoreelTheme(darkTheme =  false) {
                 OnboardingScreen(
                     navigateToSignIn = {
                         val intent = Intent(this, SignInActivity::class.java)

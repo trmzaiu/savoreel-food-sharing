@@ -171,7 +171,8 @@ fun EditableField(
             Icon(
                 painter = it,
                 contentDescription = label,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(22.dp),
+                tint = MaterialTheme.colorScheme.onSecondary
             )
         }
         Spacer(modifier = Modifier.width(15.dp))

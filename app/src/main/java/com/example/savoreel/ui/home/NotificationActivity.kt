@@ -4,6 +4,7 @@ package com.example.savoreel.ui.home
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -39,11 +40,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -72,10 +73,10 @@ import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.profile.UserAvatar
 import com.example.savoreel.ui.profile.UserWithOutAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
-import com.google.firebase.auth.FirebaseAuth
 
 class NotificationActivity: ComponentActivity() {
     private val themeViewModel: ThemeViewModel by viewModels()
+    private val notificationViewModel: NotificationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,10 +84,12 @@ class NotificationActivity: ComponentActivity() {
         themeViewModel.loadUserSettings()
 
         setContent {
-            val isDarkMode by themeViewModel.isDarkModeEnabled.observeAsState(initial = false)
+            val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
 
             SavoreelTheme(darkTheme = isDarkMode) {
-                NotificationScreen()
+                val notifications by notificationViewModel.notifications.collectAsState()
+                val unreadCount by notificationViewModel.unreadCount.collectAsState()
+                NotificationScreen(notifications, unreadCount)
             }
         }
     }
@@ -94,68 +97,44 @@ class NotificationActivity: ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen() {
+fun NotificationScreen(notifications: List<Notification>, unreadCount: Int) {
     val context = LocalContext.current
     val notificationViewModel: NotificationViewModel = viewModel()
     val userViewModel: UserViewModel = viewModel()
-    val currentUser = FirebaseAuth.getInstance().currentUser
+    val currentUser by userViewModel.user.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
 
-    var notifications by remember { mutableStateOf<List<Notification>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
-    var numberOfUnreadNotifications by remember { mutableIntStateOf(0) }
-//
-//    var showSnackbar by remember { mutableStateOf(true) }
-//    var snackbarMessage by remember { mutableStateOf("aaaa") }
-//    var senderId by remember { mutableStateOf("") }
-//    var senderName by remember { mutableStateOf("") }
 
     LaunchedEffect(currentUser) {
-        if (currentUser == null) {
-            error = "Not logged in"
-            loading = false
-            return@LaunchedEffect
-        }
+//        if (currentUser == null) {
+//            error = "Not logged in"
+//            loading = false
+//            return@LaunchedEffect
+//        }
 
         try {
-            // Initial notifications load
-            notificationViewModel.getNotifications(
-                onSuccess = { notificationsList ->
-                    notifications = notificationsList
-                    loading = false
-                },
-                onFailure = { errorMessage ->
+            Log.d("NotificationScreen", "Start observing notifications...")
+            notificationViewModel.startObservingNotifications(
+                onError = { errorMessage ->
                     error = errorMessage
                     loading = false
+                    Log.e("NotificationScreen", "Error observing notifications: $errorMessage")
                 }
             )
-
-            // Set up real-time notification listener
-//            notificationViewModel.listenToNewNotifications { newNotification ->
-//                notifications = listOf(newNotification) + notifications
-//                userViewModel.getUserById(
-//                    userId = newNotification.senderId,
-//                    onSuccess = { user ->
-//                        if (user != null) {
-//                            snackbarMessage = "${user.name} ${newNotification.description}"
-//                            showSnackbar = true
-//                        }
-//                    },
-//                    onFailure = {}
-//                )
-//                numberOfUnreadNotifications++
-//            }
-
-            notificationViewModel.countUnreadNotifications(
-                onSuccess = { size ->
-                    numberOfUnreadNotifications = size
-                },
-                onFailure = {}
-            )
+            loading = false
         } catch (e: Exception) {
             error = e.message ?: "An unexpected error occurred"
             loading = false
+            Log.e("NotificationScreen", "Error observing notifications: $error")
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            Log.d("NotificationScreen", "Stopping observation of notifications")
+            notificationViewModel.stopObservingNotifications()
         }
     }
 
@@ -204,7 +183,7 @@ fun NotificationScreen() {
                                 tint = MaterialTheme.colorScheme.onBackground
                             )
 
-                            if (numberOfUnreadNotifications > 0) {
+                            if (unreadCount > 0) {
                                 Box(
                                     modifier = Modifier
                                         .size(16.dp)
@@ -213,7 +192,7 @@ fun NotificationScreen() {
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = numberOfUnreadNotifications.toString(),
+                                        text = unreadCount.toString(),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onError,
                                         maxLines = 1
@@ -244,11 +223,14 @@ fun NotificationScreen() {
                                         )
                                     },
                                     onClick = {
+                                        Log.d("NotificationScreen", "Marking all notifications as read")
                                         notificationViewModel.markAllAsRead(
                                             onSuccess = {
-                                                notifications = notifications.map { it.copy(read = true) }
+                                                Log.d("NotificationScreen", "All notifications marked as read")
                                             },
-                                            onFailure = { /* Handle error */ }
+                                            onFailure = { error ->
+                                                Log.e("NotificationScreen", "Failed to mark all as read: $error")
+                                            }
                                         )
                                         showMenu = false
                                     },
@@ -266,11 +248,14 @@ fun NotificationScreen() {
                                         )
                                    },
                                     onClick = {
+                                        Log.d("NotificationScreen", "Deleting all notifications")
                                         notificationViewModel.deleteAllNotifications(
                                             onSuccess = {
-                                                notifications = emptyList()
+                                                Log.d("NotificationScreen", "All notifications deleted")
                                             },
-                                            onFailure = { /* Handle error */ }
+                                            onFailure = { error ->
+                                                Log.e("NotificationScreen", "Failed to delete all notifications: $error")
+                                            }
                                         )
                                         showMenu = false
                                     },
@@ -331,22 +316,29 @@ fun NotificationScreen() {
                             val notification = notifications[index]
                             NotificationItem(
                                 data = notification,
-                                userViewModel = userViewModel,
                                 onDelete = {
+                                    Log.d("NotificationScreen", "Deleting notification with ID: ${notification.notificationId}")
                                     notificationViewModel.deleteNotification(
                                         notificationId = notification.notificationId,
                                         onSuccess = {
-                                            notifications = notifications.filterNot { it.notificationId == notification.notificationId }
+                                            Log.d("NotificationScreen", "Notification deleted successfully")
                                         },
-                                        onFailure = {  }
+                                        onFailure = { error ->
+                                            Log.e("NotificationScreen", "Failed to delete notification: $error")
+                                        }
                                     )
                                 },
                                 onNotificationClick = { clickedNotification ->
                                     if (!clickedNotification.read) {
+                                        Log.d("NotificationScreen", "Marking notification as read with ID: ${clickedNotification.notificationId}")
                                         notificationViewModel.markAsRead(
                                             notificationId = clickedNotification.notificationId,
-                                            onSuccess = { },
-                                            onFailure = { }
+                                            onSuccess = {
+                                                Log.d("NotificationScreen", "Notification marked as read")
+                                            },
+                                            onFailure = { error ->
+                                                Log.e("NotificationScreen", "Failed to mark notification as read: $error")
+                                            }
                                         )
                                     }
                                     val intent = Intent(context, GridPostActivity::class.java).apply {
@@ -361,33 +353,16 @@ fun NotificationScreen() {
             }
         }
     }
-//    if (showSnackbar) {
-//        Snackbar(
-//            modifier = Modifier
-//                .padding(16.dp),
-//            action = {
-//                Text(
-//                    text = "Dismiss",
-//                    color = MaterialTheme.colorScheme.secondary,
-//                    modifier = Modifier.clickable {
-//                        showSnackbar = false
-//                    }
-//                )
-//            }
-//        ) {
-//            Text(text = snackbarMessage)
-//        }
-//    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationItem(
     data: Notification,
-    userViewModel: UserViewModel,
     onDelete: () -> Unit,
     onNotificationClick: (Notification) -> Unit
 ) {
+    val userViewModel: UserViewModel = viewModel()
     var uid by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var imgRes by remember { mutableStateOf("") }
