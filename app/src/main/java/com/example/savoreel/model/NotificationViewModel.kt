@@ -251,24 +251,6 @@ class NotificationViewModel: ViewModel() {
             .addOnFailureListener { onFailure(it.message ?: "Error fetching notifications") }
     }
 
-    fun listenToNewNotifications(onNewNotification: (Notification) -> Unit) {
-        val currentUser = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        FirebaseFirestore.getInstance()
-            .collection("notifications")
-            .whereEqualTo("recipientId", currentUser)
-            .orderBy("date", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) return@addSnapshotListener
-
-                snapshot?.documentChanges?.forEach { change ->
-                    if (change.type == DocumentChange.Type.ADDED) {
-                        val notification = change.document.toObject(Notification::class.java)
-                        onNewNotification(notification)
-                    }
-                }
-            }
-    }
-
     private fun updateNotifications() {
         log("Updating notifications")
         val currentUser = auth.currentUser ?: return

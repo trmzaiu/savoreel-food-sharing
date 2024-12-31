@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -322,6 +323,7 @@ fun PhotoTakenScreen(scope: CoroutineScope,
                                     photoData = photoData,
                                     onSuccess = {
                                         postViewModel.navigateToState(PhotoState.TakePhoto)
+                                        postViewModel.resetPhoto()
                                         isLoading = false
                                     },
                                     onFailure = { errorMessage ->
@@ -370,9 +372,9 @@ fun ViewPostScreen(
     sheetState: SheetState,
     parentPagerState: PagerState,
     emojiList: MutableList<FloatingEmoji>,
-    postID: String,
+    postModel: PostModel,
+    postID: String
 ) {
-    val postModel: PostModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
     val notificationViewModel: NotificationViewModel = viewModel()
     val innerPagerState = rememberPagerState()
@@ -404,7 +406,12 @@ fun ViewPostScreen(
         postDate ?: Date(0)
     }
 
-    CallBackState()
+    BackHandler {
+        scope.launch {
+            parentPagerState.animateScrollToPage(0)
+        }
+    }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
@@ -460,6 +467,7 @@ fun ViewPostScreen(
                                 val secureUrl = remember(post.photoUri) {
                                     post.photoUri.replace("http://", "https://")
                                 }
+                                postViewModel.setPhotoUri(Uri.parse(secureUrl))
 
                                 // Debug logging
                                 LaunchedEffect(secureUrl) {
@@ -517,7 +525,6 @@ fun ViewPostScreen(
                         }
                     }
                 }
-
             }
         }
         Box(modifier = Modifier
@@ -738,12 +745,10 @@ fun CallBackState(){
     val postViewModel: PostViewModel = viewModel()
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
-    // Register a custom back press callback
     backDispatcher?.addCallback(
         LocalLifecycleOwner.current,
         object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // Ensure the navigation logic is properly triggered
                 postViewModel.navigateToState(PhotoState.TakePhoto)
             }
         }

@@ -161,19 +161,21 @@ class PostModel : ViewModel() {
     // Original getPostsFromFirebase remains the same
     fun getPostsFromFirebase(onSuccess: (List<Post>) -> Unit, onFailure: () -> Unit) {
         db.collection("posts")
-            .get()
-            .addOnSuccessListener { documents ->
+            .addSnapshotListener { snapshots, exception ->
+                if (exception != null) {
+                    Log.e("Firebase", "Error fetching posts: ${exception.message}")
+                    return@addSnapshotListener
+                }
+
                 val fetchedPosts = mutableListOf<Post>()
-                for (document in documents) {
+                snapshots?.documents?.forEach { document ->
                     val post = document.toObject(Post::class.java)
-                    fetchedPosts.add(post)
+                    if (post != null) {
+                        fetchedPosts.add(post)
+                    }
                 }
                 _posts.value = fetchedPosts
                 onSuccess(fetchedPosts)
-            }
-            .addOnFailureListener { exception ->
-                Log.e("Firebase", "Error fetching posts", exception)
-                onFailure()
             }
     }
 

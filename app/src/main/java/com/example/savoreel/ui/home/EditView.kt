@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -45,7 +46,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.net.URL
 
 
 @Composable
@@ -189,37 +197,73 @@ fun EditableField(
 
 fun downloadPhoto(context: Context, photoUri: Uri?) {
     if (photoUri != null) {
-        val resolver = context.contentResolver
-        val fileName = "Photo_${System.currentTimeMillis()}.jpg"
-        val contentValues = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-        }
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val inputStream = URL(photoUri.toString()).openStream()
+                val fileName = "Photo_${System.currentTimeMillis()}.jpg"
+                val resolver = context.contentResolver
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                }
 
-        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-        uri?.let {
-            resolver.openOutputStream(it)?.use { outputStream ->
-                resolver.openInputStream(photoUri)?.copyTo(outputStream)
+                val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                uri?.let {
+                    resolver.openOutputStream(it)?.use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Photo downloaded: $fileName", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Failed to download photo", Toast.LENGTH_SHORT).show()
+                }
+                Log.e("DownloadPhoto", "Error: ${e.message}")
             }
-            Toast.makeText(context, "Photo downloaded: $fileName", Toast.LENGTH_SHORT).show()
         }
     } else {
-        Toast.makeText(context, "Can not download photo", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Cannot download photo", Toast.LENGTH_SHORT).show()
     }
 }
 
 fun sharePhoto(context: Context, photoUri: Uri?) {
     if (photoUri != null) {
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "image/jpeg"
-            putExtra(Intent.EXTRA_STREAM, photoUri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val inputStream = URL(photoUri.toString()).openStream()
+                val file = File(context.cacheDir, "shared_photo.jpg")
+                file.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+
+                val contentUri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file
+                )
+
+                withContext(Dispatchers.Main) {
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "image/jpeg"
+                        putExtra(Intent.EXTRA_STREAM, contentUri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    context.startActivity(Intent.createChooser(shareIntent, "Share Photo"))
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Failed to share photo", Toast.LENGTH_SHORT).show()
+                }
+                Log.e("SharePhoto", "Error: ${e.message}")
+            }
         }
-        context.startActivity(Intent.createChooser(shareIntent, "Share Photo"))
     } else {
-        Toast.makeText(context, "No photo to share", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Cannot share photo", Toast.LENGTH_SHORT).show()
     }
 }
+
 
 data class FloatingEmoji(
     val emoji: String,

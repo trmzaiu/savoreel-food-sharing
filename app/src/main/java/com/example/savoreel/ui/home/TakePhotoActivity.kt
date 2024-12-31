@@ -187,14 +187,15 @@ fun HomeScreen() {
                                     TakePhotoScreen()
                                 }
 
-                            1 -> {
-                                ViewPostScreen(
-                                    scope,
-                                    sheetState,
-                                    outerPagerState,
-                                    emojiList,
-                                    postID
-                                )
+                                1 -> {
+                                    ViewPostScreen(
+                                        scope,
+                                        sheetState,
+                                        outerPagerState,
+                                        emojiList,
+                                        postModel,
+                                        postID
+                                    )
                             }
                         }
                     }
