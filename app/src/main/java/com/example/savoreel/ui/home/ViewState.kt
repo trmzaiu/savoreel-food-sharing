@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -64,6 +65,7 @@ import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.PostViewModel
 import com.example.savoreel.model.UserViewModel
+import com.example.savoreel.model.formatRelativeTime
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
@@ -322,6 +324,7 @@ fun PhotoTakenScreen(scope: CoroutineScope,
                                     photoData = photoData,
                                     onSuccess = {
                                         postViewModel.navigateToState(PhotoState.TakePhoto)
+                                        postViewModel.resetPhoto()
                                         isLoading = false
                                     },
                                     onFailure = { errorMessage ->
@@ -399,26 +402,21 @@ fun ViewPostScreen(
         }
     }
 
-    val sortedPosts = posts.sortedByDescending { post ->
-        val postDate = parseDate(post.date)
-        postDate ?: Date(0)
-    }
-
     CallBackState()
     Box(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-        if (sortedPosts.isNotEmpty()) {
+        if (posts.isNotEmpty()) {
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
                 VerticalPager(
-                    count = sortedPosts.size,
+                    count = posts.size,
                     state = innerPagerState,
                 ) { page ->
-                    val post = sortedPosts[page]
+                    val post = posts[page]
 
                     Column(modifier = Modifier
                         .fillMaxSize()
@@ -435,11 +433,9 @@ fun ViewPostScreen(
                                 .fillMaxWidth()
                                 .padding(bottom = 4.dp)
                         )
-                        val timeAgo = remember(post.date) {
-                            postModel.getTimeAgo(post.date)
-                        }
+
                         Text(
-                            text = timeAgo,
+                            text = formatRelativeTime(post.date),
                             fontSize = 16.sp,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Normal,
@@ -460,6 +456,7 @@ fun ViewPostScreen(
                                 val secureUrl = remember(post.photoUri) {
                                     post.photoUri.replace("http://", "https://")
                                 }
+                                postViewModel.setPhotoUri(Uri.parse(secureUrl))
 
                                 // Debug logging
                                 LaunchedEffect(secureUrl) {
@@ -517,7 +514,6 @@ fun ViewPostScreen(
                         }
                     }
                 }
-
             }
         }
         Box(modifier = Modifier
@@ -738,12 +734,10 @@ fun CallBackState(){
     val postViewModel: PostViewModel = viewModel()
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
-    // Register a custom back press callback
     backDispatcher?.addCallback(
         LocalLifecycleOwner.current,
         object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // Ensure the navigation logic is properly triggered
                 postViewModel.navigateToState(PhotoState.TakePhoto)
             }
         }

@@ -67,7 +67,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 class ProfileActivity : ComponentActivity() {
@@ -424,10 +423,10 @@ fun UserWithOutAvatar(name: String, sizeText: TextUnit, sizeBox: Dp) {
 }
 
 fun groupPostsByMonthYear(posts: List<Post>): Map<String, List<Post>> {
-    val groupedPosts = posts.groupBy { post ->
-        val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        val date = sdf.parse(post.date) ?: Date()
-        SimpleDateFormat("MMMM, yyyy", Locale.getDefault()).format(date)
+    val outputDateFormat = SimpleDateFormat("MMMM, yyyy", Locale.getDefault())
+
+    return posts.groupBy { post ->
+        val date = post.date.toDate()
+        outputDateFormat.format(date)
     }
-    return groupedPosts
 }

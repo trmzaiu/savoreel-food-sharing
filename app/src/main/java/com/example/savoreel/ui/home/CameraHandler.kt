@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -19,6 +20,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -56,9 +59,8 @@ fun CameraFrame(
     modifier: Modifier = Modifier,
     isFrontCamera: Boolean,
     onCapturePhoto: (Uri) -> Unit,
-    onTakePhoto: (()-> Unit) -> Unit,
+    onTakePhoto: (() -> Unit) -> Unit,
     flashEnabled: Boolean,
-
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -67,6 +69,7 @@ fun CameraFrame(
     val outputDirectory = context.cacheDir
 
     val cameraSelector = if (isFrontCamera) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
+    var camera: Camera? by remember { mutableStateOf(null) }
 
     DisposableEffect(Unit) {
         onDispose { cameraExecutor.shutdown() }
@@ -81,10 +84,21 @@ fun CameraFrame(
         }
     }
 
-
     AndroidView(
         factory = { previewView },
         modifier = modifier
+            .pointerInput(Unit) {
+                detectTransformGestures { _, _, zoomChange, _ ->
+                    camera?.cameraControl?.let { control ->
+                        val currentZoomRatio = camera?.cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
+                        val newZoomRatio = (currentZoomRatio * zoomChange).coerceIn(
+                            camera?.cameraInfo?.zoomState?.value?.minZoomRatio ?: 1f,
+                            camera?.cameraInfo?.zoomState?.value?.maxZoomRatio ?: 10f
+                        )
+                        control.setZoomRatio(newZoomRatio)
+                    }
+                }
+            }
     ) { preview ->
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
@@ -106,7 +120,7 @@ fun CameraFrame(
 
             try {
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
+                camera = cameraProvider.bindToLifecycle(
                     lifecycleOwner,
                     cameraSelector,
                     previewUseCase,
@@ -115,7 +129,6 @@ fun CameraFrame(
 
                 previewView.tag = imageCaptureUseCase
 
-                // Provide the takePhoto action
                 onTakePhoto {
                     if (isFrontCamera && flashEnabled) {
                         adjustScreenBrightness(context, 1.0f)
@@ -146,7 +159,6 @@ fun CameraFrame(
                             override fun onError(exception: ImageCaptureException) {
                                 Log.e("CameraFrame", "Photo capture failed: ${exception.message}", exception)
                                 adjustScreenBrightness(context, WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE)
-
                             }
                         }
                     )
@@ -157,6 +169,7 @@ fun CameraFrame(
         }, ContextCompat.getMainExecutor(context))
     }
 }
+
 
 fun mirrorImage(photoFile: File) {
     try {
