@@ -360,5 +360,10 @@ class PostModel : ViewModel() {
             }
     }
 
+    fun getPostsWithMatchingHashtags(posts: List<Post>, user: User): List<Post> {
+        return posts.filter { post ->
+            post.hashtag?.any { it in user.hashtags } == true
+        }
+    }
 }
 

@@ -329,7 +329,7 @@ class UserViewModel : ViewModel() {
     fun removeUserAvatar(avatarUrl: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         val userId = getCurrentUserId()?: return
         db.collection("users").document(userId)
-            .update("avatar", avatarUrl)
+            .update("avatarUrl", avatarUrl)
             .addOnSuccessListener {
                 _user.value = _user.value?.copy(avatarUrl = avatarUrl)
                 onSuccess()

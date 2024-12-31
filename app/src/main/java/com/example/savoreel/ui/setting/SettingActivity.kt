@@ -1,9 +1,13 @@
 package com.example.savoreel.ui.setting
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -44,6 +48,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -85,6 +90,10 @@ import com.example.savoreel.ui.profile.UserWithOutAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import com.google.firebase.auth.FirebaseAuth
+import java.io.File
+import java.io.FileOutputStream
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 @Suppress("DEPRECATION")
@@ -571,6 +580,8 @@ fun HandleAvatarOption(option: String, postViewModel: PostViewModel) {
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var shouldLaunchGallery by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset(0f, 0f)) }
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -581,7 +592,6 @@ fun HandleAvatarOption(option: String, postViewModel: PostViewModel) {
             Log.d("Gallery", "No image selected")
         }
         shouldLaunchGallery = false
-        postViewModel.setIsChosen(false)
     }
 
     LaunchedEffect(option) {
@@ -607,6 +617,13 @@ fun HandleAvatarOption(option: String, postViewModel: PostViewModel) {
         else -> { /* Handle other cases */ }
     }
 
+    val onScaleChange: (Float) -> Unit = { newScale ->
+        scale = newScale
+    }
+    val onOffsetChange: (Offset) -> Unit = { newOffset ->
+        offset = newOffset
+    }
+
     selectedImageUri?.let { uri ->
         val photoData = context.contentResolver.openInputStream(uri)?.readBytes() ?: byteArrayOf()
         Box (
@@ -621,7 +638,7 @@ fun HandleAvatarOption(option: String, postViewModel: PostViewModel) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AdjustableImagePreview(imageUri = uri)
+                AdjustableImagePreview(imageUri = uri, onScaleChange, onOffsetChange)
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -630,20 +647,31 @@ fun HandleAvatarOption(option: String, postViewModel: PostViewModel) {
                     Button(
                         onClick = {
                             if (photoData.isNotEmpty()) {
-                                userViewModel.uploadUserAvatar(
-                                    photoData = photoData,
-                                    onSuccess = {
-                                        Log.d("Avatar", "Avatar uploaded successfully")
-                                        selectedImageUri = null
-                                    },
-                                    onFailure = { error ->
-                                        Log.e("Avatar", "Failed to upload avatar: $error")
+                                // First crop the image into a square
+                                cropImageToSquare(uri, context, scale, offset) { croppedUri ->
+                                    // Convert the cropped URI into photoData
+                                    val croppedPhotoData = context.contentResolver.openInputStream(croppedUri)?.readBytes() ?: byteArrayOf()
+
+                                    if (croppedPhotoData.isNotEmpty()) {
+                                        // Upload the cropped image as the avatar
+                                        userViewModel.uploadUserAvatar(
+                                            photoData = croppedPhotoData,
+                                            onSuccess = {
+                                                Log.d("Avatar", "Avatar uploaded successfully")
+                                                selectedImageUri = null
+                                            },
+                                            onFailure = { error ->
+                                                Log.e("Avatar", "Failed to upload avatar: $error")
+                                            }
+                                        )
+                                    } else {
+                                        Log.e("Avatar", "Failed to convert cropped image URI to ByteArray.")
                                     }
-                                )
+                                }
+                                postViewModel.setIsChosen(false)
                             } else {
                                 Log.e("Avatar", "Failed to convert URI to ByteArray.")
                             }
-
                             Log.d("Avatar", "Confirmed image: $uri")
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -663,6 +691,7 @@ fun HandleAvatarOption(option: String, postViewModel: PostViewModel) {
                     Button(
                         onClick = {
                             selectedImageUri = null
+                            postViewModel.setIsChosen(false)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Gray
@@ -684,10 +713,11 @@ fun HandleAvatarOption(option: String, postViewModel: PostViewModel) {
     }
 }
 
+@SuppressLint("AutoboxingStateCreation")
 @Composable
-fun AdjustableImagePreview(imageUri: Uri) {
+fun AdjustableImagePreview(imageUri: Uri, onScaleChange: (Float) -> Unit, onOffsetChange: (Offset) -> Unit) {
     val context = LocalContext.current
-    var scale by remember { mutableStateOf(1f) }
+    var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset(0f, 0f)) }
     var imageDimensions by remember { mutableStateOf(Size(0f, 0f)) }
 
@@ -695,6 +725,8 @@ fun AdjustableImagePreview(imageUri: Uri) {
     val transformableState = rememberTransformableState { zoomChange, panChange, _ ->
         scale *= zoomChange
         offset += panChange
+        onScaleChange(scale)
+        onOffsetChange(offset)
     }
 
     // Fetch the image dimensions to determine the aspect ratio
@@ -706,8 +738,8 @@ fun AdjustableImagePreview(imageUri: Uri) {
 
     Box(
         modifier = Modifier
-            .size(400.dp) // Size of the circular image container
-            .clip(CircleShape) // Ensure the image is clipped to a circle
+            .size(400.dp)
+            .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surface),
         contentAlignment = Alignment.Center
     ) {
@@ -719,6 +751,8 @@ fun AdjustableImagePreview(imageUri: Uri) {
                         // Reset scale and offset on double-tap
                         scale = 1f
                         offset = Offset(0f, 0f)
+                        onScaleChange(scale)
+                        onOffsetChange(offset)
                     })
                 }
         ) {
@@ -728,7 +762,7 @@ fun AdjustableImagePreview(imageUri: Uri) {
                 modifier = Modifier
                     .fillMaxSize()
                     .offset {
-                        val maxOffsetX = (scale - 1f) * 200f // Maximum offset based on scale
+                        val maxOffsetX = (scale - 1f) * 200f
                         val maxOffsetY = (scale - 1f) * 200f
 
                         // Adjust offset based on aspect ratio
@@ -759,5 +793,37 @@ fun AdjustableImagePreview(imageUri: Uri) {
                 contentScale = ContentScale.Crop // Ensure image is cropped inside the circle
             )
         }
+    }
+}
+
+fun cropImageToSquare(imageUri: Uri, context: Context, scale: Float, offset: Offset, onSaved: (Uri) -> Unit) {
+    try {
+        val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(imageUri))
+        val squareSizePx = 400
+
+        // Calculate actual dimensions based on scale
+        val scaledWidth = bitmap.width / scale
+        val scaledHeight = bitmap.height / scale
+
+        // Calculate crop bounds
+        val left = max(0, (bitmap.width / 2 - scaledWidth / 2 + offset.x).toInt())
+        val top = max(0, (bitmap.height / 2 - scaledHeight / 2 + offset.y).toInt())
+        val right = min(bitmap.width, (left + scaledWidth).toInt())
+        val bottom = min(bitmap.height, (top + scaledHeight).toInt())
+
+        // Crop and scale
+        val cropBitmap = Bitmap.createBitmap(bitmap, left, top, right - left, bottom - top)
+        val squareBitmap = Bitmap.createScaledBitmap(cropBitmap, squareSizePx, squareSizePx, true)
+
+        // Save file
+        val fileName = "cropped_square_${System.currentTimeMillis()}.png"
+        val file = File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName)
+        FileOutputStream(file).use { out ->
+            squareBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        }
+
+        onSaved(Uri.fromFile(file))
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
 }
