@@ -10,9 +10,12 @@ import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
@@ -625,8 +628,8 @@ class UserViewModel : ViewModel() {
     }
 
     fun getFollowers(
-        userId : String,
-        onSuccess: (List<String>) -> Unit,
+        userId: String,
+        onSuccess: (List<User>) -> Unit,
         onFailure: (String) -> Unit
     ) {
         Log.d("getFollowers", "Fetching followers for userId: $userId")
@@ -638,21 +641,46 @@ class UserViewModel : ViewModel() {
                     val followersIds = user?.followers ?: emptyList()
 
                     Log.d("getFollowers", "Followers IDs: $followersIds")
-                    onSuccess(followersIds)
+
+                    if (followersIds.isEmpty()) {
+                        onSuccess(emptyList())
+                    } else {
+                        val followers = mutableListOf<User>()
+                        val tasks = followersIds.map { id ->
+                            db.collection("users").document(id).get()
+                        }
+
+                        Tasks.whenAllComplete(tasks)
+                            .addOnSuccessListener {
+                                for (task in tasks) {
+                                    val followerDoc = (task as Task<DocumentSnapshot>).result
+                                    val follower = followerDoc?.toObject(User::class.java)
+                                    if (follower != null) {
+                                        followers.add(follower)
+                                    }
+                                }
+                                onSuccess(followers)
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("getFollowers", "Failed to fetch follower details: ${exception.message}")
+                                onFailure("Failed to fetch follower details")
+                            }
+                    }
                 } else {
-                    Log.d("getFollowers", "No followers found for userId: $userId")
+                    Log.d("getFollowers", "No user found for userId: $userId")
                     onSuccess(emptyList())
                 }
             }
-            .addOnFailureListener {
-                Log.e("getFollowers", "Failed to fetch followers for userId: $userId")
-                onFailure("Failed to fetch followers for userId: $userId")
+            .addOnFailureListener { exception ->
+                Log.e("getFollowers", "Failed to fetch followers for userId: ${exception.message}")
+                onFailure("Failed to fetch followers for userId: ${exception.message}")
             }
     }
 
+
     fun getFollowing(
-        userId : String,
-        onSuccess: (List<String>) -> Unit,
+        userId: String,
+        onSuccess: (List<User>) -> Unit,
         onFailure: (String) -> Unit
     ) {
         Log.d("getFollowing", "Fetching following for userId: $userId")
@@ -664,17 +692,42 @@ class UserViewModel : ViewModel() {
                     val followingIds = user?.following ?: emptyList()
 
                     Log.d("getFollowing", "Following IDs: $followingIds")
-                    onSuccess(followingIds)
+
+                    if (followingIds.isEmpty()) {
+                        onSuccess(emptyList())
+                    } else {
+                        val followingUsers = mutableListOf<User>()
+                        val tasks = followingIds.map { id ->
+                            db.collection("users").document(id).get()
+                        }
+
+                        Tasks.whenAllComplete(tasks)
+                            .addOnSuccessListener {
+                                for (task in tasks) {
+                                    val doc = (task as Task<DocumentSnapshot>).result
+                                    val followingUser = doc?.toObject(User::class.java)
+                                    if (followingUser != null) {
+                                        followingUsers.add(followingUser)
+                                    }
+                                }
+                                onSuccess(followingUsers)
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("getFollowing", "Failed to fetch following user details: ${exception.message}")
+                                onFailure("Failed to fetch following user details")
+                            }
+                    }
                 } else {
-                    Log.d("getFollowing", "No following found for userId: $userId")
+                    Log.d("getFollowing", "User with userId $userId not found")
                     onSuccess(emptyList())
                 }
             }
-            .addOnFailureListener {
-                Log.e("getFollowing", "Failed to fetch following for userId: $userId")
-                onFailure("Failed to fetch following for userId: $userId")
+            .addOnFailureListener { exception ->
+                Log.e("getFollowing", "Failed to fetch following for userId: ${exception.message}")
+                onFailure("Failed to fetch following for userId: ${exception.message}")
             }
     }
+
 
     fun getAllUsersByNameKeyword(
         keyword: String,
