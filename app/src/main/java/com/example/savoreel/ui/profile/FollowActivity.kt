@@ -75,6 +75,7 @@ class FollowActivity: ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        themeViewModel.loadUserSettings()
         userViewModel.getUser(
             onSuccess = { user -> userViewModel.setUser(user) },
             onFailure = { error -> Log.e("SettingActivity", "Error retrieving user: $error") }

@@ -383,12 +383,10 @@ fun ViewPostScreen(
     var status by remember {mutableStateOf(false)}
 
     LaunchedEffect(posts) {
-        postModel.getPostsFromFirebase(
-            onSuccess = {
-                isLoading = false
-            },
-            onFailure = {}
-        )
+        if (posts.isEmpty()) {
+            postModel.getFollowingUserIds()
+        }
+        isLoading = false
     }
 
     CallBackState()

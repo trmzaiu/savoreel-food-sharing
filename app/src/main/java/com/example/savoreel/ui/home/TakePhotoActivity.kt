@@ -2,6 +2,7 @@ package com.example.savoreel.ui.home
 
 import RequestCameraPermission
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -42,6 +43,7 @@ import com.example.savoreel.model.PostViewModel
 import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.PostTopBar
+import com.example.savoreel.ui.profile.ProfileActivity
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.VerticalPager
@@ -66,7 +68,20 @@ class TakePhotoActivity : ComponentActivity() {
             val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
 
             SavoreelTheme(darkTheme = isDarkMode) {
-                HomeScreen()
+                HomeScreen(
+                    navigateToProfile = {
+                        val intent = Intent(this, ProfileActivity::class.java)
+                        startActivity(intent)
+                    },
+                    navigateToSearch = {
+                        val intent = Intent(this, SearchActivity::class.java)
+                        startActivity(intent)
+                    },
+                    navigateToNoti = {
+                        val intent = Intent(this, NotificationActivity::class.java)
+                        startActivity(intent)
+                    }
+                )
             }
         }
     }
@@ -96,7 +111,7 @@ enum class SheetContent {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navigateToNoti: () -> Unit) {
     val userViewModel: UserViewModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
     val postModel: PostModel = viewModel()
@@ -118,7 +133,6 @@ fun HomeScreen() {
 
     val currentSheetContent by postViewModel.currentSheetContent
 
-    var selectedEmoji by remember { mutableStateOf<String?>("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -171,7 +185,7 @@ fun HomeScreen() {
                     onPermissionDenied = { permissionGranted.value = true }
                 )
             } else {
-                PostTopBar(url, name)
+                PostTopBar(url, name, navigateToProfile, navigateToSearch, navigateToNoti)
                 Column(modifier = Modifier.padding(5.dp, 130.dp, 5.dp, 15.dp)) {
                     if (currentState != PhotoState.PhotoTaken) {
                         VerticalPager(

@@ -231,7 +231,7 @@ class PostModel : ViewModel() {
                 _posts.update { currentPosts ->
                     (currentPosts + fetchedPosts)
                         .distinctBy { it.postId }
-                        .sortedBy { it.date }
+                        .sortedByDescending { it.date }
                 }
             }
             .addOnFailureListener { exception ->

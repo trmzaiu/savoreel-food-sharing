@@ -78,7 +78,7 @@ class ProfileActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        themeViewModel.loadUserSettings()
+        themeViewModel.loadDarkModeFromState()
 
         setContent {
             val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
@@ -231,7 +231,7 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
                 }
                 if (isRowVisible) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).padding(horizontal = 20.dp),
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).padding(horizontal = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {

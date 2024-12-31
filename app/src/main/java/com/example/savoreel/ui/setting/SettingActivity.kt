@@ -1,6 +1,5 @@
 package com.example.savoreel.ui.setting
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -100,10 +99,6 @@ class SettingActivity : ComponentActivity() {
 
         setContent {
             val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
-
-            LaunchedEffect(isDarkMode) {
-                setResult(Activity.RESULT_OK)
-            }
 
             SavoreelTheme(darkTheme = isDarkMode) {
                 SettingTheme(

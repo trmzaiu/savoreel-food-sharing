@@ -53,7 +53,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.savoreel.R
-import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.Post
 import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.PostViewModel
@@ -61,6 +60,7 @@ import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.model.formatRelativeTime
 import com.example.savoreel.ui.component.PostTopBar
+import com.example.savoreel.ui.profile.ProfileActivity
 import com.example.savoreel.ui.theme.SavoreelTheme
 import com.example.savoreel.ui.theme.nunitoFontFamily
 import kotlinx.coroutines.launch
@@ -81,7 +81,26 @@ class PostActivity: ComponentActivity() {
             Log.d("PostActivity", "Received POST_ID: $postId")
 
             SavoreelTheme(darkTheme = isDarkMode) {
-                PostScreen(postId = postId)
+                PostScreen(postId = postId,
+                    navigateToProfile = {
+                        val intent = Intent(this, ProfileActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        startActivity(intent)
+                        finish()
+                    },
+                    navigateToSearch = {
+                        val intent = Intent(this, SearchActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        startActivity(intent)
+                        finish()
+                    },
+                    navigateToNoti = {
+                        val intent = Intent(this, NotificationActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        startActivity(intent)
+                        finish()
+                    }
+                )
             }
         }
     }
@@ -89,11 +108,10 @@ class PostActivity: ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
-fun PostScreen(postId: String){
+fun PostScreen(postId: String, navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navigateToNoti: () -> Unit){
     val userViewModel: UserViewModel = viewModel()
     val postModel: PostModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
-    val notificationViewModel: NotificationViewModel = viewModel()
 
     val currentUser by userViewModel.user.collectAsState()
     var name by remember { mutableStateOf("") }
@@ -102,7 +120,6 @@ fun PostScreen(postId: String){
     var post by remember { mutableStateOf(Post()) }
     val context = LocalContext.current
     var photoUri by remember { mutableStateOf<Uri?>(null) }
-
 
     val currentSheetContent by postViewModel.currentSheetContent
     val emojiList = remember { mutableStateListOf<FloatingEmoji>() }
@@ -139,22 +156,14 @@ fun PostScreen(postId: String){
             onFailure = { isLoading = false }
         )
     }
-    userViewModel.getUserById(
-        post.userId,
-        onSuccess = { user ->
-            if (user != null) {
-                name = user.name.toString()
-            }
-        },
-        onFailure = {}
-    )
+
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)){
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
         } else {
-            PostTopBar(url,name)
+            PostTopBar(url,name, navigateToProfile, navigateToSearch, navigateToNoti)
             Box(modifier = Modifier.padding(5.dp, 130.dp, 5.dp, 15.dp)) {
                 Column(
                     modifier = Modifier.fillMaxSize().padding(top = 30.dp)
@@ -166,8 +175,14 @@ fun PostScreen(postId: String){
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        var postName by remember { mutableStateOf("") }
+                        userViewModel.getUserById(
+                            post.userId,
+                            onSuccess = { user -> postName = user?.name ?: "" },
+                            onFailure = {}
+                        )
                         Text(
-                            text = post.name,
+                            text = postName,
                             fontSize = 20.sp,
                             fontFamily = nunitoFontFamily,
                             fontWeight = FontWeight.Bold,

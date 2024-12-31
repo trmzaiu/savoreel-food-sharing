@@ -4,7 +4,6 @@ package com.example.savoreel.ui.component
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Intent
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -59,10 +58,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.savoreel.R
 import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.Post
-import com.example.savoreel.ui.home.NotificationActivity
 import com.example.savoreel.ui.home.PostImage
-import com.example.savoreel.ui.home.SearchActivity
-import com.example.savoreel.ui.profile.ProfileActivity
 import com.example.savoreel.ui.profile.UserAvatar
 import com.example.savoreel.ui.profile.UserWithOutAvatar
 import com.example.savoreel.ui.theme.nunitoFontFamily
@@ -464,20 +460,7 @@ fun BellButton(
 }
 
 @Composable
-fun PostTopBar(url: String, name: String) {
-    val context = LocalContext.current
-    val navigateToProfile = {
-        val intent = Intent(context, ProfileActivity::class.java)
-        context.startActivity(intent)
-    }
-    val navigateToSearch = {
-        val intent = Intent(context, SearchActivity::class.java)
-        context.startActivity(intent)
-    }
-    val navigateToNoti = {
-        val intent = Intent(context, NotificationActivity::class.java)
-        context.startActivity(intent)
-    }
+fun PostTopBar(url: String, name: String, navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navigateToNoti: () -> Unit) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

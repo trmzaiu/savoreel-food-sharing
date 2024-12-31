@@ -9,18 +9,20 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,6 +54,7 @@ import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.ImageCustom
 import com.example.savoreel.ui.component.PostTopBar
 import com.example.savoreel.ui.profile.FollowActivity
+import com.example.savoreel.ui.profile.ProfileActivity
 import com.example.savoreel.ui.profile.UserAvatar
 import com.example.savoreel.ui.profile.UserWithOutAvatar
 import com.example.savoreel.ui.theme.SavoreelTheme
@@ -73,15 +76,33 @@ class GridPostActivity: ComponentActivity() {
             val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
             val userID = intent.getStringExtra("USER_ID") ?: "Everyone"
             SavoreelTheme(darkTheme = isDarkMode) {
-                GridPost(userID = userID)
+                GridPost(userID = userID,
+                    navigateToProfile = {
+                        val intent = Intent(this, ProfileActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        startActivity(intent)
+                        finish()
+                    },
+                    navigateToSearch = {
+                        val intent = Intent(this, SearchActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        startActivity(intent)
+                        finish()
+                    },
+                    navigateToNoti = {
+                        val intent = Intent(this, NotificationActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        startActivity(intent)
+                        finish()
+                    }
+                )
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GridPost(userID: String) {
+fun GridPost(userID: String, navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navigateToNoti: () -> Unit) {
     val postModel: PostModel = viewModel()
     val userViewModel: UserViewModel = viewModel()
     var isRowVisible by remember { mutableStateOf(false) }
@@ -95,7 +116,7 @@ fun GridPost(userID: String) {
     var currentUserAvatar by remember { mutableStateOf("") }
     var listOfPost by remember { mutableStateOf(emptyList<Post>()) }
     val context = LocalContext.current
-    val posts by postModel.posts.collectAsState(emptyList())
+    val posts by postModel.posts.collectAsState()
     val currentUser by userViewModel.user.collectAsState()
 
     LaunchedEffect(currentUser) {
@@ -115,12 +136,12 @@ fun GridPost(userID: String) {
     }
 
     LaunchedEffect(posts) {
-        postModel.getPostsFromFirebase(
-            onSuccess = {
-                listOfPost = posts
-            },
-            onFailure = {}
-        )
+        if (userID == "Everyone") {
+            if (posts.isEmpty()) {
+                postModel.getFollowingUserIds()
+            }
+            listOfPost = posts
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -160,23 +181,23 @@ fun GridPost(userID: String) {
             .background(color = MaterialTheme.colorScheme.background)
     ) {
         Column {
-            PostTopBar(currentUserAvatar, currentUserName)
+            PostTopBar(currentUserAvatar, currentUserName, navigateToProfile, navigateToSearch, navigateToNoti)
 
             if (isRowVisible) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 10.dp)
-                        .padding(horizontal = 20.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).padding(horizontal = 30.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                    ) {
                         if (avatarUrl.isNotEmpty()) {
                             UserAvatar(avatarUrl, 100.dp)
                         } else {
                             UserWithOutAvatar(name, 60.sp, 100.dp)
                         }
+
                         Text(
                             text = name,
                             fontFamily = nunitoFontFamily,
@@ -186,11 +207,14 @@ fun GridPost(userID: String) {
                             modifier = Modifier.padding(top = 5.dp)
                         )
                     }
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
-                            .weight(1f)
-                            .clickable {
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
                                 val intent = Intent(context, FollowActivity::class.java).apply {
                                     putExtra("USER_ID", userID)
                                     putExtra("TAB", "following")
@@ -211,11 +235,16 @@ fun GridPost(userID: String) {
                             color = MaterialTheme.colorScheme.onBackground,
                         )
                     }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
-                            .weight(1f)
-                            .clickable {
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
                                 val intent = Intent(context, FollowActivity::class.java).apply {
                                     putExtra("USER_ID", userID)
                                     putExtra("TAB", "follower")
@@ -239,7 +268,7 @@ fun GridPost(userID: String) {
                 }
             }
 
-            GridImage(posts = listOfPost, onClick = { post ->
+            GridImage(listOfPost, onClick = { post ->
                 val intent = Intent(context, PostActivity::class.java).apply {
                     putExtra("POST_ID", post.postId)
                 }
