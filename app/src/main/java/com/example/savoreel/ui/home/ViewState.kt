@@ -2,6 +2,7 @@ package com.example.savoreel.ui.home
 
 import CameraFrame
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.activity.OnBackPressedCallback
@@ -369,14 +370,17 @@ fun ViewPostScreen(
     sheetState: SheetState,
     parentPagerState: PagerState,
     emojiList: MutableList<FloatingEmoji>,
-    postModel: PostModel,
-    postID: String
+    postID: String,
 ) {
+    val postModel: PostModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
+    val notificationViewModel: NotificationViewModel = viewModel()
     val innerPagerState = rememberPagerState()
     val posts by postModel.posts.collectAsState(emptyList())
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(true) }
+    var emo by remember {mutableStateOf("")}
+    var status by remember {mutableStateOf(false)}
 
     LaunchedEffect(posts) {
         if (posts.isEmpty()) {
@@ -499,9 +503,21 @@ fun ViewPostScreen(
                                     ic = R.drawable.ic_location
                                 )
                             }
+                            if (status) {
+                                notificationViewModel.createNotification(
+                                    recipientId = post.userId,
+                                    type = "React",
+                                    message = "react $emo your photo",
+                                    onSuccess = {
+                                        status = false
+                                    },
+                                    onFailure = {},
+                                )
+                            }
                         }
                     }
                 }
+
             }
         }
         Box(modifier = Modifier
@@ -550,6 +566,8 @@ fun ViewPostScreen(
                                             Log.d("Add Emoji", "Add to DB not success")
                                         }
                                     )
+                                    status = true
+                                    emo = emoji
                                 }
                             )
                         }
@@ -573,6 +591,10 @@ fun ViewPostScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     ImageButton(R.drawable.ic_grid_image, "Show Grid", 40.dp) {
+                        val intent = Intent(context, GridPostActivity::class.java).apply {
+                            putExtra("USER_ID", "Everyone")
+                        }
+                        context.startActivity(intent)
                     }
                     ImageButton(R.drawable.circle, "Back Home",45.dp) {
                         postViewModel.resetPhoto()

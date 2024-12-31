@@ -3,7 +3,6 @@ package com.example.savoreel.model
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query

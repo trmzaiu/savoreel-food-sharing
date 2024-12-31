@@ -187,72 +187,71 @@ fun HomeScreen() {
                                     TakePhotoScreen()
                                 }
 
-                                1 -> {
-                                    ViewPostScreen(
-                                        scope,
-                                        sheetState,
-                                        outerPagerState,
-                                        emojiList,
-                                        postModel,
-                                        postID
-                                    )
-                                }
+                            1 -> {
+                                ViewPostScreen(
+                                    scope,
+                                    sheetState,
+                                    outerPagerState,
+                                    emojiList,
+                                    postID
+                                )
                             }
                         }
-                    } else {
-                        PhotoTakenScreen(
-                            scope,
-                            sheetState,
-                            photoUri,
-                            title,
-                            location,
-                            hashtag,
-                            editingField,
-                            postModel
-                        )
                     }
+                } else {
+                    PhotoTakenScreen(
+                        scope,
+                        sheetState,
+                        photoUri,
+                        title,
+                        location,
+                        hashtag,
+                        editingField,
+                        postModel
+                    )
                 }
-                if (sheetState.isVisible) {
-                    ModalBottomSheet(
-                        onDismissRequest = {
-                            postViewModel.setcurrentSheetContent(SheetContent.NONE)
-                            scope.launch { sheetState.hide() }
-                        },
-                        sheetState = sheetState,
-                        modifier =
-                        when (currentSheetContent) {
-                            SheetContent.EMOJI_PICKER -> Modifier.height(400.dp)
-                            else -> Modifier
-                        }
-                    ) {
-                        when (currentSheetContent) {
-                            SheetContent.EMOJI_PICKER ->
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .verticalScroll(rememberScrollState())
-                                ) {
-                                    EmojiPickerDialog(
-                                        onEmojiSelected = { emoji ->
-                                            repeat(20) {
-                                                val randomX = Random.nextFloat() * 300f
-                                                val randomY = Random.nextFloat() * 1000f
-                                                emojiList.add(FloatingEmoji(emoji, randomX, randomY))
+            }
+            if (sheetState.isVisible) {
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        postViewModel.setcurrentSheetContent(SheetContent.NONE)
+                        scope.launch { sheetState.hide() }
+                    },
+                    sheetState = sheetState,
+                    modifier =
+                    when (currentSheetContent) {
+                        SheetContent.EMOJI_PICKER -> Modifier.height(400.dp)
+                        else -> Modifier
+                    }
+                ) {
+                    when (currentSheetContent) {
+                        SheetContent.EMOJI_PICKER ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState())
+                            ) {
+                                EmojiPickerDialog(
+                                    onEmojiSelected = { emoji ->
+                                        repeat(20) {
+                                            val randomX = Random.nextFloat() * 300f
+                                            val randomY = Random.nextFloat() * 1000f
+                                            emojiList.add(FloatingEmoji(emoji, randomX, randomY))
+                                        }
+                                        postModel.uploadEmojiReaction(
+                                            postId = postID,
+                                            emoji = emoji,
+                                            onSuccess = {
+                                                Log.d("Add Emoji", "Add to DB success")
+                                            },
+                                            onFailure = {
+                                                Log.d("Add Emoji", "Add to DB not success")
                                             }
-                                            postModel.uploadEmojiReaction(
-                                                postId = postID,
-                                                emoji = emoji,
-                                                onSuccess = {
-                                                    Log.d("Add Emoji", "Add to DB success")
-                                                },
-                                                onFailure = {
-                                                    Log.d("Add Emoji", "Add to DB not success")
-                                                }
-                                            )
-                                            scope.launch { sheetState.hide() }
-                                        },
-                                    )
-                                }
+                                        )
+                                        scope.launch { sheetState.hide() }
+                                    },
+                                )
+                            }
 
                             SheetContent.OPTIONS -> BottomSheet(
                                 scope = scope,
