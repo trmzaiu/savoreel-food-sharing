@@ -406,7 +406,6 @@ fun BellButton(
     val notificationViewModel: NotificationViewModel = viewModel()
     var numberOfUnreadNotifications by remember { mutableIntStateOf(0) }
 
-
     LaunchedEffect(Unit){
         notificationViewModel.countUnreadNotifications(
             onSuccess = { size ->

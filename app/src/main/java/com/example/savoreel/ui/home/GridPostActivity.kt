@@ -91,9 +91,7 @@ fun GridPost(userID: String) {
     var currentUserAvatar by remember { mutableStateOf("") }
     var listOfPost by remember { mutableStateOf(emptyList<Post>()) }
     val context = LocalContext.current
-
-    isRowVisible = userID != "Everyone"
-
+    val posts by postModel.posts.collectAsState(emptyList())
     val currentUser by userViewModel.user.collectAsState()
 
     LaunchedEffect(currentUser) {
@@ -130,17 +128,31 @@ fun GridPost(userID: String) {
                 Log.e("GridPost", "Error retrieving user: $error")
             }
         )
-    }
-
-    LaunchedEffect(Unit) {
-        postModel.getPostsFromUserId(
-            userID,
-            onSuccess = { posts ->
+        if (userID != "Everyone") {
+            isRowVisible = true
+            postModel.getPostsFromUserId(
+                userID,
+                onSuccess = { posts ->
+                    listOfPost = posts
+                },
+                onFailure = {
+                }
+            )
+        } else{
+            if (posts.isEmpty()) {
+                postModel.getPostsFromFirebase(
+                    onSuccess = { firebasePosts ->
+                        listOfPost = firebasePosts
+                    },
+                    onFailure = {
+                        Log.e("GridPost", "Error retrieving posts from Firebase")
+                    }
+                )
+            } else {
                 listOfPost = posts
-            },
-            onFailure = {  }
-        )
-        Log.e("Lemon", "$listOfPost")
+            }
+            Log.e("Post", "GridPost: $posts")
+        }
     }
 
     Box(

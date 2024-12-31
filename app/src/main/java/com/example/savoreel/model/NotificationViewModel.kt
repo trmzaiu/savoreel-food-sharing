@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
@@ -179,23 +178,5 @@ class NotificationViewModel: ViewModel() {
                     .addOnFailureListener { onFailure(it.message ?: "Error deleting notifications") }
             }
             .addOnFailureListener { onFailure(it.message ?: "Error fetching notifications") }
-    }
-
-    fun listenToNewNotifications(onNewNotification: (Notification) -> Unit) {
-        val currentUser = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        FirebaseFirestore.getInstance()
-            .collection("notifications")
-            .whereEqualTo("recipientId", currentUser)
-            .orderBy("date", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) return@addSnapshotListener
-
-                snapshot?.documentChanges?.forEach { change ->
-                    if (change.type == DocumentChange.Type.ADDED) {
-                        val notification = change.document.toObject(Notification::class.java)
-                        onNewNotification(notification)
-                    }
-                }
-            }
     }
 }

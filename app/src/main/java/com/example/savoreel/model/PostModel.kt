@@ -159,7 +159,7 @@ class PostModel : ViewModel() {
     }
 
     // Original getPostsFromFirebase remains the same
-    fun getPostsFromFirebase() {
+    fun getPostsFromFirebase(onSuccess: (List<Post>) -> Unit, onFailure: () -> Unit) {
         db.collection("posts")
             .get()
             .addOnSuccessListener { documents ->
@@ -169,9 +169,11 @@ class PostModel : ViewModel() {
                     fetchedPosts.add(post)
                 }
                 _posts.value = fetchedPosts
+                onSuccess(fetchedPosts)
             }
             .addOnFailureListener { exception ->
                 Log.e("Firebase", "Error fetching posts", exception)
+                onFailure()
             }
     }
 
@@ -334,5 +336,25 @@ class PostModel : ViewModel() {
                 onFailure(errorMessage)
             }
     }
+
+    fun getUserIdFromPostId(postId: String, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+        db.collection("posts").document(postId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val userId = document.getString("userID")
+                    if (userId != null) {
+                        onSuccess(userId)
+                    } else {
+                        onFailure(Exception("UserID not found for postId: $postId"))
+                    }
+                } else {
+                    onFailure(Exception("Post not found for postId: $postId"))
+                }
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception)
+            }
+    }
+
 }
 

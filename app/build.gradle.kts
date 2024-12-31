@@ -136,6 +136,7 @@ dependencies {
     // Cloudinary
     implementation ("com.cloudinary:cloudinary-android:2.3.1")
     implementation ("com.cloudinary:cloudinary-core:1.33.0")
+    implementation(libs.firebase.messaging.ktx)
 
     // Testing
     testImplementation(libs.junit)

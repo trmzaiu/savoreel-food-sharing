@@ -163,10 +163,10 @@ fun PostScreen(postId: String){
                                 isTitle = true,
                             )
                         }
-                        if (post.hashtag.isNotEmpty()) {
+                        if (post.hashtag?.isNotEmpty() == true) {
                             EditableField(
                                 label = "Add Hashtag",
-                                value = post.hashtag,
+                                value = post.hashtag.toString(),
                                 onStartEdit = {},
                                 ic = R.drawable.ic_hashtag
                             )
