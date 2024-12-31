@@ -114,6 +114,15 @@ fun GridPost(userID: String) {
         )
     }
 
+    LaunchedEffect(posts) {
+        postModel.getPostsFromFirebase(
+            onSuccess = {
+                listOfPost = posts
+            },
+            onFailure = {}
+        )
+    }
+
     LaunchedEffect(Unit) {
         userViewModel.getUserById(
             userId = userID,
@@ -143,12 +152,6 @@ fun GridPost(userID: String) {
                 }
             )
         }
-    }
-    LaunchedEffect(posts) {
-        if (posts.isEmpty()) {
-            postModel.getFollowingUserIds()
-        }
-        listOfPost = posts
     }
 
     Box(

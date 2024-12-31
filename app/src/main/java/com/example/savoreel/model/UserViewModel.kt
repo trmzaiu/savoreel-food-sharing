@@ -552,7 +552,6 @@ class UserViewModel : ViewModel() {
         object ExistingUser : SignInResult()
     }
 
-    // Update toggleFollowStatus to include notification
     fun toggleFollowStatus(
         userId: String,
         onSuccess: (Boolean) -> Unit,

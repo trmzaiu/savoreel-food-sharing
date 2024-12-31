@@ -137,25 +137,38 @@ class NotificationViewModel: ViewModel() {
         onSuccess: () -> Unit,
         onFailure: (String) -> Unit
     ) {
+        log("Creating notification for recipient: $recipientId")
         val currentUser = auth.currentUser ?: run {
             onFailure("User not logged in")
+            log("User not logged in")
             return
         }
 
+        if (recipientId.isEmpty()) {
+            onFailure("Recipient ID is empty")
+            log("Recipient ID is empty")
+            return
+        }
+
+        val notificationId = db.collection("notifications").document().id
         val notification = Notification(
-            notificationId = db.collection("notifications").document().id,
+            notificationId = notificationId,
             recipientId = recipientId,
             senderId = currentUser.uid,
             description = message,
             type = type
         )
 
-        db.collection("notifications").document(notification.notificationId)
-            .set(notification)
+        val notificationRef = db.collection("notifications").document(notificationId)
+        notificationRef.set(notification)
             .addOnSuccessListener {
                 onSuccess()
+                log("Notification created successfully for recipient: $recipientId")
             }
-            .addOnFailureListener { onFailure(it.message ?: "Failed to create notification") }
+            .addOnFailureListener { exception ->
+                log("Error creating notification: ${exception.message}")
+                onFailure(exception.message ?: "Failed to create notification")
+            }
     }
 
     fun getNotifications(onSuccess: (List<Notification>) -> Unit, onFailure: (String) -> Unit) {

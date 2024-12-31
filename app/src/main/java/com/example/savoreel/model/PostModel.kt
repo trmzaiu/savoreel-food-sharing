@@ -15,8 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Locale
 import kotlin.coroutines.suspendCoroutine
 
 class PostModel : ViewModel() {
@@ -341,35 +339,6 @@ class PostModel : ViewModel() {
                 Log.e("Firebase", errorMessage)
                 onFailure(errorMessage)
             }
-    }
-
-    fun getTimeAgo(dateString: String): String {
-        if (dateString.isEmpty()) {
-            return "Invalid date"
-        }
-
-        val format = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        val postDate = format.parse(dateString)
-
-        postDate?.let {
-            val currentTime = System.currentTimeMillis()
-            val postTime = it.time
-            val timeDifference = currentTime - postTime
-
-            val seconds = timeDifference / 1000
-            val minutes = seconds / 60
-            val hours = minutes / 60
-            val days = hours / 24
-            val months = days / 30
-
-            return when {
-                months >= 1 -> if (months.toInt() == 1) "1 month ago" else "$months months ago"
-                days >= 1 -> if (days.toInt() == 1) "1 day ago" else "$days days ago"
-                hours >= 1 -> if (hours.toInt() == 1) "1 hour ago" else "$hours hours ago"
-                minutes >= 1 -> if (minutes.toInt() == 1) "1 minute ago" else "$minutes minutes ago"
-                else -> "Just now"
-            }
-        } ?: return "Invalid date"
     }
 
     fun getUserIdFromPostId(postId: String, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {

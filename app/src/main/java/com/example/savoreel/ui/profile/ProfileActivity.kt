@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -59,6 +60,7 @@ import com.example.savoreel.model.ThemeViewModel
 import com.example.savoreel.model.UserViewModel
 import com.example.savoreel.ui.component.BackArrow
 import com.example.savoreel.ui.component.NavButton
+import com.example.savoreel.ui.home.PostActivity
 import com.example.savoreel.ui.home.PostImage
 import com.example.savoreel.ui.setting.SettingActivity
 import com.example.savoreel.ui.theme.SavoreelTheme
@@ -331,6 +333,8 @@ fun CalendarWithImages(
     title: String,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     Box(
         modifier = Modifier.clip(RoundedCornerShape(15))
     ) {
@@ -372,8 +376,10 @@ fun CalendarWithImages(
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(15))
                             .clickable {
-                                println("Clicked on post ID: ${post.postId}")
-                                //chanh à nếu m làm tới đây bạn sẽ thấy tôi đợi bạn
+                                val intent = Intent(context, PostActivity::class.java).apply {
+                                    putExtra("POST_ID", post.postId)
+                                }
+                                context.startActivity(intent)
                             }
                     )
                 }

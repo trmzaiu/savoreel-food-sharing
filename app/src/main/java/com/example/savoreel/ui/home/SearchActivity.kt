@@ -55,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter.Companion.tint
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -132,7 +133,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
     var postsWithHashtag by remember { mutableStateOf(emptyList<Post>()) }
     var postsWithTitle by remember { mutableStateOf(emptyList<Post>()) }
     var loadingFollowStatus by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
-
+    val context = LocalContext.current
     // Fetch recent search history
     LaunchedEffect(Unit) {
         userViewModel.getSearchHistory(
@@ -182,7 +183,6 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                 postModel.searchPostByTitle(
                     searchQuery,
                     onSuccess = { posts ->
-                        // Filter posts by title (case-insensitive)
                         postsWithTitle = posts.filter { post ->
                             post.title?.contains(searchQuery, ignoreCase = true) == true
                         }
@@ -202,7 +202,6 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
         }
     }
 
-    // Gộp bài viết từ hashtag và tiêu đề
     val posts = remember(postsWithHashtag, postsWithTitle) {
         (postsWithHashtag + postsWithTitle).distinctBy { it.postId }
     }
@@ -220,7 +219,6 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Search bar with back arrow
             Row(
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
@@ -382,11 +380,11 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                             userViewModel.isFollowing(person.userId.toString(),
                                                 onSuccess = { isFollowing ->
                                                     isFollow = isFollowing
-                                                    loadingFollowStatus = loadingFollowStatus - person.userId.toString() // Remove loading state
+                                                    loadingFollowStatus = loadingFollowStatus - person.userId.toString()
                                                 },
                                                 onFailure = { error ->
                                                     Log.e("SearchScreen", "Failed to fetch follow status: $error")
-                                                    loadingFollowStatus = loadingFollowStatus - person.userId.toString() // Remove loading state
+                                                    loadingFollowStatus = loadingFollowStatus - person.userId.toString()
                                                 }
                                             )
                                         }
@@ -410,12 +408,8 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                                     persons = updatedList
                                                     isFollow = isFollowing
                                                     Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
-
                                                     if (isFollowing) {
-                                                        person.userId?.let { it1 ->
-                                                            notificationViewModel.createNotification(
-                                                                it1, "Follow", "has started following you.", {}, { })
-                                                        }
+                                                        notificationViewModel.createNotification(person.userId.toString(), "Follow", "has started following you.", {}, {})
                                                     }
                                                 },
                                                 onFailure = { errorMessage ->
@@ -500,9 +494,12 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                                                 it
                                                             }
                                                         }
-                                                        persons = updatedList // Update the persons list with modified follow status
-                                                        isFollow = isFollowing // Flip the follow status
+                                                        persons = updatedList
+                                                        isFollow = isFollowing
                                                         Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
+                                                        if (isFollowing) {
+                                                            notificationViewModel.createNotification(person.userId.toString(), "Follow", "has started following you.", {}, {})
+                                                        }
                                                     },
                                                     onFailure = { errorMessage ->
                                                         Log.e("SearchScreen", "Failed to follow/unfollow: $errorMessage")
@@ -543,7 +540,15 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                     color = MaterialTheme.colorScheme.onBackground
                                 )
                             } else {
-                                GridImage(posts = posts.take(9), onClick = {})
+                                GridImage(
+                                    posts = posts.take(9),
+                                    onClick = { post ->
+                                        val intent = Intent(context, PostActivity::class.java).apply {
+                                            putExtra("POST_ID", post.postId)
+                                        }
+                                        context.startActivity(intent)
+                                    }
+                                )
 
                                 if (posts.size > 3) {
                                     Text(
