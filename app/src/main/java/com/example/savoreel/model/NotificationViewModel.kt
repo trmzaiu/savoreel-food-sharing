@@ -32,7 +32,41 @@ class NotificationViewModel: ViewModel() {
 
     init {
         observeUnreadNotifications()
+        observeNotifications()
     }
+
+    private fun observeNotifications() {
+        val currentUser = auth.currentUser ?: run {
+            log("No authenticated user.")
+            return
+        }
+
+        log("Start observing notifications")
+
+        // Lắng nghe thay đổi trong collection 'notifications'
+        notificationListener = db.collection("notifications")
+            .whereEqualTo("recipientId", currentUser.uid)
+            .orderBy("date", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    log("Error fetching notifications: ${e.message}")
+                    return@addSnapshotListener
+                }
+
+                snapshot?.let {
+                    // Chuyển đổi danh sách documents thành danh sách Notification
+                    val notificationList = it.documents.mapNotNull { doc ->
+                        doc.toObject(Notification::class.java)
+                    }
+                    _notifications.value = notificationList
+
+                    // Cập nhật số lượng thông báo chưa đọc
+                    _unreadCount.value = notificationList.count { !it.read }
+                    log("Notifications updated: ${notificationList.size} items")
+                }
+            }
+    }
+
 
     private fun observeUnreadNotifications() {
         val currentUser = auth.currentUser ?: run {

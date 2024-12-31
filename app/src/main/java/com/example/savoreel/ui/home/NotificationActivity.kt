@@ -100,20 +100,12 @@ class NotificationActivity: ComponentActivity() {
 fun NotificationScreen(notifications: List<Notification>, unreadCount: Int) {
     val context = LocalContext.current
     val notificationViewModel: NotificationViewModel = viewModel()
-    val userViewModel: UserViewModel = viewModel()
-    val currentUser by userViewModel.user.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
 
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(currentUser) {
-//        if (currentUser == null) {
-//            error = "Not logged in"
-//            loading = false
-//            return@LaunchedEffect
-//        }
-
+    LaunchedEffect(Unit) {
         try {
             Log.d("NotificationScreen", "Start observing notifications...")
             notificationViewModel.startObservingNotifications(
@@ -355,7 +347,6 @@ fun NotificationScreen(notifications: List<Notification>, unreadCount: Int) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationItem(
     data: Notification,
@@ -460,7 +451,7 @@ fun NotificationItem(
                                 fontSize = 16.sp
                             )
                         ) {
-                            append(" ${data.description}.")
+                            append(" ${data.description}")
                         }
                         withStyle(
                             style = SpanStyle(

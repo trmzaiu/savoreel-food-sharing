@@ -49,27 +49,33 @@
         </activity>
         <activity android:name=".ui.onboarding.SignInActivity"
             android:exported="true"
-            android:theme="@style/Theme.Savoreel">
+            android:theme="@style/Theme.Savoreel"
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity android:name=".ui.onboarding.SignUpActivity"
             android:exported="true"
-            android:theme="@style/Theme.Savoreel">
+            android:theme="@style/Theme.Savoreel"
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity android:name=".ui.onboarding.NameActivity"
             android:exported="true"
-            android:theme="@style/Theme.Savoreel">
+            android:theme="@style/Theme.Savoreel"
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity android:name=".ui.onboarding.EmailActivity"
             android:exported="true"
-            android:theme="@style/Theme.Savoreel">
+            android:theme="@style/Theme.Savoreel"
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity android:name=".ui.onboarding.PasswordActivity"
             android:exported="true"
-            android:theme="@style/Theme.Savoreel">
+            android:theme="@style/Theme.Savoreel"
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity android:name=".ui.onboarding.ChangePasswordActivity"
             android:exported="true"
-            android:theme="@style/Theme.Savoreel">
+            android:theme="@style/Theme.Savoreel"
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity android:name=".ui.onboarding.SuccessActivity"
             android:exported="true"
@@ -112,7 +118,8 @@
         </activity>
         <activity android:name=".ui.home.SearchActivity"
             android:exported="true"
-            android:theme="@style/Theme.Savoreel">
+            android:theme="@style/Theme.Savoreel"
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity android:name=".ui.home.NotificationActivity"
             android:exported="true"
