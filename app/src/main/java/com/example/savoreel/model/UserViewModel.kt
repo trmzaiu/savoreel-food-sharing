@@ -257,6 +257,42 @@ class UserViewModel : ViewModel() {
             }
     }
 
+    fun updateUserHashtags(keyword: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val userId = getCurrentUserId() ?: return
+        val hashtag = keyword.split(" ").find { it.startsWith("#") && it.length > 1 }
+
+        // If no valid hashtag is found, return early
+        if (hashtag == null) {
+            onFailure("No valid hashtag found in the keyword.")
+            return
+        }
+
+        db.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                val user = document.toObject(User::class.java)
+                val hashtags = user?.hashtags?.toMutableList() ?: mutableListOf()
+
+                // Add the hashtag if it's not already in the user's hashtags list
+                if (!hashtags.contains(hashtag)) {
+                    hashtags.add(hashtag)
+                }
+
+                // Update the user's hashtags in the database
+                db.collection("users").document(userId)
+                    .update("hashtags", hashtags)
+                    .addOnSuccessListener {
+                        onSuccess()
+                    }
+                    .addOnFailureListener {
+                        onFailure(it.localizedMessage ?: "Failed to update hashtags.")
+                    }
+            }
+            .addOnFailureListener {
+                onFailure(it.localizedMessage ?: "Failed to retrieve user data.")
+            }
+    }
+
     // Function to update the user's name
     fun updateUserName(name: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         val userId = getCurrentUserId()?: return
@@ -765,6 +801,50 @@ class UserViewModel : ViewModel() {
             }
             .addOnFailureListener { exception ->
                 onFailure("Failed to get users: ${exception.localizedMessage}")
+            }
+    }
+
+    fun getHashtags(onSuccess: (List<String>) -> Unit, onFailure: (String) -> Unit) {
+        val hashtagCount = mutableMapOf<String, Int>()
+
+        // Lấy tất cả người dùng
+        db.collection("users").get()
+            .addOnSuccessListener { usersDocuments ->
+                usersDocuments.forEach { userDocument ->
+                    val user = userDocument.toObject(User::class.java)
+                    val userHashtags = user.hashtags ?: emptyList()
+
+                    // Loại bỏ # và đếm các hashtag
+                    userHashtags.forEach { hashtag ->
+                        val cleanedHashtag = hashtag.trimStart('#') // Loại bỏ ký tự # nếu có
+                        hashtagCount[cleanedHashtag] = hashtagCount.getOrDefault(cleanedHashtag, 0) + 1
+                    }
+                }
+
+                db.collection("posts").get()
+                    .addOnSuccessListener { postsDocuments ->
+                        postsDocuments.forEach { postDocument ->
+                            val post = postDocument.toObject(Post::class.java)
+                            post.hashtag?.forEach { hashtag ->
+                                val cleanedHashtag = hashtag.trimStart('#') // Loại bỏ ký tự # nếu có
+                                hashtagCount[cleanedHashtag] = hashtagCount.getOrDefault(cleanedHashtag, 0) + 1
+                            }
+                        }
+
+                        // Sắp xếp các hashtag theo số lượng và lấy 10 hashtag phổ biến nhất
+                        val sortedHashtags = hashtagCount.entries
+                            .sortedByDescending { it.value }
+                            .take(10)
+                            .map { it.key }
+
+                        onSuccess(sortedHashtags)
+                    }
+                    .addOnFailureListener { exception ->
+                        onFailure("Error fetching posts: ${exception.localizedMessage}")
+                    }
+            }
+            .addOnFailureListener { exception ->
+                onFailure("Error fetching users: ${exception.localizedMessage}")
             }
     }
 }

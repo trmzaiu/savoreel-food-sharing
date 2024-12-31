@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
@@ -181,61 +182,82 @@ class PostModel : ViewModel() {
         return currentUser.uid
     }
 
-    fun getFollowingUserIds() {
+    fun fetchPosts() {
         val currentUserId = getCurrentUserId() ?: return
         db.collection("users").document(currentUserId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    val followingIds = document.get("following") as? List<String> ?: emptyList()
-                    // Handle case where user is not following anyone
-                    if (followingIds.isEmpty()) {
-                        Log.d("Firebase", "User is not following anyone.")
-                        getPostsFromUsers(currentUserId, followingIds)
-                    } else {
-                        // Fetch posts for the current user and their following list
-                        getPostsFromUsers(currentUserId, followingIds)
+                    val user = document.toObject(User::class.java)
+                    val followingIds = user?.following ?: emptyList()
+                    val userHashtags = user?.hashtags ?: emptyList()
+
+                    val userIdsToFetch = followingIds.toMutableList().apply { add(currentUserId) }
+
+                    // Fetch posts from followed users and current user
+                    val postsByUsers = mutableListOf<Post>()
+                    val chunkedLists = userIdsToFetch.chunked(10)
+                    val tasks = chunkedLists.map { chunk ->
+                        db.collection("posts")
+                            .whereIn("userId", chunk)
+                            .get()
+                            .addOnSuccessListener { documents ->
+                                for (document in documents) {
+                                    postsByUsers.add(document.toObject(Post::class.java))
+                                }
+                            }
                     }
-                } else {
-                    Log.e("Firebase", "User document not found")
+
+                    // Fetch posts with matching hashtags
+                    val postsByHashtags = mutableListOf<Post>()
+                    db.collection("posts")
+                        .get()
+                        .addOnSuccessListener { documents ->
+                            for (document in documents) {
+                                val post = document.toObject(Post::class.java)
+                                val matchingHashtag = post.hashtag?.any { postTag ->
+                                    userHashtags.any { userTag -> userTag.contains(postTag.take(4), true) }
+                                } == true
+                                if (matchingHashtag) postsByHashtags.add(post)
+                            }
+                        }
+
+                    // Combine posts and update
+                    Tasks.whenAllComplete(tasks).addOnCompleteListener {
+                        val combinedPosts = (postsByUsers + postsByHashtags)
+                            .distinctBy { it.postId }
+                            .sortedByDescending { it.date }
+
+                        // Update the global posts list (if needed)
+                        _posts.update { currentPosts ->
+                            (currentPosts + combinedPosts)
+                                .distinctBy { it.postId }
+                                .sortedByDescending { it.date }
+                        }
+                    }
                 }
             }
             .addOnFailureListener { exception ->
-                Log.e("Firebase", "Error fetching following list", exception)
+                // Handle failure
             }
     }
 
-    private fun getPostsFromUsers(currentUserId: String, followingIds: List<String>) {
-        val userIdsToFetch = followingIds.toMutableList().apply { add(currentUserId) }
-
-        if (userIdsToFetch.size > 10) {
-            val chunkedLists = userIdsToFetch.chunked(10)
-            chunkedLists.forEach { chunk ->
-                fetchPostsForChunk(chunk)
-            }
-        } else {
-            fetchPostsForChunk(userIdsToFetch)
-        }
-    }
-
-    private fun fetchPostsForChunk(userIds: List<String>) {
+    fun getPostsByHashtag(searchHashtag: String, onSuccess: (List<Post>) -> Unit, onFailure: (String) -> Unit) {
         db.collection("posts")
-            .whereIn("userId", userIds)
-//            .orderBy("date", Query.Direction.DESCENDING)
+            .whereArrayContains("hashtag", searchHashtag)
             .get()
             .addOnSuccessListener { documents ->
-                val fetchedPosts = mutableListOf<Post>()
+                val posts = mutableListOf<Post>()
                 for (document in documents) {
                     val post = document.toObject(Post::class.java)
-                    fetchedPosts.add(post)
+                    val matchingHashtags = post.hashtag?.filter { it == searchHashtag }
+                    if (matchingHashtags?.isNotEmpty() == true) {
+                        posts.add(post)
+                    }
                 }
-                _posts.update { currentPosts ->
-                    (currentPosts + fetchedPosts)
-                        .distinctBy { it.postId }
-                        .sortedByDescending { it.date }
-                }
+                onSuccess(posts)
             }
             .addOnFailureListener { exception ->
-                Log.e("Firebase", "Error fetching posts", exception)
+                onFailure("Error fetching posts with hashtag: ${exception.localizedMessage}")
             }
     }
 
@@ -358,12 +380,6 @@ class PostModel : ViewModel() {
             .addOnFailureListener { exception ->
                 onFailure(exception)
             }
-    }
-
-    fun getPostsWithMatchingHashtags(posts: List<Post>, user: User): List<Post> {
-        return posts.filter { post ->
-            post.hashtag?.any { it in user.hashtags } == true
-        }
     }
 }
 

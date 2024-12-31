@@ -74,11 +74,12 @@ fun HashTagScreen(navigateToTakePhoto: () -> Unit) {
     var selectedTags by remember { mutableStateOf<MutableSet<String>>(mutableSetOf()) }
     var visibleHashtags by remember { mutableStateOf<List<String>>(emptyList()) }
     val allHashtags = listOf(
-        "#fastfood", "#vietnamese", "#korean", "#vegetarian",
-        "#sushi", "#dessert", "#other", "#cake", "#chinese",
-        "#hotpot", "#cookie", "#pizza", "#burgers", "#pasta",
-        "#salad", "#steak", "#seafood", "#noodles", "#tacos",
-        "#soup", "#grill"
+        "#pizza", "#burger", "#sushi", "#pasta", "#tacos", "#ramen", "#steak",
+        "#sushiroll", "#hotdog", "#soup", "#salad", "#friedrice", "#noodles",
+        "#dimsum", "#burrito", "#lasagna", "#soup", "#cake", "#icecream",
+        "#cookies", "#brownies", "#donuts", "#fruitsmoothie", "#smoothie",
+        "#coffee", "#tea", "#cocktail", "#wine", "#beer", "#champagne",
+        "#margarita", "#mojito"
     )
 
     LaunchedEffect(Unit) {

@@ -69,12 +69,13 @@ class GridPostActivity: ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         themeViewModel.loadUserSettings()
-        postModel.getFollowingUserIds()
+        postModel.fetchPosts()
         notificationViewModel.countUnreadNotifications()
 
         setContent {
             val isDarkMode by themeViewModel.isDarkModeEnabled.collectAsState()
             val userID = intent.getStringExtra("USER_ID") ?: "Everyone"
+            val hashtag = intent.getStringExtra("HASH_TAG") ?: ""
             SavoreelTheme(darkTheme = isDarkMode) {
                 GridPost(userID = userID,
                     navigateToProfile = {
@@ -94,7 +95,8 @@ class GridPostActivity: ComponentActivity() {
                         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                         startActivity(intent)
                         finish()
-                    }
+                    },
+                    hashtag
                 )
             }
         }
@@ -102,10 +104,11 @@ class GridPostActivity: ComponentActivity() {
 }
 
 @Composable
-fun GridPost(userID: String, navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navigateToNoti: () -> Unit) {
+fun GridPost(userID: String, navigateToProfile: () -> Unit, navigateToSearch: () -> Unit, navigateToNoti: () -> Unit, hashtag: String) {
     val postModel: PostModel = viewModel()
     val userViewModel: UserViewModel = viewModel()
     var isRowVisible by remember { mutableStateOf(false) }
+    var withHashtag by remember { mutableStateOf(false) }
 
     var name by remember { mutableStateOf("") }
     var uid by remember { mutableStateOf("") }
@@ -118,6 +121,7 @@ fun GridPost(userID: String, navigateToProfile: () -> Unit, navigateToSearch: ()
     val context = LocalContext.current
     val posts by postModel.posts.collectAsState()
     val currentUser by userViewModel.user.collectAsState()
+
 
     LaunchedEffect(currentUser) {
         userViewModel.getUser(
@@ -136,9 +140,9 @@ fun GridPost(userID: String, navigateToProfile: () -> Unit, navigateToSearch: ()
     }
 
     LaunchedEffect(posts) {
-        if (userID == "Everyone") {
+        if (userID == "Everyone" && hashtag == "") {
             if (posts.isEmpty()) {
-                postModel.getFollowingUserIds()
+                postModel.fetchPosts()
             }
             listOfPost = posts
         }
@@ -162,7 +166,7 @@ fun GridPost(userID: String, navigateToProfile: () -> Unit, navigateToSearch: ()
                 Log.e("GridPost", "Error retrieving user: $error")
             }
         )
-        if (userID != "Everyone") {
+        if (userID != "Everyone" && hashtag == "") {
             isRowVisible = true
             postModel.getPostsFromUserId(
                 userID,
@@ -171,6 +175,17 @@ fun GridPost(userID: String, navigateToProfile: () -> Unit, navigateToSearch: ()
                 },
                 onFailure = {
                 }
+            )
+        }
+    }
+
+    LaunchedEffect(hashtag) {
+        if (hashtag != "") {
+            withHashtag = true
+            postModel.getPostsByHashtag(
+                hashtag,
+                onSuccess = { listOfPost = it},
+                onFailure = {}
             )
         }
     }
@@ -265,6 +280,21 @@ fun GridPost(userID: String, navigateToProfile: () -> Unit, navigateToSearch: ()
                             color = MaterialTheme.colorScheme.onBackground,
                         )
                     }
+                }
+            }
+
+            if (withHashtag) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    horizontalArrangement = Arrangement.Center
+                    ) {
+                    Text (
+                        text = hashtag,
+                        fontFamily = nunitoFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
             }
 

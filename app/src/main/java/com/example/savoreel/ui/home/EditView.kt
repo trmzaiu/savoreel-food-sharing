@@ -179,7 +179,7 @@ fun EditableField(
             Icon(
                 painter = it,
                 contentDescription = label,
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.onSecondary
             )
         }

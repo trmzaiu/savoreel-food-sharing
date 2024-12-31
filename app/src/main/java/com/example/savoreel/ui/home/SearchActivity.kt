@@ -127,6 +127,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
     var selectedTab by remember { mutableIntStateOf(0) }
     var showSuggestions by remember { mutableStateOf(searchQuery.isEmpty()) }
     var recentSearches by remember { mutableStateOf<List<String>>(emptyList()) }
+    var suggestion by remember { mutableStateOf<List<String>>(emptyList()) }
     val tabs = listOf("All", "People", "Post")
 
     var persons by remember { mutableStateOf(emptyList<User>()) }
@@ -142,6 +143,17 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
             },
             onFailure = { error ->
                 Log.e("Search", "Failed to fetch search history: $error")
+            }
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        userViewModel.getHashtags(
+            onSuccess = { hashtags ->
+                suggestion = hashtags
+            },
+            onFailure = { error ->
+                Log.e("Search", "Failed to fetch hashtags: $error")
             }
         )
     }
@@ -206,10 +218,6 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
         (postsWithHashtag + postsWithTitle).distinctBy { it.postId }
     }
 
-    LaunchedEffect(posts) {
-        Log.d("Search", "Total combined posts: ${posts.size}")
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -260,6 +268,13 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                     keyboardController?.hide()
                                     focusManager.clearFocus()
                                 })
+                                if (searchQuery.startsWith("#")) {
+                                    userViewModel.updateUserHashtags(searchQuery, onSuccess = {
+                                        Log.d("Search", "Hashtag saved successfully.")
+                                    }, onFailure = { errorMessage ->
+                                        Log.e("Search", "Failed to save hashtag: $errorMessage")
+                                    })
+                                }
                             }
                         }),
                         decorationBox = { innerTextField ->
@@ -311,16 +326,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
 
                     SearchCategory(
                         title = "Suggestion for you",
-                        items = listOf(
-                            "vietnamese",
-                            "vegetarian",
-                            "korean",
-                            "tiramisu",
-                            "fastfood",
-                            "bunbo",
-                            "buffet",
-                            "seafood"
-                        ),
+                        items = suggestion,
                         isSuggestion = true,
                         onItemClick = { selectedItem ->
                             userViewModel.updateSearchHistory(selectedItem, onSuccess = {

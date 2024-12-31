@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -384,7 +385,7 @@ fun ViewPostScreen(
 
     LaunchedEffect(posts) {
         if (posts.isEmpty()) {
-            postModel.getFollowingUserIds()
+            postModel.fetchPosts()
         }
         isLoading = false
     }
@@ -475,13 +476,43 @@ fun ViewPostScreen(
                             }
                             if (post.hashtag?.isNotEmpty() == true) {
                                 val hashtagsList: List<String> = post.hashtag
-                                val hashtags = hashtagsList.joinToString(" ")
-                                EditableField(
-                                    label = "Add Hashtag",
-                                    value = hashtags,
-                                    onStartEdit = {},
-                                    ic = R.drawable.ic_hashtag
-                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(5.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_hashtag),
+                                        contentDescription = "Add Hashtag",
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSecondary
+                                    )
+                                    Spacer(modifier = Modifier.width(15.dp))
+
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp),modifier = Modifier.weight(1f)){
+                                        hashtagsList.forEach { hashtag ->
+                                            Box(
+                                                modifier = Modifier.clickable (
+                                                    interactionSource = remember { MutableInteractionSource() },
+                                                    indication = null
+                                                ) {
+                                                    val intent = Intent(context, GridPostActivity::class.java).apply {
+                                                        putExtra("HASH_TAG", hashtag)
+                                                    }
+                                                    context.startActivity(intent)
+                                                }
+                                            ) {
+                                            Text(
+                                                text = hashtag,
+                                                color = MaterialTheme.colorScheme.onBackground,
+                                                fontWeight = FontWeight.Normal,
+                                                fontSize = 18.sp,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             if (post.location.isNotEmpty()) {
                                 EditableField(
@@ -499,7 +530,7 @@ fun ViewPostScreen(
                                     onSuccess = {
                                         status = false
                                     },
-                                    onFailure = {},
+                                    onFailure = { },
                                 )
                             }
                         }

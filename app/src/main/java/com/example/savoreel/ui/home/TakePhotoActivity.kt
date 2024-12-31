@@ -61,7 +61,7 @@ class TakePhotoActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         themeViewModel.loadUserSettings()
-        postModel.getFollowingUserIds()
+        postModel.fetchPosts()
         notificationViewModel.countUnreadNotifications()
 
         setContent {
@@ -93,7 +93,7 @@ class TakePhotoActivity : ComponentActivity() {
             onSuccess = { user -> userViewModel.setUser(user) },
             onFailure = { error -> Log.e("TakePhotoActivity", "Error retrieving user: $error") }
         )
-        postModel.getFollowingUserIds()
+        postModel.fetchPosts()
         notificationViewModel.countUnreadNotifications()
     }
 }
