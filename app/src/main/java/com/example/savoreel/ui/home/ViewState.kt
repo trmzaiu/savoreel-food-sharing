@@ -311,7 +311,7 @@ fun PhotoTakenScreen(scope: CoroutineScope,
                         if (photoUri != null && photoUri != Uri.EMPTY) {
                             val inputStream = context.contentResolver.openInputStream(photoUri)
                             val photoData = inputStream?.readBytes() ?: byteArrayOf()
-
+                            var newPostId: String =""
                             if (photoData.isNotEmpty()) {
                                 postModel.uploadPost(
                                     name = name,
@@ -319,7 +319,8 @@ fun PhotoTakenScreen(scope: CoroutineScope,
                                     hashtag = hashtag,
                                     location = location,
                                     photoData = photoData,
-                                    onSuccess = {
+                                    onSuccess = { postId ->
+                                        newPostId = postId
                                         postViewModel.navigateToState(PhotoState.TakePhoto)
                                         postViewModel.resetPhoto()
                                         isLoading = false
@@ -331,11 +332,14 @@ fun PhotoTakenScreen(scope: CoroutineScope,
                                 )
                                 notificationViewModel.createNotifications(
                                     recipientIds = listOfFollowers,
+                                    postId = newPostId,
                                     type = "Upload",
                                     message = "uploaded new photo",
                                     onSuccess = {},
                                     onFailure = {},
                                 )
+                              //  notificationViewModel.sendNotificationBroadcast(context, name, "uploaded new photo.")
+
                             } else {
                                 Log.e("PhotoTakenScreen", "Failed to convert URI to ByteArray.")
                                 isLoading = false
@@ -522,18 +526,19 @@ fun ViewPostScreen(
                                     ic = R.drawable.ic_location
                                 )
                             }
-                            if (status) {
-                                notificationViewModel.createNotification(
-                                    recipientId = post.userId,
-                                    type = "React",
-                                    message = "react $emo your photo",
-                                    onSuccess = {
-                                        status = false
-                                    },
-                                    onFailure = { },
-                                )
-                            }
                         }
+                    }
+                    if (status) {
+                        notificationViewModel.createNotification(
+                            recipientId = post.userId,
+                            postId = post.postId,
+                            type = "React",
+                            message = "react $emo your photo",
+                            onSuccess = {
+                                status = false
+                            },
+                            onFailure = { },
+                        )
                     }
                 }
             }
@@ -589,16 +594,11 @@ fun ViewPostScreen(
                                 }
                             )
                         }
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_emoji),
-                            contentDescription = "Emoji Picker",
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clickable {
-                                    scope.launch { sheetState.show() }
-                                    postViewModel.setcurrentSheetContent(SheetContent.EMOJI_PICKER)
-                                }
-                        )
+
+                        ImageButton(R.drawable.ic_emoji, "More Emoji", 30.dp){
+                            scope.launch { sheetState.show() }
+                            postViewModel.setcurrentSheetContent(SheetContent.EMOJI_PICKER)
+                        }
                     }
 
                 }

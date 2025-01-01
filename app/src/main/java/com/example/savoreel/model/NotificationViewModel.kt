@@ -2,6 +2,7 @@ package com.example.savoreel.model
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.example.savoreel.sendSystemNotification
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -43,30 +44,47 @@ class NotificationViewModel: ViewModel() {
 
         log("Start observing notifications")
 
-        // Lắng nghe thay đổi trong collection 'notifications'
-        notificationListener = db.collection("notifications")
-            .whereEqualTo("recipientId", currentUser.uid)
-            .orderBy("date", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) {
-                    log("Error fetching notifications: ${e.message}")
-                    return@addSnapshotListener
-                }
+        // Truy vấn thông tin người dùng từ database
+        getUserById(
+            currentUser.uid,
+            onSuccess = { user ->
+                val name = user?.name ?: "User"
 
-                snapshot?.let {
-                    // Chuyển đổi danh sách documents thành danh sách Notification
-                    val notificationList = it.documents.mapNotNull { doc ->
-                        doc.toObject(Notification::class.java)
+                notificationListener = db.collection("notifications")
+                    .whereEqualTo("recipientId", currentUser.uid)
+                    .orderBy("date", Query.Direction.DESCENDING)
+                    .addSnapshotListener { snapshot, e ->
+                        if (e != null) {
+                            log("Error fetching notifications: ${e.message}")
+                            return@addSnapshotListener
+                        }
+
+                        snapshot?.let {
+                            val newNotificationList = it.documents.mapNotNull { doc ->
+                                doc.toObject(Notification::class.java)
+                            }
+
+                            val oldNotifications = _notifications.value
+                            _notifications.value = newNotificationList
+
+                            // Lọc các thông báo mới
+                            val newNotifications = newNotificationList.filterNot { notification ->
+                                oldNotifications?.any { it.notificationId == notification.notificationId } == true
+                            }
+
+                            // Gửi thông báo mới nhất
+                            if (newNotifications.isNotEmpty()) {
+                                val latestNotification = newNotifications.first()
+                                sendSystemNotification(name, latestNotification)
+                            }
+                        }
                     }
-                    _notifications.value = notificationList
-
-                    // Cập nhật số lượng thông báo chưa đọc
-                    _unreadCount.value = notificationList.count { !it.read }
-                    log("Notifications updated: ${notificationList.size} items")
-                }
+            },
+            onFailure = { error ->
+                log("Failed to fetch user: $error")
             }
+        )
     }
-
 
     private fun observeUnreadNotifications() {
         val currentUser = auth.currentUser ?: run {
@@ -112,6 +130,25 @@ class NotificationViewModel: ViewModel() {
             }
     }
 
+    fun getUserById(
+        userId: String,
+        onSuccess: (User?) -> Unit,
+        onFailure: (String) -> Unit
+    ){
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val userData = document.toObject(User::class.java)
+                    onSuccess(userData)
+                } else {
+                    onSuccess(null)
+                }
+            }
+            .addOnFailureListener {
+                onFailure("Failed to get user data.")
+            }
+    }
+
     fun stopObservingNotifications() {
         log("Stop observing notifications")
         notificationListener?.remove()
@@ -120,6 +157,7 @@ class NotificationViewModel: ViewModel() {
 
     fun createNotifications(
         recipientIds: List<String>,
+        postId: String,
         type: String,
         message: String,
         onSuccess: () -> Unit,
@@ -144,6 +182,7 @@ class NotificationViewModel: ViewModel() {
             val notification = Notification(
                 notificationId = notificationId,
                 recipientId = recipientId,
+                postId = postId,
                 senderId = currentUser.uid,
                 description = message,
                 type = type
@@ -166,6 +205,7 @@ class NotificationViewModel: ViewModel() {
 
     fun createNotification(
         recipientId: String,
+        postId: String,
         type: String,
         message: String,
         onSuccess: () -> Unit,
@@ -188,6 +228,7 @@ class NotificationViewModel: ViewModel() {
         val notification = Notification(
             notificationId = notificationId,
             recipientId = recipientId,
+            postId = postId,
             senderId = currentUser.uid,
             description = message,
             type = type

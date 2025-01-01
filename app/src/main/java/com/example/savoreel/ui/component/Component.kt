@@ -444,14 +444,14 @@ fun BellButton(
             Box(
                 modifier = Modifier
                     .size(16.dp)
-                    .background(MaterialTheme.colorScheme.error, CircleShape)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape)
                     .align(Alignment.TopEnd),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = badgeText,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onError,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     maxLines = 1
                 )
             }

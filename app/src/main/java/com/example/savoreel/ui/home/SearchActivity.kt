@@ -415,7 +415,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                                     isFollow = isFollowing
                                                     Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
                                                     if (isFollowing) {
-                                                        notificationViewModel.createNotification(person.userId.toString(), "Follow", "has started following you.", {}, {})
+                                                        notificationViewModel.createNotification(person.userId.toString(), "","Follow", "has started following you.", {}, {})
                                                     }
                                                 },
                                                 onFailure = { errorMessage ->
@@ -504,7 +504,7 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                                         isFollow = isFollowing
                                                         Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
                                                         if (isFollowing) {
-                                                            notificationViewModel.createNotification(person.userId.toString(), "Follow", "has started following you.", {}, {})
+                                                            notificationViewModel.createNotification(person.userId.toString(), "", "Follow", "has started following you.", {}, {})
                                                         }
                                                     },
                                                     onFailure = { errorMessage ->

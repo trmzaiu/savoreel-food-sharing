@@ -179,14 +179,14 @@ fun NotificationScreen(notifications: List<Notification>, unreadCount: Int) {
                                 Box(
                                     modifier = Modifier
                                         .size(16.dp)
-                                        .background(MaterialTheme.colorScheme.error, CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary, CircleShape)
                                         .align(Alignment.TopEnd),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         text = unreadCount.toString(),
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onError,
+                                        color = MaterialTheme.colorScheme.onPrimary,
                                         maxLines = 1
                                     )
                                 }
@@ -333,10 +333,17 @@ fun NotificationScreen(notifications: List<Notification>, unreadCount: Int) {
                                             }
                                         )
                                     }
-                                    val intent = Intent(context, GridPostActivity::class.java).apply {
-                                        putExtra("USER_ID", clickedNotification.senderId)
+                                    if (clickedNotification.type == "Follow"){
+                                        val intent = Intent(context, GridPostActivity::class.java).apply {
+                                            putExtra("USER_ID", clickedNotification.senderId)
+                                        }
+                                        context.startActivity(intent)
+                                    } else {
+                                        val intent = Intent(context, PostActivity::class.java).apply {
+                                            putExtra("POST_ID", clickedNotification.postId)
+                                        }
+                                        context.startActivity(intent)
                                     }
-                                    context.startActivity(intent)
                                 }
                             )
                         }
@@ -360,6 +367,7 @@ fun NotificationItem(
     val isReadBackgroundColor = if (data.read) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.tertiary
     var offset by remember { mutableFloatStateOf(0f) }
     val dismissThreshold = 140f
+    val context = LocalContext.current
 
     LaunchedEffect(data.senderId) {
         userViewModel.getUserById(

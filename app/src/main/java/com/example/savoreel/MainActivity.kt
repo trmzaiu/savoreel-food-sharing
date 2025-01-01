@@ -1,15 +1,20 @@
 package com.example.savoreel
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import com.example.savoreel.ui.home.TakePhotoActivity
 import com.example.savoreel.ui.onboarding.OnboardingActivity
 import com.example.savoreel.ui.onboarding.SignInActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : ComponentActivity() {
+
+    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -32,6 +37,13 @@ class MainActivity : ComponentActivity() {
                 finish()
             }
         }
+
+        FirebaseMessaging.getInstance().subscribeToTopic("all")
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("FCM", "Subscribed to 'all' topic")
+                }
+            }
     }
 }
 

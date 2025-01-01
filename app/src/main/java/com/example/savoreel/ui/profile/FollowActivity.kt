@@ -273,6 +273,7 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
                                                 if (isFollowing) {
                                                     notificationViewModel.createNotification(
                                                         person.userId.toString(),
+                                                        "",
                                                         "Follow",
                                                         "has started following you.",
                                                         {},
@@ -353,6 +354,7 @@ fun FollowScreen(initialTab: String, userId: String?, onUserClick: (String) -> U
                                                 if (isFollowing) {
                                                     notificationViewModel.createNotification(
                                                         person.userId.toString(),
+                                                        "",
                                                         "Follow",
                                                         "has started following you.",
                                                         {},

@@ -53,6 +53,7 @@ android {
 dependencies {
     // AndroidX Libraries
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.core:core-ktx:1.10.0")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -89,6 +90,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.android.gms:play-services-auth:20.3.0")
+    implementation("com.google.firebase:firebase-messaging:23.1.1")
+
 
     // Google Maps and Places
     implementation("com.google.android.gms:play-services-maps:19.0.0")

@@ -56,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.savoreel.R
+import com.example.savoreel.model.NotificationViewModel
 import com.example.savoreel.model.Post
 import com.example.savoreel.model.PostModel
 import com.example.savoreel.model.PostViewModel
@@ -115,6 +116,7 @@ fun PostScreen(postId: String, navigateToProfile: () -> Unit, navigateToSearch: 
     val userViewModel: UserViewModel = viewModel()
     val postModel: PostModel = viewModel()
     val postViewModel: PostViewModel = viewModel()
+    val notificationViewModel: NotificationViewModel = viewModel()
 
     val currentUser by userViewModel.user.collectAsState()
     var name by remember { mutableStateOf("") }
@@ -297,7 +299,7 @@ fun PostScreen(postId: String, navigateToProfile: () -> Unit, navigateToSearch: 
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-
+                        var status by remember {mutableStateOf(false)}
                         listOf("😀", "😍", "😂", "❤️", "🔥").forEach { emoji ->
                             Text(
                                 text = emoji,
@@ -318,21 +320,33 @@ fun PostScreen(postId: String, navigateToProfile: () -> Unit, navigateToSearch: 
                                             Log.d("Add Emoji", "Add to DB not success")
                                         }
                                     )
+                                    status = true
                                 }
                             )
-                        }
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_emoji),
-                            contentDescription = "Emoji Picker",
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clickable {
-                                    scope.launch { sheetState.show() }
-                                    postViewModel.setcurrentSheetContent(SheetContent.EMOJI_PICKER)
+                            var currentName by remember {mutableStateOf("")}
+                            userViewModel.getUser({
+                                if (it != null) {
+                                    currentName = it.name.toString()
                                 }
-                        )
+                            }, {})
+                            if (status) {
+                                notificationViewModel.createNotification(
+                                    recipientId = post.userId,
+                                    postId = post.postId,
+                                    type = "React",
+                                    message = "react $emoji your photo",
+                                    onSuccess = {
+                                        status = false
+                                    },
+                                    onFailure = {},
+                                )
+                            }
+                        }
+                        ImageButton(R.drawable.ic_emoji, "More Emoji", 30.dp){
+                            scope.launch { sheetState.show() }
+                            postViewModel.setcurrentSheetContent(SheetContent.EMOJI_PICKER)
+                        }
                     }
-
                 }
                 Row(
                     modifier = Modifier
