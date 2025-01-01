@@ -332,7 +332,7 @@ fun PhotoTakenScreen(scope: CoroutineScope,
                                 notificationViewModel.createNotifications(
                                     recipientIds = listOfFollowers,
                                     type = "Upload",
-                                    message = "uploaded new photo",
+                                    message = "uploaded new photo.",
                                     onSuccess = {},
                                     onFailure = {},
                                 )
@@ -526,7 +526,7 @@ fun ViewPostScreen(
                                 notificationViewModel.createNotification(
                                     recipientId = post.userId,
                                     type = "React",
-                                    message = "react $emo your photo",
+                                    message = "react $emo your photo.",
                                     onSuccess = {
                                         status = false
                                     },

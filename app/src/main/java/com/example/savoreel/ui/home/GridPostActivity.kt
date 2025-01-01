@@ -80,13 +80,13 @@ class GridPostActivity: ComponentActivity() {
                 GridPost(userID = userID,
                     navigateToProfile = {
                         val intent = Intent(this, ProfileActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         startActivity(intent)
                         finish()
                     },
                     navigateToSearch = {
                         val intent = Intent(this, SearchActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         startActivity(intent)
                         finish()
                     },
