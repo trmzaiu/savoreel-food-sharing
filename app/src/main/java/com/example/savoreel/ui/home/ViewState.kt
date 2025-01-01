@@ -334,12 +334,10 @@ fun PhotoTakenScreen(scope: CoroutineScope,
                                     recipientIds = listOfFollowers,
                                     postId = newPostId,
                                     type = "Upload",
-                                    message = "uploaded new photo",
+                                    message = "uploaded new photo.",
                                     onSuccess = {},
                                     onFailure = {},
                                 )
-                              //  notificationViewModel.sendNotificationBroadcast(context, name, "uploaded new photo.")
-
                             } else {
                                 Log.e("PhotoTakenScreen", "Failed to convert URI to ByteArray.")
                                 isLoading = false
