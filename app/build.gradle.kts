@@ -19,6 +19,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
     }
 
     buildTypes {
@@ -140,13 +141,16 @@ dependencies {
     implementation ("com.cloudinary:cloudinary-android:2.3.1")
     implementation ("com.cloudinary:cloudinary-core:1.33.0")
     implementation(libs.firebase.messaging.ktx)
+    implementation(libs.androidx.junit.ktx)
 
     // Testing
     testImplementation(libs.junit)
+    testImplementation(libs.androidx.ui.test.junit4.android)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.6")
     androidTestImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")
+    androidTestImplementation ("androidx.test:runner:1.6.2")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)

@@ -152,7 +152,6 @@
         </provider>
         <receiver android:name=".model.NotificationReceiver" android:enabled="true" android:exported="true"/>
 
-
         <service
             android:name=".service.MyFirebaseMessagingService"
             android:exported="true"> <!-- Thêm android:exported -->
