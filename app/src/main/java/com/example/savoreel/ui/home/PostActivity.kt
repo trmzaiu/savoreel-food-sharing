@@ -323,12 +323,6 @@ fun PostScreen(postId: String, navigateToProfile: () -> Unit, navigateToSearch: 
                                     status = true
                                 }
                             )
-                            var currentName by remember {mutableStateOf("")}
-                            userViewModel.getUser({
-                                if (it != null) {
-                                    currentName = it.name.toString()
-                                }
-                            }, {})
                             if (status) {
                                 notificationViewModel.createNotification(
                                     recipientId = post.userId,
