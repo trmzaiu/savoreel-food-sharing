@@ -20,6 +20,7 @@ fun sendSystemNotification(name: String, notification: Notification) {
         val importance = NotificationManager.IMPORTANCE_HIGH
         val channel = NotificationChannel(channelId, channelName, importance).apply {
             description = channelDescription
+            
         }
         val notificationManager: NotificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -27,9 +28,9 @@ fun sendSystemNotification(name: String, notification: Notification) {
     }
 
     val builder = NotificationCompat.Builder(context, channelId)
-        .setSmallIcon(R.drawable.heart)
-        .setContentTitle(name)
-        .setContentText("$name ${notification.description}")
+        .setSmallIcon(R.drawable.rounded_logo)
+        .setContentTitle("Savoreel")
+        .setContentText("Chung Anh ${notification.description}")
         .setPriority(NotificationCompat.PRIORITY_HIGH)
 
     with(NotificationManagerCompat.from(context)) {

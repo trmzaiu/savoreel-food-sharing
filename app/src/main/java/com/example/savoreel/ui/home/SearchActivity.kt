@@ -134,6 +134,9 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
     var postsWithHashtag by remember { mutableStateOf(emptyList<Post>()) }
     var postsWithTitle by remember { mutableStateOf(emptyList<Post>()) }
     var loadingFollowStatus by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
+
+    var isLoadingPeople by remember { mutableStateOf(true) }
+    var isLoadingPosts by remember { mutableStateOf(true) }
     val context = LocalContext.current
     // Fetch recent search history
     LaunchedEffect(Unit) {
@@ -160,17 +163,20 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
 
     LaunchedEffect(searchQuery) {
         if (searchQuery.isNotEmpty()) {
-            val usersDeferred = async {
+            isLoadingPeople = true
+            isLoadingPosts = true
+            val fetchUsersDeferred = async {
                 userViewModel.getAllUsersByNameKeyword(
                     searchQuery,
                     onSuccess = { users ->
-                        // Filter users based on the search query
                         persons = users.filter { user ->
                             user.name?.contains(searchQuery, ignoreCase = true) == true
                         }
+                        isLoadingPeople = false
                     },
                     onFailure = { error ->
                         Log.e("Search", "Failed to fetch users: $error")
+                        isLoadingPeople = false
                     }
                 )
             }
@@ -183,10 +189,12 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                         postsWithHashtag = posts.filter { post ->
                             post.hashtag?.any { it.contains(searchQuery, ignoreCase = true) } == true
                         }
+                        isLoadingPosts = false
                         Log.d("Search", "Posts with hashtag: ${postsWithHashtag.size}")
                     },
                     onFailure = { error ->
                         Log.e("Search", "Failed to fetch posts by hashtag: $error")
+                        isLoadingPosts = false
                     }
                 )
             }
@@ -199,18 +207,22 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                             post.title?.contains(searchQuery, ignoreCase = true) == true
                         }
                         Log.d("Search", "Posts with title: ${postsWithTitle.size}")
+                        isLoadingPosts = false
                     },
                     onFailure = { error ->
                         Log.e("Search", "Failed to fetch posts by title: $error")
+                        isLoadingPosts = false
                     }
                 )
             }
 
-            awaitAll(usersDeferred, postsWithHashtagDeferred, postsWithTitleDeferred)
+            awaitAll(fetchUsersDeferred ,postsWithHashtagDeferred, postsWithTitleDeferred)
         } else {
             persons = emptyList()
             postsWithHashtag = emptyList()
             postsWithTitle = emptyList()
+            isLoadingPeople = false
+            isLoadingPosts = false
         }
     }
 
@@ -440,14 +452,17 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                         } else {
                             GridImage(
                                 posts = posts,
-                                onClick = {},
+                                onClick = {post ->
+                                    val intent = Intent(context, PostActivity::class.java).apply {
+                                        putExtra("POST_ID", post.postId)
+                                    }
+                                    context.startActivity(intent)
+                                },
                                 modifier = Modifier.padding(horizontal = 20.dp)
                             )
                         }
                     "All" -> {
-                        Column(modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 10.dp)) {
+                        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp)) {
                             // People section
                             Text(
                                 text = "People",
@@ -455,76 +470,82 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                 color = MaterialTheme.colorScheme.onSecondary
                             )
 
-                            if (persons.isEmpty()) {
-                                // Show a "No results found" message when no users are found
-                                Text(
-                                    text = "No results found",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(horizontal = 20.dp),
-                                    color = MaterialTheme.colorScheme.onBackground
+                            if (isLoadingPeople) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             } else {
-                                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                    items(persons.take(3)) { person ->
-                                        var isFollow by remember { mutableStateOf(false) }
-                                        val isLoading = loadingFollowStatus[person.userId.toString()] ?: false
+                                if (persons.isNotEmpty()) {
+                                    Column(modifier = Modifier.fillMaxWidth()) {
+                                        persons.take(3).forEach { person ->
+                                            var isFollow by remember { mutableStateOf(false) }
+                                            val isLoading = loadingFollowStatus[person.userId.toString()] ?: false
 
-                                        LaunchedEffect(person.userId) {
-                                            if (!loadingFollowStatus.containsKey(person.userId.toString())) {
-                                                loadingFollowStatus = loadingFollowStatus + (person.userId.toString() to true)
-                                                userViewModel.isFollowing(person.userId.toString(),
-                                                    onSuccess = { isFollowing ->
-                                                        isFollow = isFollowing
-                                                        loadingFollowStatus = loadingFollowStatus - person.userId.toString() // Remove loading state
-                                                    },
-                                                    onFailure = { error ->
-                                                        Log.e("SearchScreen", "Failed to fetch follow status: $error")
-                                                        loadingFollowStatus = loadingFollowStatus - person.userId.toString() // Remove loading state
-                                                    }
-                                                )
+                                            LaunchedEffect(person.userId) {
+                                                if (!loadingFollowStatus.containsKey(person.userId.toString())) {
+                                                    loadingFollowStatus = loadingFollowStatus + (person.userId.toString() to true)
+                                                    userViewModel.isFollowing(person.userId.toString(),
+                                                        onSuccess = { isFollowing ->
+                                                            isFollow = isFollowing
+                                                            loadingFollowStatus = loadingFollowStatus - person.userId.toString() // Remove loading state
+                                                        },
+                                                        onFailure = { error ->
+                                                            Log.e("SearchScreen", "Failed to fetch follow status: $error")
+                                                            loadingFollowStatus = loadingFollowStatus - person.userId.toString() // Remove loading state
+                                                        }
+                                                    )
+                                                }
                                             }
-                                        }
 
-                                        UserItem(
-                                            user = person,
-                                            isFollow = isFollow,
-                                            isLoading = isLoading,
-                                            onFollowClick = {
-                                                userViewModel.toggleFollowStatus(
-                                                    userId = person.userId.toString(),
-                                                    onSuccess = { isFollowing ->
-                                                        val updatedList = persons.map {
-                                                            if (it.userId == person.userId) {
-                                                                it.copy(following = (if (isFollowing) it.following - person.userId else it.following + person.userId) as List<String>)
-                                                            } else {
-                                                                it
+                                            UserItem(
+                                                user = person,
+                                                isFollow = isFollow,
+                                                isLoading = isLoading,
+                                                onFollowClick = {
+                                                    userViewModel.toggleFollowStatus(
+                                                        userId = person.userId.toString(),
+                                                        onSuccess = { isFollowing ->
+                                                            val updatedList = persons.map {
+                                                                if (it.userId == person.userId) {
+                                                                    it.copy(following = (if (isFollowing) it.following - person.userId else it.following + person.userId) as List<String>)
+                                                                } else {
+                                                                    it
+                                                                }
                                                             }
-                                                        }
-                                                        persons = updatedList
-                                                        isFollow = isFollowing
-                                                        Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
-                                                        if (isFollowing) {
-                                                            notificationViewModel.createNotification(person.userId.toString(), "", "Follow", "has started following you.", {}, {})
-                                                        }
-                                                    },
-                                                    onFailure = { errorMessage ->
-                                                        Log.e("SearchScreen", "Failed to follow/unfollow: $errorMessage")
-                                                    },
-                                                )
-                                            },
-                                            onUserClick
+                                                            persons = updatedList
+                                                            isFollow = isFollowing
+                                                            Log.d("SearchScreen", "Follow status updated for ${person.name}: $isFollowing")
+                                                            if (isFollowing) {
+                                                                notificationViewModel.createNotification(person.userId.toString(), "", "Follow", "has started following you.", {}, {})
+                                                            }
+                                                        },
+                                                        onFailure = { errorMessage ->
+                                                            Log.e("SearchScreen", "Failed to follow/unfollow: $errorMessage")
+                                                        },
+                                                    )
+                                                },
+                                                onUserClick
+                                            )
+                                        }
+                                    }
+                                    if (persons.size > 3) {
+                                        Text(
+                                            text = "See more",
+                                            modifier = Modifier
+                                                .fillMaxWidth().clickable { selectedTab = 1 },
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color.Gray,
+                                            textDecoration = TextDecoration.Underline,
+                                            textAlign = TextAlign.Center
                                         )
                                     }
-                                }
-                                if (persons.size > 3) {
+                                } else {
                                     Text(
-                                        text = "See more",
-                                        modifier = Modifier
-                                            .fillMaxWidth().clickable { selectedTab = 1 },
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray,
-                                        textDecoration = TextDecoration.Underline,
-                                        textAlign = TextAlign.Center
+                                        text = "No results found",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(horizontal = 20.dp),
+                                        color = MaterialTheme.colorScheme.onBackground
                                     )
                                 }
                             }
@@ -538,35 +559,43 @@ fun SearchScreen(initialQuery: String, searchResult: () -> Unit, onUserClick: (S
                                 modifier = Modifier.padding(vertical = 8.dp),
                                 color = MaterialTheme.colorScheme.onSecondary
                             )
-                            if (posts.isEmpty()) {
-                                Text(
-                                    text = "No results found",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(horizontal = 20.dp),
-                                    color = MaterialTheme.colorScheme.onBackground
+
+                            if (isLoadingPosts) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             } else {
-                                GridImage(
-                                    posts = posts.take(9),
-                                    onClick = { post ->
-                                        val intent = Intent(context, PostActivity::class.java).apply {
-                                            putExtra("POST_ID", post.postId)
-                                        }
-                                        context.startActivity(intent)
-                                    }
-                                )
-
-                                if (posts.size > 3) {
+                                if (posts.isEmpty()) {
                                     Text(
-                                        text = "See more",
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable { selectedTab = 2 },
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray,
-                                        textDecoration = TextDecoration.Underline,
-                                        textAlign = TextAlign.Center
+                                        text = "No results found",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(horizontal = 20.dp),
+                                        color = MaterialTheme.colorScheme.onBackground
                                     )
+                                } else {
+                                    GridImage(
+                                        posts = posts.take(9),
+                                        onClick = { post ->
+                                            val intent = Intent(context, PostActivity::class.java).apply {
+                                                putExtra("POST_ID", post.postId)
+                                            }
+                                            context.startActivity(intent)
+                                        }
+                                    )
+
+                                    if (posts.size > 9) {
+                                        Text(
+                                            text = "See more",
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { selectedTab = 2 },
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color.Gray,
+                                            textDecoration = TextDecoration.Underline,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
                                 }
                             }
                         }

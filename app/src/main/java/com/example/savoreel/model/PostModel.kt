@@ -13,7 +13,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.suspendCoroutine
@@ -182,6 +181,26 @@ class PostModel : ViewModel() {
         return currentUser.uid
     }
 
+    init {
+        // Automatically fetch posts when the object is initialized
+        fetchPosts()
+
+        // Set up listeners for changes in following list or hashtags (if needed)
+        observeUserChanges()
+    }
+
+    private fun observeUserChanges() {
+        // Set up a listener for changes in the user's following or hashtags
+        val currentUserId = getCurrentUserId() ?: return
+
+        db.collection("users").document(currentUserId).addSnapshotListener { document, _ ->
+            if (document != null && document.exists()) {
+                // If the user data changes, trigger fetching posts again
+                fetchPosts()
+            }
+        }
+    }
+
     fun fetchPosts() {
         val currentUserId = getCurrentUserId() ?: return
         db.collection("users").document(currentUserId).get()
@@ -227,12 +246,10 @@ class PostModel : ViewModel() {
                             .distinctBy { it.postId }
                             .sortedByDescending { it.date }
 
-                        // Update the global posts list (if needed)
-                        _posts.update { currentPosts ->
-                            (currentPosts + combinedPosts)
-                                .distinctBy { it.postId }
-                                .sortedByDescending { it.date }
-                        }
+                        // Update the global posts list
+                        _posts.value = (combinedPosts)
+                            .distinctBy { it.postId }
+                            .sortedByDescending { it.date }
                     }
                 }
             }
@@ -240,6 +257,7 @@ class PostModel : ViewModel() {
                 // Handle failure
             }
     }
+
 
     fun getPostsByHashtag(searchHashtag: String, onSuccess: (List<Post>) -> Unit, onFailure: (String) -> Unit) {
         db.collection("posts")

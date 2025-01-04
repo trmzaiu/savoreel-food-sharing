@@ -69,6 +69,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class ProfileActivity : ComponentActivity() {
@@ -183,7 +184,7 @@ fun ProfileScreen(navigateToSetting: () -> Unit, navigateToFollow: (String, Stri
             Column(
                 modifier = Modifier
                     .padding(top = 40.dp)
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = 15.dp)
             ) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -336,7 +337,7 @@ fun CalendarWithImages(
     val context = LocalContext.current
 
     Box(
-        modifier = Modifier.clip(RoundedCornerShape(15))
+        modifier = Modifier.clip(RoundedCornerShape(5))
     ) {
         Column(
             modifier = modifier
@@ -431,8 +432,12 @@ fun UserWithOutAvatar(name: String, sizeText: TextUnit, sizeBox: Dp) {
 fun groupPostsByMonthYear(posts: List<Post>): Map<String, List<Post>> {
     val outputDateFormat = SimpleDateFormat("MMMM, yyyy", Locale.getDefault())
 
+    // Group the posts by the formatted date string and then sort the result by date in descending order
     return posts.groupBy { post ->
         val date = post.date.toDate()
         outputDateFormat.format(date)
-    }
+    }.toSortedMap(compareByDescending {
+        val date = outputDateFormat.parse(it) // Parse the date string back to Date object
+        date ?: Date(0) // Use epoch if parsing fails (fallback)
+    })
 }
